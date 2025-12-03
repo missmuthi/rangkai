@@ -8,7 +8,7 @@ const { book, loading, error, fetchBook, cleanMetadata } = useBookFetch()
 const { createScan } = useScans()
 
 const scannerRef = ref<HTMLElement | null>(null)
-const scanner = ref<InstanceType<typeof import('html5-qrcode').Html5QrcodeScanner> | null>(null)
+const scanner = ref<InstanceType<typeof import('html5-qrcode').Html5Qrcode> | null>(null)
 const lastScan = ref('')
 const lastScanAt = ref(0)
 const autoClean = ref(true)
@@ -72,9 +72,10 @@ async function saveCurrentBook() {
 onMounted(async () => {
   const { Html5Qrcode } = await import('html5-qrcode')
 
-  scanner.value = new Html5Qrcode('scanner-reader', { verbose: false })
+  const scannerInstance = new Html5Qrcode('scanner-reader', { verbose: false })
+  scanner.value = scannerInstance
 
-  await scanner.value.start(
+  await scannerInstance.start(
     { facingMode: 'environment' },
     { fps: 10, qrbox: { width: 250, height: 150 } },
     onScanSuccess,
@@ -84,7 +85,7 @@ onMounted(async () => {
 
 onUnmounted(() => {
   scanner.value?.stop().catch(() => {})
-  scanner.value?.clear().catch(() => {})
+  scanner.value?.clear()
 })
 </script>
 
