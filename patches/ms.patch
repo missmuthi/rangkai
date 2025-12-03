@@ -1,0 +1,12 @@
+diff --git a/lib/index.mjs b/lib/index.mjs
+index 76810ac466174db536f8662ef37036f81afdf6ac..f723224cb373a012912da1bf074d3a2ac8f0f9e3 100644
+--- a/lib/index.mjs
++++ b/lib/index.mjs
+@@ -80,6 +80,7 @@ function parse(str) {
+             throw new Error(`The unit ${type} was matched, but no matching case exists.`);
+     }
+ }
++export { ms };
+ export default ms;
+ /**
+  * Short format for `ms`.
