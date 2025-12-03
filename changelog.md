@@ -1,0 +1,42 @@
+### 0.0.2 — 2025-12-03
+ - Added: Phase 1 NuxtHub migration dependencies (drizzle-orm, zod, tailwindcss, html5-qrcode, better-auth)
+ - Added: Dev dependencies (drizzle-kit, vitest, @playwright/test, @vite-pwa/nuxt, @nuxtjs/tailwindcss)
+ - Added: `server/db/schema.ts` with Drizzle schema (scans, users, sessions tables)
+ - Added: `server/utils/db.ts` wrapper exporting useDb() helper
+ - Added: `server/api/health.get.ts` endpoint for DB connectivity validation
+ - Changed: Added pnpm override for ms@^2.1.3 to fix @nuxthub/core build compatibility
+ - Changed: Upgraded @nuxthub/core to 0.9.1, nuxt to 3.20.1
+
+### 0.0.1 — 2025-12-03
+ - Added initial `agents.md` and `instructions.md` docs (NuxtHub migration guidance)
+
+---
+
+## Changelog Rules
+
+- This file is the source of truth for project version changes.
+- Always update this file in the same PR that introduces the change.
+- Follow Semantic Versioning (MAJOR.MINOR.PATCH) where:
+  - PATCH: Bug fixes, documentation updates
+  - MINOR: New features and enhancements
+  - MAJOR: Breaking changes
+- Include date (YYYY-MM-DD), a brief summary, and categorized bullet points: `Added`, `Changed`, `Fixed`, `Deprecated`, `Removed`.
+
+Example:
+
+```
+### 0.0.2 — 2025-12-20
+ - Added: `server/api/ai/clean.post.ts`
+ - Changed: `useDrizzle()` helper added
+ - Fixed: Typo in `README.md`
+```
+
+Notes:
+
+- This file should be updated as part of the PR. If a PR does not include a changelog update, reviewers should request update before merging.
+- Small documentation-only changes may use a `PATCH` version bump.
+- Hotfixes should use the `PATCH` bump and be merged to `main` quickly.
+
+---
+
+Keep entries short and immutable — never rewrite earlier versions (unless fixing a proven mistake), but rather add an additional entry to correct or clarify.
