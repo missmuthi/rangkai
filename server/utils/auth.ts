@@ -74,3 +74,8 @@ export async function requireAuth(event: H3Event): Promise<AuthUser> {
 
   return user
 }
+
+export async function signOutFromEvent(event: H3Event) {
+  const auth = getAuth()
+  return auth.api.signOut({ headers: event.headers })
+}
