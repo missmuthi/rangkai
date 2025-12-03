@@ -1,0 +1,58 @@
+name: 'Check changelog updated'
+
+on:
+  pull_request:
+    types: [opened, edited, synchronize, reopened]
+
+jobs:
+  changelog-check:
+    name: Verify changelog update for source changes
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Fetch base ref
+        run: |
+          echo "Base ref: ${{ github.event.pull_request.base.ref }}"
+          git fetch origin ${{ github.event.pull_request.base.ref }} --depth=1 || true
+
+      - name: Get changed files
+        id: changed
+        run: |
+          BASE_REF=${{ github.event.pull_request.base.ref }}
+          echo "Comparing with base: $BASE_REF"
+          CHANGED=$(git diff --name-only origin/$BASE_REF...HEAD || true)
+          echo "Changed files:\n$CHANGED"
+          echo "changed_files<<EOF" >> $GITHUB_OUTPUT
+          echo "$CHANGED" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+      - name: Validate changelog update
+        run: |
+          CHANGED_FILES="${{ steps.changed.outputs.changed_files }}"
+
+          # Patterns that require changelog update
+          PATTERN='^(app/|server/|types/|docs/|public/|README.md|nuxt.config.ts|drizzle.config.ts|package.json|pnpm-lock.yaml|package-lock.json|vite.config.ts|playwright.config.ts|vitest.config.ts|tests/|src/|app.vue)'
+
+          echo "$CHANGED_FILES"
+
+          # Check if we changed any source files
+          if echo "$CHANGED_FILES" | grep -E "$PATTERN" >/dev/null; then
+            echo "Detected source/config/doc changes requiring changelog update."
+
+            # Check if changelog.md is updated in the PR
+            if echo "$CHANGED_FILES" | grep -xq "changelog.md"; then
+              echo "changelog.md updated — OK"
+              exit 0
+            else
+              echo "ERROR: You touched source files but did not update changelog.md. Please add an entry to changelog.md in this PR."
+              exit 1
+            fi
+          else
+            echo "No files requiring changelog found — skipping changelog enforcement"
+            exit 0
+          fi
+        shell: bash
