@@ -24,4 +24,12 @@ export default defineNuxtConfig({
   },
   // Development
   devtools: { enabled: true },
+  runtimeConfig: {
+    authSecret: '',
+    oauthGoogleClientId: '',
+    oauthGoogleClientSecret: '',
+    public: {
+      siteUrl: ''
+    }
+  }
 })
