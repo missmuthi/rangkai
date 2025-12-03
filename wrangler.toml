@@ -50,7 +50,7 @@ bucket_name = "rangkai-blob"
 # ============================================
 # NOTES
 # ============================================
-# 
+#
 # For NuxtHub projects, most configuration is handled by:
 # 1. nuxt.config.ts -> hub: { database: true, kv: true, blob: true }
 # 2. Cloudflare Dashboard -> Pages -> Settings -> Bindings

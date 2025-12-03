@@ -142,12 +142,12 @@ node -e "console.log(require('crypto').randomBytes(32).toString('base64'))"
 
 ## Step 6: GitHub Actions Workflow (Optional)
 
-For more control over deployments, use GitHub Actions with Wrangler:
+For more control over deployments, use GitHub Actions with Wrangler. This workflow runs quality checks on all PRs and deploys only when merged to `main`:
 
 Create `.github/workflows/deploy.yml`:
 
 ```yaml
-name: Deploy to Cloudflare Pages
+name: CI/CD
 
 on:
   push:
@@ -155,42 +155,61 @@ on:
   pull_request:
     branches: [main]
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
+  # Run quality checks on all pushes and PRs
+  quality:
+    name: Quality Checks
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'pnpm'
+      - run: pnpm install
+      - run: pnpm typecheck
+      - run: pnpm lint
+      - run: pnpm test
+
+  # Deploy to Cloudflare Pages (main branch only)
   deploy:
+    name: Deploy to Production
+    needs: quality
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     permissions:
       contents: read
       deployments: write
-      
+    environment:
+      name: production
+      url: ${{ steps.deploy.outputs.deployment-url }}
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
         with:
           version: 10
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: 20
           cache: 'pnpm'
-
-      - name: Install dependencies
-        run: pnpm install
-
-      - name: Build
-        run: pnpm build
+      - run: pnpm install
+      - run: pnpm build
         env:
           NUXT_PUBLIC_SITE_URL: ${{ secrets.NUXT_PUBLIC_SITE_URL }}
-
       - name: Deploy to Cloudflare Pages
+        id: deploy
         uses: cloudflare/wrangler-action@v3
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          command: pages deploy dist --project-name=rangkai
+          command: pages deploy dist --project-name=rangkai --branch=main
 ```
 
 ### Required GitHub Secrets
