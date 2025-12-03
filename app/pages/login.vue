@@ -25,9 +25,9 @@
 
       <div>
         <button
-          @click="loginWithGoogle"
           type="button"
           class="group relative w-full flex justify-center py-3 px-4 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+          @click="loginWithGoogle"
         >
           <span class="absolute left-0 inset-y-0 flex items-center pl-3">
             <svg class="h-5 w-5" viewBox="0 0 24 24">
