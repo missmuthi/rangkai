@@ -5,6 +5,7 @@ export default defineEventHandler(async (event) => {
     '/api/health',
     '/api/auth/',
     '/api/auth-session',
+    '/api/book/', // Book metadata is public/cached
     '/login',
     '/_nuxt',
     '/__nuxt',
