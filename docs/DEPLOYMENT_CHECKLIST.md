@@ -35,6 +35,7 @@
 - [ ] CSP headers configured
 - [ ] Auth routes protected
 - [ ] User data isolation verified
+- [ ] Google OAuth credentials added as secrets (NUXT_OAUTH_GOOGLE_CLIENT_ID, NUXT_OAUTH_GOOGLE_CLIENT_SECRET)
 
 ### Documentation
 - [ ] README.md updated

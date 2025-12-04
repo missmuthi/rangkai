@@ -10,14 +10,21 @@
         </p>
       </div>
 
-      <div v-if="error" class="rounded-md bg-red-50 p-4">
+      <div v-if="error || route.query.error === 'auth_not_configured'" class="rounded-md bg-red-50 p-4">
         <div class="flex">
           <div class="ml-3">
             <h3 class="text-sm font-medium text-red-800">
-              Authentication failed
+              {{ route.query.error === 'auth_not_configured' ? 'Google Sign-In Not Configured' : 'Authentication failed' }}
             </h3>
             <div class="mt-2 text-sm text-red-700">
-              <p>Please try again or contact support if the issue persists.</p>
+              <p>
+                <span v-if="route.query.error === 'auth_not_configured'">
+                  Google OAuth is not configured for this deployment. Follow the deployment guide to add a Google OAuth client ID & secret.
+                </span>
+                <span v-else>
+                  Please try again or contact support if the issue persists.
+                </span>
+              </p>
             </div>
           </div>
         </div>

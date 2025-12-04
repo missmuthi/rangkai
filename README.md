@@ -1,4 +1,4 @@
-# NuxtHub Starter Template
+# Rangkai — Book Scanner
 
 This starter lets you get started with [NuxtHub](https://hub.nuxt.com) in seconds.
 

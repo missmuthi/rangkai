@@ -21,7 +21,8 @@ export const useAuth = () => {
   }
 
   const loginWithGoogle = () => {
-    navigateTo('/api/auth/sign-in/social?provider=google', { 
+    // Navigate to our own redirect endpoint which handles provider validation
+    navigateTo('/api/auth/google', {
       external: true
     })
   }

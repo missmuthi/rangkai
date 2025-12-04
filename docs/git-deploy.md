@@ -80,6 +80,12 @@ NUXT_PUBLIC_SITE_URL = "https://your-project.pages.dev"
 
 ```bash
 npx wrangler d1 execute rangkai-db --remote --file=./server/db/migrations/0001_init.sql
+
+Or use the helper script:
+
+```bash
+pnpm migrate:prod
+```
 ```
 
 ### Step 4: Add Secrets
@@ -87,6 +93,12 @@ npx wrangler d1 execute rangkai-db --remote --file=./server/db/migrations/0001_i
 ```bash
 # Generate and add auth secret
 openssl rand -base64 32 | npx wrangler pages secret put NUXT_AUTH_SECRET --project-name=rangkai
+```
+
+```bash
+# Add Google OAuth credentials (required for Google social sign-in)
+npx wrangler pages secret put NUXT_OAUTH_GOOGLE_CLIENT_ID --project-name=rangkai
+npx wrangler pages secret put NUXT_OAUTH_GOOGLE_CLIENT_SECRET --project-name=rangkai
 ```
 
 ### Step 5: Build and Deploy
@@ -318,6 +330,7 @@ Before going public:
 - [x] All quality checks pass (typecheck, lint, test)
 - [x] Production deployment successful
 - [ ] Google OAuth configured (if using authentication)
+  - [ ] Google OAuth configured (if using authentication) (add secrets: `NUXT_OAUTH_GOOGLE_CLIENT_ID`, `NUXT_OAUTH_GOOGLE_CLIENT_SECRET`)
 - [ ] Custom domain configured (optional)
 
 ---

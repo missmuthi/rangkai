@@ -1,13 +1,25 @@
 import { sql } from 'drizzle-orm'
+import { users } from '../db/schema'
 
-export default eventHandler(async (_event) => {
+export default eventHandler(async (event) => {
   try {
     const db = useDb() // from server/utils/db.ts
-    // quick readonly query to validate DB
-    const result = await db.run(sql`SELECT 1 as ok`)
-    return { status: 'ok', db: !!result }
+    // Try a simple COUNT(*) query to verify connectivity
+    const rows = await db.select({ total: sql<number>`count(*)` }).from(users)
+    const count = (rows && rows[0] && (rows[0] as any).total) || 0
+
+    return {
+      status: 'ok',
+      region: (event.context as any)?.cf?.colo || null,
+      users: Number(count)
+    }
   } catch (err) {
     console.error('health check failed', err)
-    throw createError({ statusCode: 500, statusMessage: 'DB connection failed' })
+    return {
+      status: 'error',
+      db: 'disconnected',
+      message: err instanceof Error ? err.message : String(err),
+      region: (event.context as any)?.cf?.colo || null
+    }
   }
 })

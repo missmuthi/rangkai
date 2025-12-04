@@ -9,6 +9,28 @@ export function getAuth() {
   if (_auth) return _auth
 
   const config = useRuntimeConfig()
+  // Build social providers only if credentials are present
+  const socialProviders: any = {}
+  if (config.oauthGoogleClientId && config.oauthGoogleClientSecret) {
+    socialProviders.google = {
+      clientId: config.oauthGoogleClientId || '',
+      clientSecret: config.oauthGoogleClientSecret || '',
+      redirectURI: config.public.siteUrl
+        ? `${config.public.siteUrl}/api/auth/callback/google`
+        : 'http://localhost:3000/api/auth/callback/google'
+    }
+  } else {
+    // Helpful dev-time logging for missing provider creds
+    if (process.env.NODE_ENV !== 'production') {
+      // eslint-disable-next-line no-console
+      console.warn('[auth] Google OAuth credentials not provided. Google sign-in will be disabled.')
+    }
+  }
+  // If OAuth creds are provided, ensure a base site URL is set so redirects use a proper URL
+  if ((config.oauthGoogleClientId || config.oauthGoogleClientSecret) && !config.public.siteUrl && process.env.NODE_ENV !== 'production') {
+    // eslint-disable-next-line no-console
+    console.warn('[auth] oauth credentials found but `public.siteUrl` is not set; callbacks may redirect to http://localhost:3000')
+  }
 
   _auth = betterAuth({
     database: drizzleAdapter(hubDatabase(), {
@@ -21,15 +43,7 @@ export function getAuth() {
     emailAndPassword: {
       enabled: false
     },
-    socialProviders: {
-      google: {
-        clientId: config.oauthGoogleClientId || '',
-        clientSecret: config.oauthGoogleClientSecret || '',
-        redirectURI: config.public.siteUrl
-          ? `${config.public.siteUrl}/api/auth/callback/google`
-          : 'http://localhost:3000/api/auth/callback/google'
-      }
-    },
+    socialProviders,
     secret: config.authSecret || 'dev-secret-change-in-production',
     baseURL: config.public.siteUrl || 'http://localhost:3000'
   })
