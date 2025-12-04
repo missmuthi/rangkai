@@ -68,7 +68,7 @@ export default defineNuxtConfig({
     oauthGoogleClientSecret: '',
     public: {
       // Ensure there is a safe fallback so OAuth redirect URI uses a valid domain
-      siteUrl: process.env.NUXT_PUBLIC_SITE_URL || 'https://rangkai-book-metadata.pages.dev'
+      siteUrl: process.env.NUXT_PUBLIC_SITE_URL || 'https://rangkai-d3k.pages.dev'
     }
   }
 })
