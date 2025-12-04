@@ -20,11 +20,34 @@ export const useAuth = () => {
     }
   }
 
-  const loginWithGoogle = () => {
-    // Navigate to our own redirect endpoint which handles provider validation
-    navigateTo('/api/auth/google', {
-      external: true
-    })
+  const loginWithGoogle = async () => {
+    loading.value = true
+    try {
+      // POST to the social sign-in endpoint which will return a redirect URL
+      const data = await $fetch<{ url?: string; redirect?: boolean }>(
+        '/api/auth/sign-in/social',
+        { method: 'POST', body: { provider: 'google' } }
+      )
+
+      // If endpoint returns a `url`, navigate there
+      const url = data?.url ? data.url : null
+      if (url) {
+        // Use full navigation to external provider page
+        window.location.href = url
+      } else if (data?.redirect) {
+        // fallback in case sign-in handler indicates redirect flow
+        window.location.href = '/login'
+      } else {
+        // No redirect returned, fallback to our server's helper endpoint
+        navigateTo('/api/auth/google', { external: true })
+      }
+    } catch (err) {
+      console.error('Login failed:', err)
+      // fallback redirect to login with error
+      await navigateTo('/login?error=auth_failed')
+    } finally {
+      loading.value = false
+    }
   }
 
   const logout = async () => {

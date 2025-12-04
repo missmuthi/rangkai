@@ -10,16 +10,19 @@
         </p>
       </div>
 
-      <div v-if="error || route.query.error === 'auth_not_configured'" class="rounded-md bg-red-50 p-4">
+      <div v-if="error || route.query.error === 'auth_not_configured' || route.query.error === 'auth_method_not_allowed'" class="rounded-md bg-red-50 p-4">
         <div class="flex">
           <div class="ml-3">
             <h3 class="text-sm font-medium text-red-800">
-              {{ route.query.error === 'auth_not_configured' ? 'Google Sign-In Not Configured' : 'Authentication failed' }}
+              {{ route.query.error === 'auth_not_configured' ? 'Google Sign-In Not Configured' : (route.query.error === 'auth_method_not_allowed' ? 'Invalid sign-in method' : 'Authentication failed') }}
             </h3>
             <div class="mt-2 text-sm text-red-700">
               <p>
                 <span v-if="route.query.error === 'auth_not_configured'">
                   Google OAuth is not configured for this deployment. Follow the deployment guide to add a Google OAuth client ID & secret.
+                </span>
+                <span v-else-if="route.query.error === 'auth_method_not_allowed'">
+                  Directly visiting the social sign-in URL is not allowed. Please use the Sign In button on this page.
                 </span>
                 <span v-else>
                   Please try again or contact support if the issue persists.

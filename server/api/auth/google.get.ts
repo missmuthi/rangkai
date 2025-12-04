@@ -6,7 +6,11 @@ export default defineEventHandler(async (event) => {
     // Redirect to login with friendly error
     return sendRedirect(event, '/login?error=auth_not_configured')
   }
-
-  // Redirect to Better Auth social sign-in endpoint
-  return sendRedirect(event, '/api/auth/sign-in/social?provider=google')
+  // For GET requests we won't directly redirect to the POST-based sign-in endpoint.
+  // Instead provide a helpful response so clients POST to the sign-in endpoint to get the redirect URL.
+  return {
+    ok: true,
+    provider: 'google',
+    message: 'Google OAuth available. POST to /api/auth/sign-in/social with { provider: "google" }'
+  }
 })
