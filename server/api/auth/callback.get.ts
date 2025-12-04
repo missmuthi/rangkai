@@ -14,7 +14,7 @@ export default defineEventHandler(async (event) => {
     return sendRedirect(event, '/api/auth/callback/google')
   } catch (err) {
     // If redirect fails for any reason, fallback to login with an error
-    // eslint-disable-next-line no-console
+     
     console.warn('auth callback redirect failed', err)
     return sendRedirect(event, '/login?error=auth_failed')
   }
