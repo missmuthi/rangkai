@@ -1,7 +1,7 @@
 <script setup lang="ts">
 useSeoMeta({
-  title: 'NuxtHub Starter',
-  description: 'A Nuxt template to build your full-stack application on the edge.'
+  title: 'Rangkai - Book Scanner',
+  description: 'Indonesian book metadata harvester for librarians.'
 })
 </script>
 
