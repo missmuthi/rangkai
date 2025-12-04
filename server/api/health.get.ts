@@ -1,6 +1,6 @@
 import { sql } from 'drizzle-orm'
 
-export default eventHandler(async (event) => {
+export default eventHandler(async (_event) => {
   try {
     const db = useDb() // from server/utils/db.ts
     // quick readonly query to validate DB

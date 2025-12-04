@@ -1,0 +1,52 @@
+# Wrangler configuration for Rangkai
+# This file is the SOURCE OF TRUTH for Pages Functions configuration
+# https://developers.cloudflare.com/pages/functions/wrangler-configuration/
+
+name = "rangkai"
+compatibility_date = "2025-04-25"
+compatibility_flags = ["nodejs_compat"]
+
+# Pages configuration - this enables wrangler.toml as source of truth
+pages_build_output_dir = "dist"
+
+# ============================================
+# BINDINGS (applies to local, preview & production)
+# ============================================
+
+# D1 Database
+[[d1_databases]]
+binding = "DB"
+database_name = "rangkai-db"
+database_id = "ff59aaac-cf7a-44f2-8f94-1d71482389c9"
+
+# KV Namespaces
+[[kv_namespaces]]
+binding = "KV"
+id = "457dc32275364e8db48ed7f2fcd59f5c"
+
+[[kv_namespaces]]
+binding = "CACHE"
+id = "2cd4dceb60f34809a627314e444c497d"
+
+# ============================================
+# ENVIRONMENT VARIABLES
+# ============================================
+# Note: Sensitive vars should be set via `wrangler pages secret put`
+# or in Cloudflare Dashboard
+
+[vars]
+NUXT_PUBLIC_SITE_URL = "https://rangkai-d3k.pages.dev"
+
+# ============================================
+# ENVIRONMENT OVERRIDES (optional)
+# ============================================
+
+# Production-specific overrides (if needed)
+# [env.production]
+# [env.production.vars]
+# NUXT_PUBLIC_SITE_URL = "https://your-custom-domain.com"
+
+# Preview-specific overrides (if needed)
+# [env.preview]
+# [env.preview.vars]
+# NUXT_PUBLIC_SITE_URL = "https://preview.rangkai-d3k.pages.dev"

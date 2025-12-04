@@ -22,7 +22,7 @@ function formatDate (v?: string | number | Date) {
   <div>
     <h3>Messages</h3>
     <form @submit.prevent="sendMessage">
-      <input v-model="newMessage" placeholder="Type a message" />
+      <input v-model="newMessage" placeholder="Type a message" >
       <button type="submit">Send</button>
     </form>
 

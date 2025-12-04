@@ -8,13 +8,51 @@ export default defineNuxtConfig({
   // https://nuxt.com/modules
   modules: [
     '@nuxthub/core',
-    '@nuxt/eslint'
+    '@nuxt/eslint',
+    '@nuxtjs/tailwindcss',
+    '@vite-pwa/nuxt'
   ],
   hub: {
     database: true,
     kv: true,
-    blob: true,
+    blob: false, // Disabled - R2 not enabled on account
     cache: true,
+  },
+  // PWA Configuration
+  pwa: {
+    registerType: 'autoUpdate',
+    manifest: {
+      name: 'Rangkai Book Scanner',
+      short_name: 'Rangkai',
+      description: 'Scan and catalog books with ISBN barcodes',
+      theme_color: '#4f46e5',
+      background_color: '#ffffff',
+      display: 'standalone',
+      orientation: 'portrait',
+      icons: [
+        {
+          src: '/icon-192x192.png',
+          sizes: '192x192',
+          type: 'image/png'
+        },
+        {
+          src: '/icon-512x512.png',
+          sizes: '512x512',
+          type: 'image/png'
+        }
+      ]
+    },
+    workbox: {
+      navigateFallback: '/',
+      globPatterns: ['**/*.{js,css,html,png,svg,ico}']
+    },
+    client: {
+      installPrompt: true
+    },
+    devOptions: {
+      enabled: true,
+      type: 'module'
+    }
   },
   nitro: {
     experimental: {

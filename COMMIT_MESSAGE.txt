@@ -1,0 +1,41 @@
+feat(frontend): migrate UI components to Nuxt 3
+
+Phase 4 - Frontend Migration:
+
+Composables:
+- useBookFetch.ts - Book metadata fetching + AI cleanup
+- useScans.ts - CRUD operations for scan history
+
+Components:
+- BookCard.vue - Book metadata display with actions
+- ScanHistory.vue - Searchable scan list with delete
+
+Pages:
+- pages/scan/mobile.vue - Mobile barcode scanner with html5-qrcode
+- pages/history.vue - Scan history with CSV export
+
+Infrastructure:
+- layouts/scanner.vue - Dark scanner layout
+- middleware/auth.ts - Route protection
+- server/api/image-proxy.get.ts - CSP-compliant image proxy
+- app/types/book.ts - Shared TypeScript types
+
+Features:
+- Real-time ISBN barcode scanning
+- Automatic metadata fetching from 3 sources
+- Optional AI-based metadata cleanup
+- Scan history management with search
+- CSV export with UTF-8 support
+- Image proxy for external book covers
+- Authentication-protected routes
+
+Dependencies:
+- Added html5-qrcode for barcode scanning
+
+Build Status:
+- ✅ Type check passed
+- ✅ Build succeeded (1.62 MB, 469 kB gzip)
+- ✅ Dev server starts successfully
+
+See PHASE4_SUMMARY.md for complete details.
+See PHASE4_QUICKSTART.md for usage guide.
