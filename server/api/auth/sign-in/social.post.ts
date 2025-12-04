@@ -16,8 +16,13 @@ export default defineEventHandler(async (event) => {
     // Return whatever the auth API returned (likely url + redirect boolean or session)
     return result
   } catch (err) {
-    // Bubble up the error with helpful message without leaking secrets
-    console.warn('signInSocial proxy failed', (err as any)?.message || err)
-    throw createError({ statusCode: 500, message: 'social sign-in failed' })
+    // Bubble up the error with helpful message (for debugging). Avoid leaking credentials.
+    const message = (err as any)?.message || String(err)
+    console.warn('signInSocial proxy failed', message)
+    // Return a structured error with message for debugging during preview builds
+    return {
+      error: true,
+      message: message
+    }
   }
 })
