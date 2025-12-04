@@ -6,10 +6,12 @@ import { scans } from '../../db/schema'
 import { requireAuth } from '../../utils/auth'
 
 interface CreateScanBody {
-  isbn?: string
+  isbn: string
   title?: string
   authors?: string
+  publisher?: string
   description?: string
+  status?: string
 }
 
 export default defineEventHandler(async (event) => {
@@ -19,14 +21,22 @@ export default defineEventHandler(async (event) => {
 
   console.info(`[api:scans] Creating scan for user ${user.id}`, { isbn: body.isbn })
 
+  // Generate a unique ID for the scan
+  const scanId = `scan_${Date.now()}_${Math.random().toString(36).substring(7)}`
+
   const result = await db
     .insert(scans)
     .values({
+      id: scanId,
       user_id: user.id,
-      isbn: body.isbn || null,
-      title: body.title || null,
-      authors: body.authors || null,
-      description: body.description || null
+      isbn: body.isbn,
+      title: body.title || '',
+      authors: body.authors || '',
+      publisher: body.publisher || '',
+      description: body.description || '',
+      status: body.status || 'pending',
+      created_at: new Date(),
+      updated_at: new Date()
     })
     .returning()
 

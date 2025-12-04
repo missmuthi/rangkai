@@ -1,12 +1,15 @@
 export default defineNuxtRouteMiddleware(async (to) => {
-  const { isAuthenticated, fetchUser } = useAuth()
+  const { isAuthenticated, isLoading, fetchSession } = useAuth()
 
-  // Ensure we have a session loaded, so the auth check is accurate
-  await fetchUser()
-
-  if (!isAuthenticated.value) {
-    return navigateTo('/login')
+  // Wait for auth to load if still loading
+  if (isLoading.value) {
+    await fetchSession()
   }
 
-  // Allow access to login page even when authenticated? Keep current behavior default
+  // Redirect to login if not authenticated
+  if (!isAuthenticated.value) {
+    return navigateTo(`/login?redirect=${encodeURIComponent(to.fullPath)}`, { 
+      replace: true,
+    })
+  }
 })

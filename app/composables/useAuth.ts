@@ -4,71 +4,131 @@ export interface User {
   name: string | null
 }
 
+interface Session {
+  token: string
+  expiresAt: Date
+  userId: string
+}
+
+interface AuthState {
+  user: User | null
+  session: Session | null
+  isLoading: boolean
+  isAuthenticated: boolean
+}
+
 export const useAuth = () => {
-  const user = useState<User | null>('auth:user', () => null)
-  const loading = useState<boolean>('auth:loading', () => false)
+  const state = useState<AuthState>('auth', () => ({
+    user: null,
+    session: null,
+    isLoading: true,
+    isAuthenticated: false,
+  }))
 
-  const fetchUser = async () => {
-    loading.value = true
-    try {
-      const data = await $fetch<{ user: User | null }>('/api/auth-session')
-      user.value = data.user
-    } catch {
-      user.value = null
-    } finally {
-      loading.value = false
-    }
-  }
+  const config = useRuntimeConfig()
+  const baseURL = config.public.siteUrl
 
-  const loginWithGoogle = async () => {
-    loading.value = true
+  // Fetch current session
+  async function fetchSession() {
+    state.value.isLoading = true
     try {
-      // POST to the social sign-in endpoint which will return a redirect URL
-      const data = await $fetch<{ url?: string; redirect?: boolean }>(
-        '/api/auth/sign-in/social',
-        { method: 'POST', body: { provider: 'google' } }
+      const response = await $fetch<{ session: Session; user: User } | null>(
+        '/api/auth/get-session',
+        {
+          credentials: 'include',
+        }
       )
-
-      // If endpoint returns a `url`, navigate there
-      const url = data?.url ? data.url : null
-      if (url) {
-        // Use full navigation to external provider page
-        window.location.href = url
-      } else if (data?.redirect) {
-        // fallback in case sign-in handler indicates redirect flow
-        window.location.href = '/login'
+      
+      if (response?.session && response?.user) {
+        state.value.session = response.session
+        state.value.user = response.user
+        state.value.isAuthenticated = true
       } else {
-        // No redirect returned, fallback to our server's helper endpoint
-        navigateTo('/api/auth/google', { external: true })
+        state.value.session = null
+        state.value.user = null
+        state.value.isAuthenticated = false
       }
-    } catch (err) {
-      console.error('Login failed:', err)
-      // fallback redirect to login with error
-      await navigateTo('/login?error=auth_failed')
+    } catch (error) {
+      console.error('Failed to fetch session:', error)
+      state.value.session = null
+      state.value.user = null
+      state.value.isAuthenticated = false
     } finally {
-      loading.value = false
+      state.value.isLoading = false
     }
   }
 
-  const logout = async () => {
-    loading.value = true
+  // Legacy compatibility method
+  const fetchUser = fetchSession
+
+  // Email/Password Sign Up
+  async function signUp(email: string, password: string, name: string) {
+    const response = await $fetch('/api/auth/sign-up/email', {
+      method: 'POST',
+      body: { email, password, name },
+      credentials: 'include',
+    })
+    await fetchSession()
+    return response
+  }
+
+  // Email/Password Sign In
+  async function signIn(email: string, password: string) {
+    const response = await $fetch('/api/auth/sign-in/email', {
+      method: 'POST',
+      body: { email, password },
+      credentials: 'include',
+    })
+    await fetchSession()
+    return response
+  }
+
+  // OAuth Sign In (Google, GitHub, etc.)
+  function signInWithOAuth(provider: 'google' | 'github') {
+    // Redirect to OAuth provider
+    window.location.href = `/api/auth/sign-in/social?provider=${provider}&callbackURL=${encodeURIComponent(baseURL + '/scan/mobile')}`
+  }
+
+  // Legacy Google login method
+  const loginWithGoogle = async () => {
+    signInWithOAuth('google')
+  }
+
+  // Sign Out
+  async function signOut() {
+    state.value.isLoading = true
     try {
-      await $fetch('/api/auth/sign-out', { method: 'POST' })
-      user.value = null
+      await $fetch('/api/auth/sign-out', {
+        method: 'POST',
+        credentials: 'include',
+      })
+      state.value.session = null
+      state.value.user = null
+      state.value.isAuthenticated = false
       await navigateTo('/login')
     } catch (error) {
       console.error('Logout failed:', error)
     } finally {
-      loading.value = false
+      state.value.isLoading = false
     }
   }
 
+  // Legacy logout method
+  const logout = signOut
+
   return {
-    user: computed(() => user.value),
-    loading: computed(() => loading.value),
-    isAuthenticated: computed(() => !!user.value),
-    fetchUser,
-    loginWithGoogle,
-    logout
+    user: computed(() => state.value.user),
+    session: computed(() => state.value.session),
+    loading: computed(() => state.value.isLoading),
+    isLoading: computed(() => state.value.isLoading),
+    isAuthenticated: computed(() => state.value.isAuthenticated),
+    fetchSession,
+    fetchUser, // Legacy compatibility
+    signUp,
+    signIn,
+    signInWithOAuth,
+    loginWithGoogle, // Legacy compatibility
+    signOut,
+    logout, // Legacy compatibility
   }
 }

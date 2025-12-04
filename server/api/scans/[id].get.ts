@@ -18,20 +18,12 @@ export default defineEventHandler(async (event) => {
     })
   }
 
-  const scanId = parseInt(id, 10)
-  if (isNaN(scanId)) {
-    throw createError({
-      statusCode: 400,
-      message: 'Invalid scan ID format'
-    })
-  }
-
-  console.info(`[api:scans] Getting scan ${scanId} for user ${user.id}`)
+  console.info(`[api:scans] Getting scan ${id} for user ${user.id}`)
 
   const [scan] = await db
     .select()
     .from(scans)
-    .where(and(eq(scans.id, scanId), eq(scans.user_id, user.id)))
+    .where(and(eq(scans.id, id), eq(scans.user_id, user.id)))
     .limit(1)
 
   if (!scan) {

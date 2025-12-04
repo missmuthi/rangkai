@@ -1,51 +1,66 @@
 import type { H3Event } from 'h3'
 import { betterAuth } from 'better-auth'
 import { drizzleAdapter } from 'better-auth/adapters/drizzle'
-import { users, sessions } from '../db/schema'
+import { drizzle } from 'drizzle-orm/d1'
+import * as schema from '../db/schema'
 
 let _auth: ReturnType<typeof betterAuth> | null = null
 
 export function getAuth() {
   if (_auth) return _auth
 
+  const db = hubDatabase()
+  const drizzleDb = drizzle(db, { schema })
   const config = useRuntimeConfig()
+
   // Build social providers only if credentials are present
-  const socialProviders: any = {}
+  const socialProviders: Record<string, { clientId: string, clientSecret: string }> = {}
   if (config.oauthGoogleClientId && config.oauthGoogleClientSecret) {
     socialProviders.google = {
       clientId: config.oauthGoogleClientId || '',
       clientSecret: config.oauthGoogleClientSecret || '',
-      redirectURI: config.public.siteUrl
-        ? `${config.public.siteUrl}/api/auth/callback/google`
-        : 'http://localhost:3000/api/auth/callback/google'
     }
   } else {
     // Helpful dev-time logging for missing provider creds
     if (process.env.NODE_ENV !== 'production') {
-      // eslint-disable-next-line no-console
       console.warn('[auth] Google OAuth credentials not provided. Google sign-in will be disabled.')
     }
   }
   // If OAuth creds are provided, ensure a base site URL is set so redirects use a proper URL
   if ((config.oauthGoogleClientId || config.oauthGoogleClientSecret) && !config.public.siteUrl && process.env.NODE_ENV !== 'production') {
-    // eslint-disable-next-line no-console
     console.warn('[auth] oauth credentials found but `public.siteUrl` is not set; callbacks may redirect to http://localhost:3000')
   }
 
   _auth = betterAuth({
-    database: drizzleAdapter(hubDatabase(), {
+    database: drizzleAdapter(drizzleDb, {
       provider: 'sqlite',
       schema: {
-        user: users,
-        session: sessions
+        user: schema.user,
+        session: schema.session,
+        account: schema.account,
+        verification: schema.verification,
       }
     }),
+    secret: config.authSecret || 'dev-secret-change-in-production',
+    baseURL: config.public.siteUrl || 'http://localhost:3000',
+    trustedOrigins: [config.public.siteUrl || 'http://localhost:3000'],
     emailAndPassword: {
-      enabled: false
+      enabled: true,
+      autoSignIn: true,
     },
     socialProviders,
-    secret: config.authSecret || 'dev-secret-change-in-production',
-    baseURL: config.public.siteUrl || 'http://localhost:3000'
+    session: {
+      expiresIn: 60 * 60 * 24 * 7, // 7 days
+      updateAge: 60 * 60 * 24, // Update session every 24 hours
+      cookieCache: {
+        enabled: true,
+        maxAge: 60 * 5, // 5 minutes
+      },
+    },
+    advanced: {
+      cookiePrefix: 'rangkai',
+      useSecureCookies: process.env.NODE_ENV === 'production',
+    },
   })
 
   return _auth
@@ -57,10 +72,18 @@ export type AuthUser = {
   name: string | null
 }
 
+// Helper to get session from event
+export async function getServerSession(event: H3Event) {
+  const auth = getAuth()
+  const session = await auth.api.getSession({
+    headers: event.headers,
+  })
+  return session
+}
+
 export async function getUserFromEvent(event: H3Event): Promise<AuthUser | null> {
   try {
-    const auth = getAuth()
-    const session = await auth.api.getSession({ headers: event.headers })
+    const session = await getServerSession(event)
 
     if (!session?.user) {
       return null

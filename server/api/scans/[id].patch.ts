@@ -2,7 +2,7 @@
  * PATCH /api/scans/[id] - Update a specific scan for the authenticated user
  */
 
-import { eq, and, sql } from 'drizzle-orm'
+import { eq, and } from 'drizzle-orm'
 import { scans } from '../../db/schema'
 import { requireAuth } from '../../utils/auth'
 
@@ -26,15 +26,7 @@ export default defineEventHandler(async (event) => {
     })
   }
 
-  const scanId = parseInt(id, 10)
-  if (isNaN(scanId)) {
-    throw createError({
-      statusCode: 400,
-      message: 'Invalid scan ID format'
-    })
-  }
-
-  console.info(`[api:scans] Updating scan ${scanId} for user ${user.id}`)
+  console.info(`[api:scans] Updating scan ${id} for user ${user.id}`)
 
   // Build update object with only provided fields
   const updateData: Record<string, unknown> = {}
@@ -48,9 +40,9 @@ export default defineEventHandler(async (event) => {
     .update(scans)
     .set({
       ...updateData,
-      updated_at: sql`(unixepoch())`
+      updated_at: new Date()
     })
-    .where(and(eq(scans.id, scanId), eq(scans.user_id, user.id)))
+    .where(and(eq(scans.id, id), eq(scans.user_id, user.id)))
     .returning()
 
   if (!updated) {
@@ -60,7 +52,7 @@ export default defineEventHandler(async (event) => {
     })
   }
 
-  console.info(`[api:scans] Updated scan ${scanId} for user ${user.id}`)
+  console.info(`[api:scans] Updated scan ${id} for user ${user.id}`)
 
   return updated
 })

@@ -1,28 +1,62 @@
 import { sqliteTable, integer, text } from 'drizzle-orm/sqlite-core'
-import { sql } from 'drizzle-orm'
 
+// Better Auth required tables
+export const user = sqliteTable('user', {
+  id: text('id').primaryKey(),
+  name: text('name').notNull(),
+  email: text('email').notNull().unique(),
+  emailVerified: integer('emailVerified', { mode: 'boolean' }).notNull().default(false),
+  image: text('image'),
+  createdAt: integer('createdAt', { mode: 'timestamp' }).notNull(),
+  updatedAt: integer('updatedAt', { mode: 'timestamp' }).notNull(),
+})
+
+export const session = sqliteTable('session', {
+  id: text('id').primaryKey(),
+  expiresAt: integer('expiresAt', { mode: 'timestamp' }).notNull(),
+  token: text('token').notNull().unique(),
+  createdAt: integer('createdAt', { mode: 'timestamp' }).notNull(),
+  updatedAt: integer('updatedAt', { mode: 'timestamp' }).notNull(),
+  ipAddress: text('ipAddress'),
+  userAgent: text('userAgent'),
+  userId: text('userId').notNull().references(() => user.id, { onDelete: 'cascade' }),
+})
+
+export const account = sqliteTable('account', {
+  id: text('id').primaryKey(),
+  accountId: text('accountId').notNull(),
+  providerId: text('providerId').notNull(),
+  userId: text('userId').notNull().references(() => user.id, { onDelete: 'cascade' }),
+  accessToken: text('accessToken'),
+  refreshToken: text('refreshToken'),
+  idToken: text('idToken'),
+  accessTokenExpiresAt: integer('accessTokenExpiresAt', { mode: 'timestamp' }),
+  refreshTokenExpiresAt: integer('refreshTokenExpiresAt', { mode: 'timestamp' }),
+  scope: text('scope'),
+  password: text('password'),
+  createdAt: integer('createdAt', { mode: 'timestamp' }).notNull(),
+  updatedAt: integer('updatedAt', { mode: 'timestamp' }).notNull(),
+})
+
+export const verification = sqliteTable('verification', {
+  id: text('id').primaryKey(),
+  identifier: text('identifier').notNull(),
+  value: text('value').notNull(),
+  expiresAt: integer('expiresAt', { mode: 'timestamp' }).notNull(),
+  createdAt: integer('createdAt', { mode: 'timestamp' }),
+  updatedAt: integer('updatedAt', { mode: 'timestamp' }),
+})
+
+// App tables
 export const scans = sqliteTable('scans', {
-  id: integer('id').primaryKey({ autoIncrement: true }).notNull(),
-  user_id: text('user_id').notNull(),
-  isbn: text('isbn'),
+  id: text('id').primaryKey(),
+  user_id: text('user_id').notNull().references(() => user.id, { onDelete: 'cascade' }),
+  isbn: text('isbn').notNull(),
   title: text('title'),
   authors: text('authors'),
+  publisher: text('publisher'),
   description: text('description'),
-  created_at: integer('created_at', { mode: 'timestamp' }).notNull().default(sql`(unixepoch())`),
-  updated_at: integer('updated_at', { mode: 'timestamp' }).notNull().default(sql`(unixepoch())`)
-})
-
-export const users = sqliteTable('users', {
-  id: text('id').primaryKey().notNull(),
-  email: text('email').notNull().unique(),
-  name: text('name'),
-  created_at: integer('created_at', { mode: 'timestamp' }).notNull().default(sql`(unixepoch())`),
-  updated_at: integer('updated_at', { mode: 'timestamp' }).notNull().default(sql`(unixepoch())`)
-})
-
-export const sessions = sqliteTable('sessions', {
-  id: text('id').primaryKey().notNull(),
-  user_id: text('user_id').notNull(),
-  expires_at: integer('expires_at', { mode: 'timestamp' }).notNull(),
-  created_at: integer('created_at', { mode: 'timestamp' }).notNull().default(sql`(unixepoch())`)
+  status: text('status').default('pending'),
+  created_at: integer('created_at', { mode: 'timestamp' }).notNull(),
+  updated_at: integer('updated_at', { mode: 'timestamp' }).notNull(),
 })

@@ -1,37 +1,48 @@
-import { getUserFromEvent } from '../utils/auth'
+import { getServerSession } from '../utils/auth'
+
+// Routes that don't require authentication
+const publicRoutes = [
+  '/api/auth',      // Auth endpoints
+  '/api/health',    // Health check
+  '/api/book',      // Public book lookup (cached)
+  '/_nuxt',         // Nuxt assets
+  '/__nuxt',        // Nuxt internals
+]
+
+// Pages that don't require authentication
+const publicPages = [
+  '/',
+  '/login',
+  '/register',
+]
 
 export default defineEventHandler(async (event) => {
-  const publicPaths = [
-    '/api/health',
-    '/api/auth/',
-    '/api/auth-session',
-    '/api/book/', // Book metadata is public/cached
-    '/login',
-    '/_nuxt',
-    '/__nuxt',
-    '/favicon.ico'
-  ]
-
   const path = event.path || getRequestURL(event).pathname
 
-  // Skip auth check for public paths
-  const isPublic = publicPaths.some(publicPath => path.startsWith(publicPath))
+  // Skip during prerendering
+  if (import.meta.prerender) return
 
-  if (isPublic) {
-    return
-  }
+  // Skip public routes
+  if (publicRoutes.some(route => path.startsWith(route))) return
 
-  // Get user from session
-  const user = await getUserFromEvent(event)
+  // Skip public pages
+  if (publicPages.includes(path)) return
 
-  // Store user in event context for API routes
-  event.context.user = user
+  // Skip non-API routes (let client-side middleware handle page protection)
+  if (!path.startsWith('/api/')) return
 
-  // Protect API routes (except public ones)
-  if (path.startsWith('/api/') && !user) {
+  // Get session for protected API routes
+  const session = await getServerSession(event)
+
+  if (!session) {
     throw createError({
       statusCode: 401,
-      message: 'Unauthorized'
+      statusMessage: 'Unauthorized',
+      message: 'Authentication required',
     })
   }
+
+  // Attach session to event context for use in API handlers
+  event.context.session = session
+  event.context.user = session.user
 })

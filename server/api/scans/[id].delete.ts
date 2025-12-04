@@ -18,19 +18,11 @@ export default defineEventHandler(async (event) => {
     })
   }
 
-  const scanId = parseInt(id, 10)
-  if (isNaN(scanId)) {
-    throw createError({
-      statusCode: 400,
-      message: 'Invalid scan ID format'
-    })
-  }
-
-  console.info(`[api:scans] Deleting scan ${scanId} for user ${user.id}`)
+  console.info(`[api:scans] Deleting scan ${id} for user ${user.id}`)
 
   const [deleted] = await db
     .delete(scans)
-    .where(and(eq(scans.id, scanId), eq(scans.user_id, user.id)))
+    .where(and(eq(scans.id, id), eq(scans.user_id, user.id)))
     .returning()
 
   if (!deleted) {
@@ -40,7 +32,7 @@ export default defineEventHandler(async (event) => {
     })
   }
 
-  console.info(`[api:scans] Deleted scan ${scanId} for user ${user.id}`)
+  console.info(`[api:scans] Deleted scan ${id} for user ${user.id}`)
 
   setResponseStatus(event, 204)
   return null

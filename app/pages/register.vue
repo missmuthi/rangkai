@@ -4,10 +4,10 @@
       <!-- Header -->
       <div class="text-center">
         <h1 class="text-3xl font-bold text-gray-900 dark:text-white">
-          Welcome to Rangkai
+          Create your account
         </h1>
         <p class="mt-2 text-gray-600 dark:text-gray-400">
-          Sign in to manage your book catalog
+          Start cataloging your books
         </p>
       </div>
 
@@ -16,11 +16,16 @@
         {{ error }}
       </div>
 
+      <!-- Success Alert -->
+      <div v-if="success" class="bg-green-50 dark:bg-green-900/20 text-green-600 dark:text-green-400 p-4 rounded-lg">
+        Account created successfully! Redirecting...
+      </div>
+
       <!-- OAuth Buttons -->
       <div class="space-y-3">
         <button
           class="w-full flex items-center justify-center gap-3 px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition"
-          @click="handleGoogleLogin"
+          @click="handleGoogleSignup"
         >
           <svg class="w-5 h-5" viewBox="0 0 24 24">
             <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
@@ -38,12 +43,27 @@
           <div class="w-full border-t border-gray-300 dark:border-gray-600" />
         </div>
         <div class="relative flex justify-center text-sm">
-          <span class="px-2 bg-gray-50 dark:bg-gray-900 text-gray-500">Or continue with email</span>
+          <span class="px-2 bg-gray-50 dark:bg-gray-900 text-gray-500">Or sign up with email</span>
         </div>
       </div>
 
       <!-- Email/Password Form -->
-      <form class="space-y-4" @submit.prevent="handleEmailLogin">
+      <form class="space-y-4" @submit.prevent="handleEmailSignup">
+        <div>
+          <label for="name" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+            Name
+          </label>
+          <input
+            id="name"
+            v-model="name"
+            type="text"
+            required
+            autocomplete="name"
+            class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+            placeholder="John Doe"
+          >
+        </div>
+
         <div>
           <label for="email" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
             Email
@@ -68,10 +88,13 @@
             v-model="password"
             type="password"
             required
-            autocomplete="current-password"
+            autocomplete="new-password"
             class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
             placeholder="••••••••"
           >
+          <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+            Minimum 8 characters
+          </p>
         </div>
 
         <button
@@ -79,16 +102,16 @@
           :disabled="loading"
           class="w-full py-3 px-4 bg-indigo-600 text-white font-medium rounded-lg hover:bg-indigo-700 focus:ring-4 focus:ring-indigo-500/50 disabled:opacity-50 disabled:cursor-not-allowed transition"
         >
-          <span v-if="loading">Signing in...</span>
-          <span v-else>Sign in</span>
+          <span v-if="loading">Creating account...</span>
+          <span v-else>Sign up</span>
         </button>
       </form>
 
-      <!-- Sign Up Link -->
+      <!-- Sign In Link -->
       <p class="text-center text-sm text-gray-600 dark:text-gray-400">
-        Don't have an account?
-        <NuxtLink to="/register" class="text-indigo-600 hover:text-indigo-500 font-medium">
-          Sign up
+        Already have an account?
+        <NuxtLink to="/login" class="text-indigo-600 hover:text-indigo-500 font-medium">
+          Sign in
         </NuxtLink>
       </p>
     </div>
@@ -100,13 +123,15 @@ definePageMeta({
   layout: false
 })
 
-const { signIn, signInWithOAuth, isAuthenticated } = useAuth()
+const { signUp, signInWithOAuth, isAuthenticated } = useAuth()
 const route = useRoute()
 const router = useRouter()
 
+const name = ref('')
 const email = ref('')
 const password = ref('')
 const error = ref('')
+const success = ref(false)
 const loading = ref(false)
 
 // Redirect if already authenticated
@@ -117,9 +142,14 @@ watch(isAuthenticated, (value) => {
   }
 }, { immediate: true })
 
-async function handleEmailLogin() {
-  if (!email.value || !password.value) {
+async function handleEmailSignup() {
+  if (!name.value || !email.value || !password.value) {
     error.value = 'Please fill in all fields'
+    return
+  }
+
+  if (password.value.length < 8) {
+    error.value = 'Password must be at least 8 characters'
     return
   }
 
@@ -127,16 +157,17 @@ async function handleEmailLogin() {
   error.value = ''
 
   try {
-    await signIn(email.value, password.value)
+    await signUp(email.value, password.value, name.value)
+    success.value = true
     // Redirect handled by watcher
   } catch (e: unknown) {
-    error.value = (e as { data?: { message?: string } }).data?.message || 'Login failed. Please check your credentials.'
+    error.value = (e as { data?: { message?: string } }).data?.message || 'Sign up failed. Please try again.'
   } finally {
     loading.value = false
   }
 }
 
-function handleGoogleLogin() {
+function handleGoogleSignup() {
   signInWithOAuth('google')
 }
 </script>
