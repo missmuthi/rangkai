@@ -15,7 +15,7 @@ export default defineNuxtConfig({
   hub: {
     database: true,
     kv: true,
-    blob: true,
+    blob: false, // Disabled - R2 not enabled on account
     cache: true,
   },
   // PWA Configuration

@@ -1,148 +1,136 @@
 # Rangkai Deployment Guide
 
-This guide covers best practices for deploying the Rangkai Book Scanner application to Cloudflare using the **self-hosted** approach (recommended by NuxtHub).
+This guide covers best practices for deploying the Rangkai Book Scanner application to Cloudflare Pages using **wrangler.toml as the source of truth**.
 
-> ⚠️ **Note**: NuxtHub Admin is being sunset on December 31st, 2025. This guide uses the recommended self-hosted deployment with Cloudflare Pages CI.
+> ✅ **Recommended Approach**: Use `wrangler.toml` to configure all bindings and deploy via CLI. This ensures reproducible deployments and version-controlled configuration.
 
 ## Prerequisites
 
 - A [Cloudflare account](https://dash.cloudflare.com/sign-up)
 - A GitHub repository with your Rangkai project
 - Node.js 20+ and pnpm installed locally
+- Wrangler CLI: `npm install -g wrangler`
 
 ## Architecture Overview
 
 Rangkai uses the following Cloudflare services:
+- **Cloudflare Pages** - Edge hosting for the Nuxt application with SSR
 - **D1 Database** - SQLite-compatible database for scans, users, sessions
 - **KV Storage** - Key-value cache for book metadata (24h TTL)
-- **R2 Blob Storage** - Object storage for book covers/images
-- **Pages** - Edge hosting for the Nuxt application
+
+> **Note**: R2 Blob Storage is optional and disabled by default. Enable it in `nuxt.config.ts` if needed.
 
 ---
 
-## Step 1: Create Cloudflare Resources
+## Quick Start (One-time Setup)
 
-Before deploying, create the necessary resources in your Cloudflare dashboard.
-
-### 1.1 Create D1 Database
+### Step 1: Create Cloudflare Resources
 
 ```bash
-# Using Wrangler CLI
+# Login to Cloudflare
+npx wrangler login
+
+# Create D1 database
 npx wrangler d1 create rangkai-db
+
+# Create KV namespaces
+npx wrangler kv namespace create KV
+npx wrangler kv namespace create CACHE
 ```
 
-Or via [Cloudflare Dashboard → D1](https://dash.cloudflare.com/?to=/:account/workers/d1):
-- Click "Create database"
-- Name: `rangkai-db`
-- Note the **Database ID** for later
+Note the IDs returned for each resource.
 
-### 1.2 Create KV Namespaces
+### Step 2: Configure wrangler.toml
+
+Update `wrangler.toml` with the resource IDs:
+
+```toml
+# Wrangler configuration for Rangkai
+# This file is the SOURCE OF TRUTH for Pages Functions configuration
+# https://developers.cloudflare.com/pages/functions/wrangler-configuration/
+
+name = "rangkai"
+compatibility_date = "2025-04-25"
+compatibility_flags = ["nodejs_compat"]
+
+# Pages configuration - enables wrangler.toml as source of truth
+pages_build_output_dir = "dist"
+
+# D1 Database
+[[d1_databases]]
+binding = "DB"
+database_name = "rangkai-db"
+database_id = "YOUR_DATABASE_ID"  # From step 1
+
+# KV Namespaces
+[[kv_namespaces]]
+binding = "KV"
+id = "YOUR_KV_NAMESPACE_ID"  # From step 1
+
+[[kv_namespaces]]
+binding = "CACHE"
+id = "YOUR_CACHE_NAMESPACE_ID"  # From step 1
+
+# Environment Variables
+[vars]
+NUXT_PUBLIC_SITE_URL = "https://your-project.pages.dev"
+```
+
+### Step 3: Apply Database Migrations
 
 ```bash
-# Main KV namespace
-npx wrangler kv:namespace create KV
-
-# Cache namespace (separate for clarity)
-npx wrangler kv:namespace create CACHE
+npx wrangler d1 execute rangkai-db --remote --file=./server/db/migrations/0001_init.sql
 ```
 
-Or via [Cloudflare Dashboard → KV](https://dash.cloudflare.com/?to=/:account/workers/kv/namespaces):
-- Create two namespaces: `rangkai-kv` and `rangkai-cache`
-- Note both **Namespace IDs**
-
-### 1.3 Create R2 Bucket
+### Step 4: Add Secrets
 
 ```bash
-npx wrangler r2 bucket create rangkai-blob
+# Generate and add auth secret
+openssl rand -base64 32 | npx wrangler pages secret put NUXT_AUTH_SECRET --project-name=rangkai
 ```
 
-Or via [Cloudflare Dashboard → R2](https://dash.cloudflare.com/?to=/:account/r2/new):
-- Create bucket: `rangkai-blob`
-- Note the **Bucket ID** from Settings → Bucket Details
-
----
-
-## Step 2: Create Cloudflare Pages Project
-
-1. Go to [Cloudflare Dashboard → Workers & Pages](https://dash.cloudflare.com/?to=/:account/workers-and-pages/create)
-2. Click **"Create"** → **"Pages"** → **"Connect to Git"**
-3. Select your GitHub repository (`rangkai`)
-4. Configure build settings:
-   - **Framework preset**: None (we use custom)
-   - **Build command**: `pnpm build`
-   - **Build output directory**: `dist`
-   - **Root directory**: `/` (or your app directory)
-
----
-
-## Step 3: Configure Bindings
-
-In your Cloudflare Pages project, go to **Settings → Functions → Bindings**:
-
-### Required Bindings
-
-| Type | Variable Name | Resource |
-|------|---------------|----------|
-| D1 Database | `DB` | Select `rangkai-db` |
-| KV Namespace | `KV` | Select `rangkai-kv` |
-| KV Namespace | `CACHE` | Select `rangkai-cache` |
-| R2 Bucket | `BLOB` | Select `rangkai-blob` |
-
-### Compatibility Flags
-
-Go to **Settings → Functions → Compatibility flags**:
-- Add: `nodejs_compat`
-
----
-
-## Step 4: Environment Variables
-
-In **Settings → Environment Variables**, add:
-
-### Required Variables
-
-| Variable | Description | Example |
-|----------|-------------|---------|
-| `NUXT_AUTH_SECRET` | Secret for better-auth sessions (32+ chars) | `openssl rand -base64 32` |
-| `NUXT_OAUTH_GOOGLE_CLIENT_ID` | Google OAuth client ID | `xxx.apps.googleusercontent.com` |
-| `NUXT_OAUTH_GOOGLE_CLIENT_SECRET` | Google OAuth client secret | `GOCSPX-xxx` |
-| `NUXT_PUBLIC_SITE_URL` | Your production URL | `https://rangkai.pages.dev` |
-
-### Optional Variables (for DevTools/Admin features)
-
-| Variable | Description |
-|----------|-------------|
-| `NUXT_HUB_CLOUDFLARE_ACCOUNT_ID` | Your Cloudflare account ID |
-| `NUXT_HUB_CLOUDFLARE_API_TOKEN` | API token with R2 Read/Write, KV Read/Write |
-
-### Generating Secrets
+### Step 5: Build and Deploy
 
 ```bash
-# Generate auth secret
-openssl rand -base64 32
+# Build the application
+pnpm build
 
-# Or using Node.js
-node -e "console.log(require('crypto').randomBytes(32).toString('base64'))"
+# Deploy to Cloudflare Pages
+npx wrangler pages deploy dist --project-name=rangkai --branch=main
 ```
 
 ---
 
-## Step 5: Configure Branch Deployments
+## Deployment Workflow
 
-### Production Branch
-- Set your production branch to `main`
-- Production deployments are accessible at your primary domain
+### Local Development
 
-### Preview Deployments
-- Non-production branches (PRs, feature branches) deploy to:
-  - `<commit>.<project>.pages.dev`
-  - `<branch>.<project>.pages.dev`
+```bash
+# Start dev server with local bindings
+pnpm dev
+
+# Or connect to remote Cloudflare resources
+pnpm dev --remote
+```
+
+### Quality Checks (before deployment)
+
+```bash
+# Run all checks
+pnpm typecheck && pnpm lint && pnpm test
+```
+
+### Production Deployment
+
+```bash
+# Build and deploy
+pnpm build
+npx wrangler pages deploy dist --project-name=rangkai --branch=main
+```
 
 ---
 
-## Step 6: GitHub Actions Workflow (Optional)
-
-For more control over deployments, use GitHub Actions with Wrangler. This workflow runs quality checks on all PRs and deploys only when merged to `main`:
+## GitHub Actions CI/CD
 
 Create `.github/workflows/deploy.yml`:
 
@@ -160,7 +148,6 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  # Run quality checks on all pushes and PRs
   quality:
     name: Quality Checks
     runs-on: ubuntu-latest
@@ -178,7 +165,6 @@ jobs:
       - run: pnpm lint
       - run: pnpm test
 
-  # Deploy to Cloudflare Pages (main branch only)
   deploy:
     name: Deploy to Production
     needs: quality
@@ -201,8 +187,6 @@ jobs:
           cache: 'pnpm'
       - run: pnpm install
       - run: pnpm build
-        env:
-          NUXT_PUBLIC_SITE_URL: ${{ secrets.NUXT_PUBLIC_SITE_URL }}
       - name: Deploy to Cloudflare Pages
         id: deploy
         uses: cloudflare/wrangler-action@v3
@@ -214,119 +198,145 @@ jobs:
 
 ### Required GitHub Secrets
 
-Add these to your repository's **Settings → Secrets and variables → Actions**:
-
 | Secret | Description |
 |--------|-------------|
-| `CLOUDFLARE_API_TOKEN` | API token with Pages:Edit permission |
+| `CLOUDFLARE_API_TOKEN` | API token with Pages:Edit, D1:Edit, KV:Edit permissions |
 | `CLOUDFLARE_ACCOUNT_ID` | Your Cloudflare account ID |
-| `NUXT_PUBLIC_SITE_URL` | Your production URL |
 
 ---
 
-## Step 7: Database Migrations
+## Configuration Reference
 
-After first deployment, run migrations:
+### nuxt.config.ts
 
-```bash
-# Apply migrations to production D1
-npx wrangler d1 execute rangkai-db --remote --file=./server/db/migrations/0001_init.sql
+```typescript
+export default defineNuxtConfig({
+  modules: ['@nuxthub/core', '@nuxt/eslint', '@nuxtjs/tailwindcss', '@vite-pwa/nuxt'],
+  hub: {
+    database: true,
+    kv: true,
+    blob: false,  // Enable if R2 is available
+    cache: true,
+  },
+})
 ```
 
-Or use NuxtHub's built-in migration system:
-```bash
-# Generate migration
-npx nuxt dev --remote
-# Then use NuxtHub DevTools to run migrations
-```
+### wrangler.toml Structure
 
----
+```toml
+name = "rangkai"
+compatibility_date = "2025-04-25"
+compatibility_flags = ["nodejs_compat"]
+pages_build_output_dir = "dist"
 
-## Deployment Commands Cheatsheet
+# Bindings (applied to all environments)
+[[d1_databases]]
+binding = "DB"
+database_name = "rangkai-db"
+database_id = "xxx"
 
-```bash
-# Local development
-pnpm dev
+[[kv_namespaces]]
+binding = "KV"
+id = "xxx"
 
-# Build for production
-pnpm build
+[[kv_namespaces]]
+binding = "CACHE"
+id = "xxx"
 
-# Preview production build locally
-pnpm preview
+[vars]
+NUXT_PUBLIC_SITE_URL = "https://rangkai-d3k.pages.dev"
 
-# Deploy using NuxtHub (if using admin)
-npx nuxthub deploy
-
-# Deploy using Wrangler
-npx wrangler pages deploy dist --project-name=rangkai
-
-# Connect to remote storage for local dev
-pnpm dev --remote
+# Environment overrides (optional)
+# [env.preview]
+# [env.preview.vars]
+# NUXT_PUBLIC_SITE_URL = "https://preview.rangkai-d3k.pages.dev"
 ```
 
 ---
 
 ## Troubleshooting
 
-### Build Fails with Missing Bindings
+### 500 Error After Deployment
 
-Ensure all bindings (D1, KV, R2) are configured in Cloudflare Pages settings.
+1. Check bindings are configured in `wrangler.toml`
+2. Verify `pages_build_output_dir = "dist"` is set
+3. Ensure `nodejs_compat` flag is enabled
 
-### OAuth Redirect Issues
+### TypeScript Errors with hubBlob()
 
-1. Add your Pages URL to Google OAuth authorized redirect URIs:
-   - `https://your-project.pages.dev/api/auth/callback/google`
-   - `https://your-custom-domain.com/api/auth/callback/google`
+If R2 is not enabled, set `blob: false` in `nuxt.config.ts` and remove blob-related API files.
 
-2. Ensure `NUXT_PUBLIC_SITE_URL` matches your actual domain.
+### Database Not Found
 
-### D1 Database Not Found
+```bash
+# Verify D1 exists
+npx wrangler d1 list
 
-1. Verify the D1 database binding is named exactly `DB`
-2. Check that `nodejs_compat` compatibility flag is enabled
+# Check binding name matches "DB"
+```
 
-### KV/R2 Access Errors
+### KV Access Errors
 
-1. Verify bindings are named `KV`, `CACHE`, and `BLOB` respectively
-2. For blob presigned URLs, add `NUXT_HUB_CLOUDFLARE_*` environment variables
+```bash
+# Verify KV namespaces exist
+npx wrangler kv namespace list
+
+# Check binding names match "KV" and "CACHE"
+```
+
+---
+
+## Useful Commands
+
+```bash
+# List all resources
+npx wrangler d1 list
+npx wrangler kv namespace list
+npx wrangler pages project list
+
+# View deployment logs
+npx wrangler pages deployment tail rangkai
+
+# Execute SQL on production D1
+npx wrangler d1 execute rangkai-db --remote --command="SELECT * FROM users"
+
+# Rollback to previous deployment
+# Go to Cloudflare Dashboard → Pages → rangkai → Deployments → Rollback
+```
 
 ---
 
 ## Production Checklist
 
-Before deploying to production:
+Before going public:
 
-- [ ] All environment variables configured
-- [ ] D1, KV, R2 bindings created and linked
-- [ ] `nodejs_compat` compatibility flag enabled
-- [ ] Google OAuth redirect URIs configured
-- [ ] Database migrations applied
+- [x] `wrangler.toml` configured with all bindings
+- [x] D1 database created and migrations applied
+- [x] KV namespaces created (KV and CACHE)
+- [x] `NUXT_AUTH_SECRET` secret added
+- [x] `NUXT_PUBLIC_SITE_URL` environment variable set
+- [x] All quality checks pass (typecheck, lint, test)
+- [x] Production deployment successful
+- [ ] Google OAuth configured (if using authentication)
 - [ ] Custom domain configured (optional)
-- [ ] SSL/TLS mode set to "Full (strict)" (if using custom domain)
 
 ---
 
-## Monitoring & Observability
+## Current Production Status
 
-- **Logs**: Cloudflare Dashboard → Workers & Pages → Your Project → Logs
-- **Analytics**: Cloudflare Dashboard → Workers & Pages → Your Project → Analytics
-- **Real-time Logs**: `npx wrangler pages deployment tail`
-
----
-
-## Rollback
-
-To rollback to a previous deployment:
-
-1. Go to Cloudflare Dashboard → Workers & Pages → Your Project → Deployments
-2. Find the deployment you want to restore
-3. Click "..." → "Rollback to this deployment"
+| Resource | Status | URL/ID |
+|----------|--------|--------|
+| Pages Project | ✅ Deployed | https://rangkai-d3k.pages.dev |
+| D1 Database | ✅ Created | `rangkai-db` |
+| KV Namespace | ✅ Created | `KV` binding |
+| Cache Namespace | ✅ Created | `CACHE` binding |
+| Auth Secret | ✅ Configured | NUXT_AUTH_SECRET |
 
 ---
 
 ## Additional Resources
 
-- [NuxtHub Deployment Docs](https://hub.nuxt.com/docs/getting-started/deploy)
-- [Cloudflare Pages Documentation](https://developers.cloudflare.com/pages/)
-- [Wrangler CLI Reference](https://developers.cloudflare.com/workers/wrangler/)
-- [better-auth Documentation](https://www.better-auth.com/)
+- [Cloudflare Pages Wrangler Configuration](https://developers.cloudflare.com/pages/functions/wrangler-configuration/)
+- [NuxtHub Documentation](https://hub.nuxt.com/docs)
+- [Cloudflare D1 Documentation](https://developers.cloudflare.com/d1/)
+- [Cloudflare KV Documentation](https://developers.cloudflare.com/kv/)
