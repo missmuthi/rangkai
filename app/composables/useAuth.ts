@@ -85,8 +85,10 @@ export const useAuth = () => {
 
   // OAuth Sign In (Google, GitHub, etc.)
   function signInWithOAuth(provider: 'google' | 'github') {
-    // Redirect to OAuth provider
-    window.location.href = `/api/auth/sign-in/social?provider=${provider}&callbackURL=${encodeURIComponent(baseURL + '/scan/mobile')}`
+    // Better Auth uses /api/auth/sign-in/{provider} for OAuth
+    // The callback will redirect to the callbackURL query parameter
+    const callbackURL = encodeURIComponent(baseURL + '/scan/mobile')
+    window.location.href = `/api/auth/sign-in/${provider}?callbackURL=${callbackURL}`
   }
 
   // Legacy Google login method

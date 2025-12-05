@@ -16,7 +16,7 @@ export default defineNuxtConfig({
     database: true,
     kv: true,
     blob: false, // Disabled - R2 not enabled on account
-    cache: true,
+    cache: false, // Temporarily disable cache to fix build issue
   },
   // PWA Configuration
   pwa: {
