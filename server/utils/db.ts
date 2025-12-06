@@ -1,5 +1,5 @@
 import { drizzle } from 'drizzle-orm/d1'
-import { hubDatabase } from '@nuxthub/core/server'
+import { hubDatabase } from '#imports'
 import * as schema from '../db/schema'
 
 export function useDb() {

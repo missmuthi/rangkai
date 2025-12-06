@@ -1,5 +1,5 @@
 import type { H3Event } from 'h3'
-import { hubDatabase } from '@nuxthub/core/server'
+import { hubDatabase } from '#imports'
 import { betterAuth } from 'better-auth'
 import { drizzleAdapter } from 'better-auth/adapters/drizzle'
 import { drizzle } from 'drizzle-orm/d1'
