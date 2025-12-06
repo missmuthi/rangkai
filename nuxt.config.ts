@@ -63,9 +63,9 @@ export default defineNuxtConfig({
   // Development
   devtools: { enabled: true },
   runtimeConfig: {
-    authSecret: '',
-    oauthGoogleClientId: '',
-    oauthGoogleClientSecret: '',
+    authSecret: process.env.AUTH_SECRET || '',
+    oauthGoogleClientId: process.env.OAUTH_GOOGLE_CLIENT_ID || '',
+    oauthGoogleClientSecret: process.env.OAUTH_GOOGLE_CLIENT_SECRET || '',
     public: {
       // Ensure there is a safe fallback so OAuth redirect URI uses a valid domain
       siteUrl: process.env.NUXT_PUBLIC_SITE_URL || 'https://rangkai-d3k.pages.dev'

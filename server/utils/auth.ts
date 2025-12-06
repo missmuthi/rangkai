@@ -1,4 +1,5 @@
 import type { H3Event } from 'h3'
+import { hubDatabase } from '@nuxthub/core/server'
 import { betterAuth } from 'better-auth'
 import { drizzleAdapter } from 'better-auth/adapters/drizzle'
 import { drizzle } from 'drizzle-orm/d1'
@@ -29,6 +30,16 @@ export function getAuth() {
   // If OAuth creds are provided, ensure a base site URL is set so redirects use a proper URL
   if ((config.oauthGoogleClientId || config.oauthGoogleClientSecret) && !config.public.siteUrl && process.env.NODE_ENV !== 'production') {
     console.warn('[auth] oauth credentials found but `public.siteUrl` is not set; callbacks may redirect to http://localhost:3000')
+  }
+
+  // Log configured social providers concisely for debugging
+  const configuredProviders = Object.keys(socialProviders)
+  if (configuredProviders.length === 0) {
+    if (process.env.NODE_ENV !== 'production') {
+      console.info('[auth] No social providers configured (Google disabled).')
+    }
+  } else {
+    console.info('[auth] Configured social providers:', configuredProviders.join(', '))
   }
 
   _auth = betterAuth({
