@@ -8,6 +8,11 @@ import { Building2, Users, AlertTriangle, Check, Copy, Sparkles, ExternalLink } 
 
 const props = defineProps<{
   book: BookMetadata
+  onAiCleanTrigger?: () => void
+}>()
+
+const emit = defineEmits<{
+  aiClean: []
 }>()
 
 // Copy state
@@ -58,7 +63,7 @@ const coverUrl = computed(() => {
     <div class="space-y-1">
       <!-- Title -->
       <div class="grid grid-cols-[140px_1fr] py-2 border-b border-gray-100 dark:border-gray-800">
-        <span class="text-sm font-medium text-muted-foreground">Title</span>
+        <span class="text-sm font-medium text-gray-500 dark:text-gray-400">Title</span>
         <div class="flex items-center gap-2">
           <span class="text-sm font-semibold text-gray-900 dark:text-gray-100">{{ book.title || '-' }}</span>
           <button v-if="book.title" @click="copyToClipboard(book.title, 'title')" class="p-1 rounded opacity-0 hover:opacity-100 transition-opacity group-hover:opacity-60">
@@ -76,12 +81,18 @@ const coverUrl = computed(() => {
 
       <!-- Call Number -->
       <div class="grid grid-cols-[140px_1fr] py-2 border-b border-gray-100 dark:border-gray-800">
-        <span class="text-sm font-medium text-muted-foreground">Call Number</span>
+        <span class="text-sm font-medium text-gray-500 dark:text-gray-400">Call Number</span>
         <div class="flex items-center gap-2">
-          <span class="text-sm font-mono bg-gray-100 dark:bg-gray-800 px-2 py-0.5 rounded text-gray-800 dark:text-gray-200">{{ book.callNumber || book.ddc || '-' }}</span>
-          <button v-if="book.callNumber || book.ddc" @click="copyToClipboard(book.callNumber || book.ddc, 'callNumber')" class="p-1 rounded opacity-0 hover:opacity-100 transition-opacity">
-            <Check v-if="copiedField === 'callNumber'" class="w-3.5 h-3.5 text-green-500" />
-            <Copy v-else class="w-3.5 h-3.5 text-muted-foreground" />
+          <template v-if="book.callNumber || book.ddc">
+            <span class="text-sm font-mono bg-gray-100 dark:bg-gray-800 px-2 py-0.5 rounded text-gray-800 dark:text-gray-200">{{ book.callNumber || book.ddc }}</span>
+            <button @click="copyToClipboard(book.callNumber || book.ddc, 'callNumber')" class="p-1 rounded opacity-0 hover:opacity-100 transition-opacity">
+              <Check v-if="copiedField === 'callNumber'" class="w-3.5 h-3.5 text-green-500" />
+              <Copy v-else class="w-3.5 h-3.5 text-muted-foreground" />
+            </button>
+          </template>
+          <button v-else @click="emit('aiClean')" class="text-xs text-amber-600 dark:text-amber-500 hover:text-amber-700 dark:hover:text-amber-400 font-medium flex items-center gap-1">
+            <Sparkles class="w-3 h-3" />
+            Generate with AI
           </button>
         </div>
       </div>
@@ -118,13 +129,19 @@ const coverUrl = computed(() => {
 
       <!-- Classification -->
       <div class="grid grid-cols-[140px_1fr] py-2 border-b border-gray-100 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-800/30">
-        <span class="text-sm font-medium text-muted-foreground">Classification</span>
+        <span class="text-sm font-medium text-gray-500 dark:text-gray-400">Classification</span>
         <div class="flex items-center gap-2">
-          <span class="text-sm text-gray-900 dark:text-gray-100">{{ book.ddc ? `${book.ddc} (DDC)` : '-' }}</span>
-          <span v-if="trustBadge" :class="['inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium', trustBadge.class]">
-            <component :is="trustBadge.icon" class="w-3 h-3" />
-            {{ trustBadge.label }}
-          </span>
+          <template v-if="book.ddc">
+            <span class="text-sm text-gray-900 dark:text-gray-100">{{ book.ddc }} (DDC)</span>
+            <span v-if="trustBadge" :class="['inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium', trustBadge.class]">
+              <component :is="trustBadge.icon" class="w-3 h-3" />
+              {{ trustBadge.label }}
+            </span>
+          </template>
+          <button v-else @click="emit('aiClean')" class="text-xs text-amber-600 dark:text-amber-500 hover:text-amber-700 dark:hover:text-amber-400 font-medium flex items-center gap-1">
+            <AlertTriangle class="w-3 h-3" />
+            Missing - Fix with AI
+          </button>
         </div>
       </div>
 
@@ -135,9 +152,15 @@ const coverUrl = computed(() => {
       </div>
 
       <!-- Subjects -->
-      <div v-if="book.subjects" class="grid grid-cols-[140px_1fr] py-2 border-b border-gray-100 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-800/30">
-        <span class="text-sm font-medium text-muted-foreground">Subject(s)</span>
-        <span class="text-sm text-gray-900 dark:text-gray-100">{{ book.subjects }}</span>
+      <div class="grid grid-cols-[140px_1fr] py-2 border-b border-gray-100 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-800/30">
+        <span class="text-sm font-medium text-gray-500 dark:text-gray-400">Subject(s)</span>
+        <template v-if="book.subjects">
+          <span class="text-sm text-gray-900 dark:text-gray-100">{{ book.subjects }}</span>
+        </template>
+        <button v-else @click="emit('aiClean')" class="text-xs text-red-600 dark:text-red-500 hover:text-red-700 dark:hover:text-red-400 font-medium flex items-center gap-1">
+          <Sparkles class="w-3 h-3" />
+          Add subjects with AI
+        </button>
       </div>
 
       <!-- Authors -->
@@ -148,8 +171,8 @@ const coverUrl = computed(() => {
 
       <!-- Description -->
       <div v-if="book.description" class="mt-4 p-4 bg-gray-50 dark:bg-gray-800/50 rounded-lg border border-gray-100 dark:border-gray-700">
-        <p class="text-xs font-medium text-muted-foreground mb-2">Description</p>
-        <p class="text-sm text-gray-700 dark:text-gray-300 line-clamp-4">{{ book.description }}</p>
+        <p class="text-xs font-medium text-gray-500 dark:text-gray-400 mb-2">Description</p>
+        <p class="text-sm leading-relaxed text-gray-700 dark:text-gray-200">{{ book.description }}</p>
       </div>
     </div>
 

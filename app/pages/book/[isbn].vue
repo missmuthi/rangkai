@@ -146,7 +146,10 @@ function handleEdit() {
           v-if="book" 
           :variant="book.isAiEnhanced ? 'secondary' : 'default'"
           size="sm"
-          class="gap-2 min-w-[140px]"
+          :class="[
+            'gap-2 min-w-[140px] transition-all duration-300',
+            !book.isAiEnhanced && !isCleaning && cooldown === 0 ? 'shadow-[0_0_20px_rgba(99,102,241,0.5),0_0_40px_rgba(99,102,241,0.2)] animate-pulse' : ''
+          ]"
           :disabled="isCleaning || cooldown > 0"
           @click="handleAiClean"
         >
@@ -216,7 +219,7 @@ function handleEdit() {
         </span>
       </div>
 
-      <BibliographicRecord :book="book" />
+      <BibliographicRecord :book="book" @ai-clean="handleAiClean" />
     </div>
 
     <div v-else class="text-center text-muted-foreground py-12">

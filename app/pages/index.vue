@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ScanBarcode, LogIn, ArrowRight } from 'lucide-vue-next'
+import { ArrowRight, Upload, Camera, Database, Download, LogIn, Sparkles } from 'lucide-vue-next'
 import Button from '@/components/ui/Button.vue'
 import Card from '@/components/ui/Card.vue'
 import CardContent from '@/components/ui/CardContent.vue'
@@ -97,11 +97,13 @@ function handleScan(isbn: string) {
     </section>
 
     <!-- Features Section -->
-    <section class="container mx-auto px-4 py-24 space-y-12">
-      <div class="text-center space-y-4">
-        <h2 class="text-3xl font-bold tracking-tight">Features</h2>
-        <p class="text-muted-foreground max-w-2xl mx-auto">
-          Everything you need to streamline your library cataloging workflow.
+    <section class="container mx-auto px-4 py-32 text-center space-y-8">
+      <div class="max-w-4xl mx-auto space-y-6">
+        <h1 class="text-5xl sm:text-6xl font-bold tracking-tight">
+          Book metadata harvester for Indonesian librarians
+        </h1>
+        <p class="text-xl text-gray-600 dark:text-gray-300">
+          Scan, fetch, <strong class="text-indigo-600 dark:text-indigo-400">and clean</strong> bibliographic metadata with AI for seamless SLiMS cataloging.
         </p>
       </div>
       

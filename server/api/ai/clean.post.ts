@@ -7,7 +7,7 @@
 import { requireAuth } from '../../utils/auth'
 import type { BookMetadata } from '../../utils/metadata/types'
 import { fetchOpenLibraryClassification } from '../../utils/metadata/openlibrary-classification'
-import { eq, like, sql } from 'drizzle-orm'
+import { eq, like } from 'drizzle-orm'
 
 // Groq API Configuration
 const GROQ_API_URL = 'https://api.groq.com/openai/v1/chat/completions'
@@ -29,8 +29,8 @@ export default defineEventHandler(async (event) => {
     })
   }
 
-  const db = useDrizzle()
-  const tables = useTables()
+  const db = hubDatabase()
+  const { classificationCache } = await import('../../db/schema')
   const isbn = metadata.isbn
 
   console.info(`[AI Clean] Processing ISBN: ${isbn}`)
@@ -41,8 +41,8 @@ export default defineEventHandler(async (event) => {
   // =================================================================
   const cached = await db
     .select()
-    .from(tables.classificationCache)
-    .where(eq(tables.classificationCache.isbn, isbn))
+    .from(classificationCache)
+    .where(eq(classificationCache.isbn, isbn))
     .get()
 
   if (cached && cached.verified) {
@@ -68,7 +68,7 @@ export default defineEventHandler(async (event) => {
     console.info(`[AI Clean] ✓ Open Library HIT - DDC: ${olData.ddc}, LCC: ${olData.lcc}`)
     
     // Save to cache for future
-    await db.insert(tables.classificationCache).values({
+    await db.insert(classificationCache).values({
       isbn,
       title: metadata.title || olData.title || '',
       authors: Array.isArray(metadata.authors) ? metadata.authors.join('; ') : metadata.authors || null,
@@ -113,12 +113,12 @@ export default defineEventHandler(async (event) => {
   const titleFirstWord = metadata.title?.split(' ')[0] || ''
   const similarBooks = await db
     .select({
-      title: tables.classificationCache.title,
-      callNumber: tables.classificationCache.callNumber,
-      ddc: tables.classificationCache.ddc,
+      title: classificationCache.title,
+      callNumber: classificationCache.callNumber,
+      ddc: classificationCache.ddc,
     })
-    .from(tables.classificationCache)
-    .where(like(tables.classificationCache.title, `%${titleFirstWord}%`))
+    .from(classificationCache)
+    .where(like(classificationCache.title, `%${titleFirstWord}%`))
     .limit(3)
     .all()
 
@@ -185,7 +185,7 @@ ${ragContext}`
 
     // Save to cache for future
     if (enhancedData.ddc || enhancedData.lcc) {
-      await db.insert(tables.classificationCache).values({
+      await db.insert(classificationCache).values({
         isbn,
         title: metadata.title || '',
         authors: Array.isArray(metadata.authors) ? metadata.authors.join('; ') : metadata.authors || null,
