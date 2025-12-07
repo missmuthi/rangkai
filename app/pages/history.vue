@@ -3,7 +3,7 @@
  * History Page - shadcn/Vercel Dashboard Style
  * Optimized for UX: flat hierarchy, proper action priority, distinct empty states
  */
-import type { Scan } from '~/types'
+// Scan import removed
 import { 
   Download, 
   ScanBarcode, 
@@ -11,8 +11,7 @@ import {
   CheckCircle2, 
   Clock, 
   AlertCircle,
-  Search,
-  Filter
+  Search
 } from 'lucide-vue-next'
 import Button from '@/components/ui/Button.vue'
 
@@ -33,7 +32,7 @@ const { exportToCSV } = useSlimsExport()
 
 // Filter state
 const filters = ref<{ status?: string; dateRange?: string; search?: string }>({})
-const selectedIds = ref<string[]>([])
+// selectedIds removed
 
 // Computed stats
 const stats = computed(() => ({

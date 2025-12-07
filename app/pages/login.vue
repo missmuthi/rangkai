@@ -44,14 +44,11 @@ definePageMeta({
   layout: false
 })
 
-const { signIn, signInWithOAuth, isAuthenticated } = useAuth()
+const { isAuthenticated } = useAuth()
 const route = useRoute()
 const router = useRouter()
 
-const email = ref('')
-const password = ref('')
 const error = ref('')
-const loading = ref(false)
 
 // Redirect if already authenticated
 watch(isAuthenticated, (value) => {
@@ -81,7 +78,7 @@ onMounted(() => {
     }
     
     const errCode = Array.isArray(query.error) ? query.error[0] : query.error
-    let msg = errorMap[errCode as string] || 'Authentication failed'
+    const msg = errorMap[errCode as string] || 'Authentication failed'
     
     if (query.details) {
        // Optional: Log details to console but don't show to user unless sanitized

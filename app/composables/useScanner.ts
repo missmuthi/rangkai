@@ -1,4 +1,4 @@
-import type { Html5Qrcode, Html5QrcodeCameraScanConfig, Html5QrcodeFullConfig } from 'html5-qrcode'
+import type { Html5Qrcode, Html5QrcodeCameraScanConfig } from 'html5-qrcode'
 
 export function useScanner() {
   const isScanning = ref(false)
@@ -12,9 +12,9 @@ export function useScanner() {
   }
 
   async function startScanner(
-    elementId: string, 
+    elementId: string,
     onResult: (text: string) => void,
-    onError: (err: string) => void = () => {}
+    onError?: (error: string) => void
   ) {
     try {
       if (scanner.value) {
@@ -44,7 +44,7 @@ export function useScanner() {
           playBeep()
           onResult(decodedText)
         },
-        (errorMessage) => {
+        (_errorMessage) => {
           // Ignore frequent scanning errors, only report critical ones if needed
           // onError(errorMessage) 
         }

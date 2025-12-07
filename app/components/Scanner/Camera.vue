@@ -13,7 +13,7 @@ const emit = defineEmits<{
   error: [message: string]
 }>()
 
-const { isScanning, error, startScanner, stopScanner } = useScanner()
+const { isScanning, error, startScanner } = useScanner()
 
 const scannerId = computed(() => props.elementId || 'scanner-camera')
 

@@ -28,7 +28,7 @@ const stats = computed(() => {
     <!-- Header -->
     <div class="flex items-center gap-6">
       <div class="h-24 w-24 rounded-full bg-primary/10 flex items-center justify-center text-4xl font-bold text-primary border-4 border-background shadow-xl">
-        <img v-if="(user as any)?.image" :src="(user as any).image" class="h-full w-full rounded-full object-cover" />
+        <img v-if="(user as any)?.image" :src="(user as any).image" class="h-full w-full rounded-full object-cover" >
         <span v-else>{{ user?.name?.charAt(0) || 'U' }}</span>
       </div>
       <div>

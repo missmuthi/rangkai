@@ -33,22 +33,22 @@ const handleLogout = async () => {
       
       <div class="grid grid-cols-3 gap-4">
         <button 
-          @click="colorMode.preference = 'light'"
           :class="['flex flex-col items-center justify-between rounded-md border-2 p-4 hover:bg-accent hover:text-accent-foreground', colorMode.preference === 'light' ? 'border-primary' : 'border-muted']"
+          @click="colorMode.preference = 'light'"
         >
           <Sun class="mb-2 h-6 w-6" />
           <span class="text-xs font-medium">Light</span>
         </button>
         <button 
-          @click="colorMode.preference = 'dark'"
           :class="['flex flex-col items-center justify-between rounded-md border-2 p-4 hover:bg-accent hover:text-accent-foreground', colorMode.preference === 'dark' ? 'border-primary' : 'border-muted']"
+          @click="colorMode.preference = 'dark'"
         >
           <Moon class="mb-2 h-6 w-6" />
           <span class="text-xs font-medium">Dark</span>
         </button>
         <button 
-          @click="colorMode.preference = 'system'"
           :class="['flex flex-col items-center justify-between rounded-md border-2 p-4 hover:bg-accent hover:text-accent-foreground', colorMode.preference === 'system' ? 'border-primary' : 'border-muted']"
+          @click="colorMode.preference = 'system'"
         >
           <Monitor class="mb-2 h-6 w-6" />
           <span class="text-xs font-medium">System</span>
@@ -76,7 +76,7 @@ const handleLogout = async () => {
       </div>
 
       <div class="flex justify-start">
-        <Button variant="destructive" @click="handleLogout" class="gap-2">
+        <Button variant="destructive" class="gap-2" @click="handleLogout">
            <LogOut class="h-4 w-4" />
            Sign Out
         </Button>

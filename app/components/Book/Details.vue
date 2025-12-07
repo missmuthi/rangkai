@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { BookMetadata } from '~/types/book'
-import { cn } from '~/utils/cn'
+// import { cn } from '~/utils/cn' unused
 
 const props = defineProps<{
   book: BookMetadata | null

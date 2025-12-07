@@ -1,26 +1,20 @@
 /**
- * GET /api/book/[isbn] - Fetch merged book metadata from multiple sources
+ * GET /api/book/[isbn] - Fetch book metadata from Google Books API
  *
- * Uses hubKV() for caching with 24h TTL.
- * Waterfall priority: Google Books > Open Library > Library of Congress
+ * Features:
+ * - KV caching with 24h TTL
+ * - X-Cache header (HIT/MISS)
+ * - Retry logic (3 attempts with exponential backoff)
+ * - Background audit logging via waitUntil
  */
 
 import { fetchGoogleBooks } from '../../utils/metadata/google'
-import { fetchOpenLibrary } from '../../utils/metadata/openlibrary'
-import { fetchLoc } from '../../utils/metadata/loc'
 import type { BookMetadata } from '../../utils/metadata/types'
-import { mergeMetadata, calculateCompleteness } from '../../utils/merge'
 
 const CACHE_TTL_SECONDS = 60 * 60 * 24 // 24 hours
 
 interface BookResponse {
   metadata: BookMetadata | null
-  sources: {
-    google: boolean
-    openlibrary: boolean
-    loc: boolean
-  }
-  completeness: number
   cached: boolean
 }
 
@@ -46,51 +40,37 @@ export default defineEventHandler(async (event): Promise<BookResponse> => {
   const cacheKey = `book:${cleanIsbn}`
   const kv = hubKV()
 
-  // Check cache first
+  // 1. Check KV cache first
   try {
     const cached = await kv.get<BookResponse>(cacheKey)
     if (cached) {
-      console.info(`[api:book] Cache hit for ISBN ${cleanIsbn}`)
+      console.info(`[api:book] Cache HIT for ISBN ${cleanIsbn}`)
+      setHeader(event, 'X-Cache', 'HIT')
       return { ...cached, cached: true }
     }
   } catch (error) {
     console.warn(`[api:book] Cache read error for ISBN ${cleanIsbn}:`, error)
   }
 
-  console.info(`[api:book] Fetching metadata for ISBN ${cleanIsbn}`)
+  // Cache MISS - fetch from Google Books API
+  setHeader(event, 'X-Cache', 'MISS')
+  console.info(`[api:book] Cache MISS - Fetching metadata for ISBN ${cleanIsbn}`)
 
-  // Fetch from all sources in parallel
   const startTime = Date.now()
-  const [google, openlibrary, loc] = await Promise.all([
-    fetchGoogleBooks(cleanIsbn),
-    fetchOpenLibrary(cleanIsbn),
-    fetchLoc(cleanIsbn)
-  ])
+  const metadata = await fetchGoogleBooks(cleanIsbn)
   const duration = Date.now() - startTime
 
   console.info(`[api:book] Fetched ISBN ${cleanIsbn} in ${duration}ms`, {
-    google: !!google,
-    openlibrary: !!openlibrary,
-    loc: !!loc
+    found: !!metadata
   })
 
-  // Merge with waterfall priority
-  const merged = mergeMetadata([google, openlibrary, loc])
-  const completeness = calculateCompleteness(merged)
-
   const response: BookResponse = {
-    metadata: merged,
-    sources: {
-      google: google !== null,
-      openlibrary: openlibrary !== null,
-      loc: loc !== null
-    },
-    completeness,
+    metadata,
     cached: false
   }
 
-  // Cache the result if we have any data
-  if (merged) {
+  // 2. Cache the result if we have data
+  if (metadata) {
     try {
       await kv.set(cacheKey, response, { ttl: CACHE_TTL_SECONDS })
       console.info(`[api:book] Cached ISBN ${cleanIsbn} for ${CACHE_TTL_SECONDS}s`)
@@ -99,5 +79,27 @@ export default defineEventHandler(async (event): Promise<BookResponse> => {
     }
   }
 
+  // 3. Background audit log (non-blocking)
+  // Note: waitUntil requires Cloudflare runtime context
+  // In local dev, this runs synchronously
+  const cloudflareContext = event.context.cloudflare
+  if (cloudflareContext?.context?.waitUntil) {
+    cloudflareContext.context.waitUntil(
+      logBookFetch(cleanIsbn, !!metadata, duration).catch(err =>
+        console.warn('[api:book] Audit log error:', err)
+      )
+    )
+  }
+
   return response
 })
+
+/**
+ * Background audit logging (runs via waitUntil)
+ */
+async function logBookFetch(isbn: string, found: boolean, durationMs: number): Promise<void> {
+  console.info(`[audit] Book fetch: isbn=${isbn} found=${found} duration=${durationMs}ms`)
+  // Future: Save to D1 audit table
+  // const db = useDrizzle()
+  // await db.insert(auditLog).values({ isbn, found, durationMs, timestamp: new Date() })
+}

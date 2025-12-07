@@ -6,7 +6,7 @@ definePageMeta({
 
 const { book, loading, error, searchByISBN, cleanMetadata } = useBookSearch()
 const { addScan } = useHistory()
-const { startScanner, stopScanner } = useScanner()
+const { startScanner } = useScanner()
 
 const scannerRef = ref<HTMLElement | null>(null)
 const lastScan = ref('')

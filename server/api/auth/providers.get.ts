@@ -1,4 +1,4 @@
-export default defineEventHandler((event) => {
+export default defineEventHandler(() => {
   const config = useRuntimeConfig()
 
   // Determine which social providers are configured based on runtime config

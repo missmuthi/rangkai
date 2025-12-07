@@ -3,7 +3,7 @@
  * History/BulkActions.vue
  * Multi-select actions for scan history
  */
-import type { Scan } from '~/types'
+// Scan import removed
 
 const props = defineProps<{
   selectedIds: string[]

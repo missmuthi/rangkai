@@ -1,7 +1,7 @@
 import { eq, and, gt } from 'drizzle-orm'
 import { v4 as uuidv4 } from 'uuid'
 import { randomBytes, createHash } from 'node:crypto'
-import { drizzle } from 'drizzle-orm/d1'
+import type { drizzle } from 'drizzle-orm/d1'
 import * as schema from '../db/schema'
 
 // --- PKCE & State Utils ---

@@ -38,9 +38,9 @@ const onSearch = () => {
         
         <Input 
           v-model="searchQuery"
-          @keydown.enter="onSearch"
           class="pl-12 pr-14 h-14 text-lg rounded-full shadow-sm border-muted-foreground/20 focus-visible:ring-primary/20 transition-all group-hover:shadow-md"
           placeholder="Search by Title, Author, or ISBN..."
+          @keydown.enter="onSearch"
         />
         
         <div class="absolute right-2 top-1/2 -translate-y-1/2">
@@ -48,8 +48,8 @@ const onSearch = () => {
             variant="ghost" 
             size="icon" 
             class="h-10 w-10 rounded-full hover:bg-primary/10 hover:text-primary transition-colors"
-            @click="openScanner"
             title="Open Camera Scanner"
+            @click="openScanner"
           >
             <Camera class="h-5 w-5" />
           </Button>
