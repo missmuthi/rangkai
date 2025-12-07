@@ -61,7 +61,8 @@ export const useAuth = () => {
   // Email/Password Sign Up
   async function signUp(email: string, password: string, name: string) {
     const response = await $fetch('/api/auth/sign-up/email', {
-      method: 'POST',
+      // @ts-expect-error - Route handled by [...all].ts but masked by [provider].get.ts types
+      method: 'POST' as const,
       body: { email, password, name },
       credentials: 'include',
     })
@@ -72,7 +73,8 @@ export const useAuth = () => {
   // Email/Password Sign In
   async function signIn(email: string, password: string) {
     const response = await $fetch('/api/auth/sign-in/email', {
-      method: 'POST',
+      // @ts-expect-error - Route handled by [...all].ts but masked by [provider].get.ts types
+      method: 'POST' as const,
       body: { email, password },
       credentials: 'include',
     })
@@ -102,7 +104,7 @@ export const useAuth = () => {
     state.value.isLoading = true
     try {
       await $fetch('/api/auth/sign-out', {
-        method: 'POST',
+        method: 'POST' as const,
         credentials: 'include',
       })
       state.value.session = null

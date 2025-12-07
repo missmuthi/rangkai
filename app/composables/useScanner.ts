@@ -55,7 +55,9 @@ export function useScanner() {
     } catch (e: unknown) {
       error.value = (e instanceof Error) ? e.message : 'Failed to start camera'
       isScanning.value = false
-      onError(error.value!)
+      if (onError && error.value) {
+        onError(error.value)
+      }
     }
   }
 

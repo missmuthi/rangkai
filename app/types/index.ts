@@ -1,17 +1,17 @@
 export interface BookMetadata {
   isbn: string
   title: string
-  subtitle?: string
+  subtitle?: string | null
   authors: string[]
-  publisher?: string
-  publishedDate?: string
-  description?: string
-  pageCount?: number
-  categories?: string[]
-  thumbnail?: string
-  language?: string
-  previewLink?: string
-  source?: string
+  publisher?: string | null
+  publishedDate?: string | null
+  description?: string | null
+  pageCount?: number | null
+  categories?: string[] | null
+  thumbnail?: string | null
+  language?: string | null
+  previewLink?: string | null
+  source?: string | null
 }
 
 export interface Scan {

@@ -22,7 +22,7 @@ export default defineEventHandler(async (event) => {
 
   const [deleted] = await db
     .delete(scans)
-    .where(and(eq(scans.id, id), eq(scans.user_id, user.id)))
+    .where(and(eq(scans.id, id), eq(scans.userId, user.id)))
     .returning()
 
   if (!deleted) {

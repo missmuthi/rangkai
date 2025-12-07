@@ -28,15 +28,15 @@ export default defineEventHandler(async (event) => {
     .insert(scans)
     .values({
       id: scanId,
-      user_id: user.id,
+      userId: user.id,
       isbn: body.isbn,
       title: body.title || '',
       authors: body.authors || '',
       publisher: body.publisher || '',
       description: body.description || '',
       status: body.status || 'pending',
-      created_at: new Date(),
-      updated_at: new Date()
+      createdAt: new Date(),
+      updatedAt: new Date()
     })
     .returning()
 

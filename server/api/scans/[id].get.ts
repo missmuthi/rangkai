@@ -23,7 +23,7 @@ export default defineEventHandler(async (event) => {
   const [scan] = await db
     .select()
     .from(scans)
-    .where(and(eq(scans.id, id), eq(scans.user_id, user.id)))
+    .where(and(eq(scans.id, id), eq(scans.userId, user.id)))
     .limit(1)
 
   if (!scan) {

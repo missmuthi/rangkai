@@ -40,9 +40,9 @@ export default defineEventHandler(async (event) => {
     .update(scans)
     .set({
       ...updateData,
-      updated_at: new Date()
+      updatedAt: new Date()
     })
-    .where(and(eq(scans.id, id), eq(scans.user_id, user.id)))
+    .where(and(eq(scans.id, id), eq(scans.userId, user.id)))
     .returning()
 
   if (!updated) {

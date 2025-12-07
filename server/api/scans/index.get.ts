@@ -15,8 +15,8 @@ export default defineEventHandler(async (event) => {
   const userScans = await db
     .select()
     .from(scans)
-    .where(eq(scans.user_id, user.id))
-    .orderBy(desc(scans.created_at))
+    .where(eq(scans.userId, user.id))
+    .orderBy(desc(scans.createdAt))
 
   console.info(`[api:scans] Found ${userScans.length} scans for user ${user.id}`)
 
