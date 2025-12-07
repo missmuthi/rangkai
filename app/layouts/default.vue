@@ -8,5 +8,6 @@
     </main>
 
     <LayoutFooter />
+    <ReloadPrompt />
   </div>
 </template>
