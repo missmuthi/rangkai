@@ -29,7 +29,7 @@ const handleLogout = async () => {
         <h3 class="text-lg font-medium">Appearance</h3>
         <p class="text-sm text-muted-foreground">Customize the interface theme.</p>
       </div>
-      <Separator />
+      <hr class="border-border" />
       
       <div class="grid grid-cols-3 gap-4">
         <button 
@@ -62,7 +62,7 @@ const handleLogout = async () => {
         <h3 class="text-lg font-medium">Account</h3>
         <p class="text-sm text-muted-foreground">Manage your account information.</p>
       </div>
-      <Separator />
+      <hr class="border-border" />
 
       <div class="flex items-center gap-4 rounded-lg border p-4">
         <div class="h-12 w-12 rounded-full overflow-hidden bg-muted flex items-center justify-center">
