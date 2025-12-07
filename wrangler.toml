@@ -42,9 +42,10 @@ NUXT_PUBLIC_SITE_URL = "https://rangkai-d3k.pages.dev"
 # ============================================
 
 # Production-specific overrides (if needed)
-# [env.production]
-# [env.production.vars]
-# NUXT_PUBLIC_SITE_URL = "https://your-custom-domain.com"
+[env.production]
+[env.production.vars]
+ENVIRONMENT = "production"
+NUXT_PUBLIC_SITE_URL = "https://rangkai-d3k.pages.dev"
 
 # Preview-specific overrides (if needed)
 # [env.preview]

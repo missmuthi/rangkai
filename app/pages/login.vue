@@ -137,6 +137,31 @@ async function handleEmailLogin() {
 }
 
 function handleGoogleLogin() {
-  signInWithOAuth('google')
+  window.location.href = '/api/auth/google'
 }
+
+onMounted(() => {
+  const query = route.query
+  if (query.error) {
+    const errorMap: Record<string, string> = {
+      'oauth_provider_error': 'Google authentication failed.',
+      'oauth_missing_params': 'Invalid response from Google.',
+      'oauth_state_mismatch': 'Security check failed. Please try again.',
+      'oauth_token_exchange_failed': 'Failed to connect to Google.',
+      'oauth_user_info_failed': 'Failed to get user info from Google.',
+      'oauth_not_configured': 'Google Sign-In is not configured.',
+      'auth_not_configured': 'Authentication is not configured.',
+    }
+    
+    const errCode = Array.isArray(query.error) ? query.error[0] : query.error
+    let msg = errorMap[errCode as string] || 'Authentication failed'
+    
+    if (query.details) {
+       // Optional: Log details to console but don't show to user unless sanitized
+       console.warn('Auth Error Details:', query.details)
+    }
+    
+    error.value = msg
+  }
+})
 </script>
