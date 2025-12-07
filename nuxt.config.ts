@@ -4,6 +4,8 @@ export default defineNuxtConfig({
   // Nuxt 4 directory structure and features
   // https://nuxt.com/docs/getting-started/upgrade#testing-nuxt-4
   future: { compatibilityVersion: 4 },
+  // Global CSS
+  css: ['~/assets/css/main.css'],
   // Nuxt Modules
   // https://nuxt.com/modules
   modules: [
@@ -25,7 +27,7 @@ export default defineNuxtConfig({
       name: 'Rangkai Book Scanner',
       short_name: 'Rangkai',
       description: 'Scan and catalog books with ISBN barcodes',
-      theme_color: '#4f46e5',
+      theme_color: '#003049', // deep-space-blue
       background_color: '#ffffff',
       display: 'standalone',
       orientation: 'portrait',

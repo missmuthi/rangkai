@@ -1,0 +1,94 @@
+/* Shadcn CSS Variables - Custom Color Palette */
+/* Primary: Deep Space Blue | Destructive: Brick Red | Accent: Papaya Whip | Secondary: Steel Blue */
+
+@layer base {
+  :root {
+    /* Background & Foreground */
+    --background: 0 0% 100%;
+    --foreground: 202 100% 14%; /* deep-space-blue */
+
+    /* Card */
+    --card: 0 0% 100%;
+    --card-foreground: 202 100% 14%;
+
+    /* Popover */
+    --popover: 0 0% 100%;
+    --popover-foreground: 202 100% 14%;
+
+    /* Primary: Deep Space Blue (#003049) → HSL: 201 100% 14% */
+    --primary: 201 100% 14%;
+    --primary-foreground: 39 93% 91%; /* papaya-whip */
+
+    /* Secondary: Steel Blue (#669bbc) → HSL: 201 36% 57% */
+    --secondary: 201 36% 57%;
+    --secondary-foreground: 0 0% 100%;
+
+    /* Muted: Steel Blue 50 (#e1ebf2) */
+    --muted: 204 37% 92%;
+    --muted-foreground: 202 31% 35%;
+
+    /* Accent: Papaya Whip (#fdf0d5) → HSL: 39 91% 91% */
+    --accent: 39 91% 91%;
+    --accent-foreground: 202 100% 14%;
+
+    /* Destructive: Brick Red (#c1121f) → HSL: 355 83% 41% */
+    --destructive: 355 83% 41%;
+    --destructive-foreground: 0 0% 98%;
+
+    /* Border, Input, Ring */
+    --border: 204 37% 85%;
+    --input: 204 37% 85%;
+    --ring: 201 100% 14%; /* matches primary */
+
+    /* Radius */
+    --radius: 0.5rem;
+  }
+
+  .dark {
+    /* Background & Foreground */
+    --background: 202 100% 4%; /* deep-space-blue.900 */
+    --foreground: 39 93% 91%; /* papaya-whip */
+
+    /* Card */
+    --card: 202 50% 8%;
+    --card-foreground: 39 93% 91%;
+
+    /* Popover */
+    --popover: 202 50% 8%;
+    --popover-foreground: 39 93% 91%;
+
+    /* Primary: Brighter blue for dark mode */
+    --primary: 200 100% 48%; /* #00a0f7 */
+    --primary-foreground: 202 100% 4%;
+
+    /* Secondary: Steel Blue 300 */
+    --secondary: 201 36% 65%;
+    --secondary-foreground: 202 100% 4%;
+
+    /* Muted */
+    --muted: 202 31% 15%;
+    --muted-foreground: 204 37% 70%;
+
+    /* Accent */
+    --accent: 39 50% 25%;
+    --accent-foreground: 39 93% 91%;
+
+    /* Destructive: Brighter red for dark mode */
+    --destructive: 355 79% 65%; /* #f05a64 */
+    --destructive-foreground: 0 0% 98%;
+
+    /* Border, Input, Ring */
+    --border: 202 31% 20%;
+    --input: 202 31% 20%;
+    --ring: 200 100% 48%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
