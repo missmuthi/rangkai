@@ -32,64 +32,8 @@
         </button>
       </div>
 
-      <!-- Divider -->
-      <div class="relative">
-        <div class="absolute inset-0 flex items-center">
-          <div class="w-full border-t border-gray-300 dark:border-gray-600" />
-        </div>
-        <div class="relative flex justify-center text-sm">
-          <span class="px-2 bg-gray-50 dark:bg-gray-900 text-gray-500">Or continue with email</span>
-        </div>
-      </div>
-
-      <!-- Email/Password Form -->
-      <form class="space-y-4" @submit.prevent="handleEmailLogin">
-        <div>
-          <label for="email" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-            Email
-          </label>
-          <input
-            id="email"
-            v-model="email"
-            type="email"
-            required
-            autocomplete="email"
-            class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-            placeholder="you@example.com"
-          >
-        </div>
-
-        <div>
-          <label for="password" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-            Password
-          </label>
-          <input
-            id="password"
-            v-model="password"
-            type="password"
-            required
-            autocomplete="current-password"
-            class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-            placeholder="••••••••"
-          >
-        </div>
-
-        <button
-          type="submit"
-          :disabled="loading"
-          class="w-full py-3 px-4 bg-indigo-600 text-white font-medium rounded-lg hover:bg-indigo-700 focus:ring-4 focus:ring-indigo-500/50 disabled:opacity-50 disabled:cursor-not-allowed transition"
-        >
-          <span v-if="loading">Signing in...</span>
-          <span v-else>Sign in</span>
-        </button>
-      </form>
-
-      <!-- Sign Up Link -->
-      <p class="text-center text-sm text-gray-600 dark:text-gray-400">
-        Don't have an account?
-        <NuxtLink to="/register" class="text-indigo-600 hover:text-indigo-500 font-medium">
-          Sign up
-        </NuxtLink>
+      <p class="text-xs text-center text-gray-500 dark:text-gray-400 pt-4">
+        By continuing, you verify that you are an authorized user of this library.
       </p>
     </div>
   </div>
@@ -117,24 +61,7 @@ watch(isAuthenticated, (value) => {
   }
 }, { immediate: true })
 
-async function handleEmailLogin() {
-  if (!email.value || !password.value) {
-    error.value = 'Please fill in all fields'
-    return
-  }
-
-  loading.value = true
-  error.value = ''
-
-  try {
-    await signIn(email.value, password.value)
-    // Redirect handled by watcher
-  } catch (e: unknown) {
-    error.value = (e as { data?: { message?: string } }).data?.message || 'Login failed. Please check your credentials.'
-  } finally {
-    loading.value = false
-  }
-}
+// function handleEmailLogin() ... removed
 
 function handleGoogleLogin() {
   window.location.href = '/api/auth/google'

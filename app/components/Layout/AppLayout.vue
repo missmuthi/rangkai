@@ -29,10 +29,12 @@ watch(() => route.path, () => {
     <aside class="fixed inset-y-0 left-0 z-50 hidden w-64 flex-col border-r border-border bg-card lg:flex">
       <!-- Logo / Brand -->
       <div class="flex h-16 items-center gap-3 border-b border-border px-6">
-        <div class="flex h-9 w-9 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-          <BookOpen class="h-5 w-5" />
-        </div>
-        <span class="text-lg font-semibold text-foreground">Rangkai</span>
+        <NuxtLink to="/dashboard" class="flex items-center gap-3 hover:opacity-80 transition-opacity">
+          <div class="flex h-9 w-9 items-center justify-center rounded-lg bg-primary text-primary-foreground">
+            <BookOpen class="h-5 w-5" />
+          </div>
+          <span class="text-lg font-semibold text-foreground">Rangkai</span>
+        </NuxtLink>
       </div>
 
       <!-- Navigation -->
@@ -74,10 +76,12 @@ watch(() => route.path, () => {
         <!-- Logo / Brand -->
         <div class="flex h-16 items-center justify-between border-b border-border px-6">
           <div class="flex items-center gap-3">
-            <div class="flex h-9 w-9 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-              <BookOpen class="h-5 w-5" />
-            </div>
-            <span class="text-lg font-semibold text-foreground">Rangkai</span>
+            <NuxtLink to="/dashboard" class="flex items-center gap-3 hover:opacity-80 transition-opacity">
+              <div class="flex h-9 w-9 items-center justify-center rounded-lg bg-primary text-primary-foreground">
+                <BookOpen class="h-5 w-5" />
+              </div>
+              <span class="text-lg font-semibold text-foreground">Rangkai</span>
+            </NuxtLink>
           </div>
           <button
             type="button"

@@ -1,102 +1,110 @@
 <script setup lang="ts">
-import Button from '@/components/ui/Button.vue'
-import { AlertCircle, RefreshCw } from 'lucide-vue-next'
+import { Book, CheckCircle, Clock } from 'lucide-vue-next'
 
 definePageMeta({
   middleware: 'auth',
+  layout: 'app',
+  title: 'My Profile'
 })
 
-const router = useRouter()
-const { profile, isLoading, error: errorMessage, loadProfile } = useProfile()
-const { logout } = useAuth()
-
-// Mock stats - would come from API in real implementation
-const stats = computed(() => ({
-  totalScans: 0, // Would be fetched from user stats
-  thisMonth: 0,
-  successRate: 100
-}))
-
-async function handleLogout() {
-  await logout()
-  router.push('/auth/login')
-}
-
-async function handleDeleteAccount() {
-  // TODO: Implement account deletion
-  console.log('Delete account requested')
-}
+const { user } = useAuth()
+const { history, fetchHistory, loading } = useHistory()
 
 onMounted(() => {
-  loadProfile()
+  fetchHistory()
 })
 
-useHead({
-  title: 'Profile - Rangkai',
+const stats = computed(() => {
+  const total = history.value.length
+  const completed = history.value.filter(s => s.status === 'complete').length
+  const pending = history.value.filter(s => s.status === 'pending').length
+  
+  return { total, completed, pending }
 })
 </script>
 
 <template>
-  <main class="flex-1 space-y-8 p-8 pt-6">
+  <div class="max-w-4xl mx-auto py-8 px-4 space-y-8">
     <!-- Header -->
-    <header class="space-y-0.5">
-      <h2 class="text-3xl font-bold tracking-tight">Profile</h2>
-      <p class="text-muted-foreground">
-        Manage your account settings and view your activity.
-      </p>
-    </header>
-
-    <!-- Loading State -->
-    <div v-if="isLoading" class="flex h-[450px] shrink-0 items-center justify-center rounded-md border border-dashed">
-      <div class="flex flex-col items-center gap-2">
-        <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
-        <p class="text-sm text-muted-foreground">Loading profile...</p>
+    <div class="flex items-center gap-6">
+      <div class="h-24 w-24 rounded-full bg-primary/10 flex items-center justify-center text-4xl font-bold text-primary border-4 border-background shadow-xl">
+        <img v-if="(user as any)?.image" :src="(user as any).image" class="h-full w-full rounded-full object-cover" />
+        <span v-else>{{ user?.name?.charAt(0) || 'U' }}</span>
+      </div>
+      <div>
+        <h1 class="text-3xl font-bold">{{ user?.name || 'User' }}</h1>
+        <p class="text-muted-foreground">{{ user?.email }}</p>
       </div>
     </div>
 
-    <!-- Error State -->
-    <div v-else-if="errorMessage" class="flex h-[450px] shrink-0 items-center justify-center rounded-md border border-dashed border-destructive/50 bg-destructive/5">
-      <div class="flex flex-col items-center text-center gap-2 max-w-[420px]">
-        <AlertCircle class="h-10 w-10 text-destructive" />
-        <h3 class="text-lg font-semibold text-destructive">Failed to load profile</h3>
-        <p class="text-sm text-muted-foreground">{{ errorMessage }}</p>
-        <Button variant="outline" class="mt-4" @click="loadProfile">
-          <RefreshCw class="mr-2 h-4 w-4" />
-          Try Again
-        </Button>
+    <!-- Stats Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <UiCard>
+        <UiCardHeader class="flex flex-row items-center justify-between pb-2">
+          <UiCardTitle class="text-sm font-medium">Total Books</UiCardTitle>
+          <Book class="h-4 w-4 text-muted-foreground" />
+        </UiCardHeader>
+        <UiCardContent>
+          <div class="text-2xl font-bold">{{ stats.total }}</div>
+          <p class="text-xs text-muted-foreground">Scanned library items</p>
+        </UiCardContent>
+      </UiCard>
+
+      <UiCard>
+        <UiCardHeader class="flex flex-row items-center justify-between pb-2">
+          <UiCardTitle class="text-sm font-medium">Cataloged</UiCardTitle>
+          <CheckCircle class="h-4 w-4 text-green-500" />
+        </UiCardHeader>
+        <UiCardContent>
+          <div class="text-2xl font-bold">{{ stats.completed }}</div>
+          <p class="text-xs text-muted-foreground">Successfully processed</p>
+        </UiCardContent>
+      </UiCard>
+
+      <UiCard>
+        <UiCardHeader class="flex flex-row items-center justify-between pb-2">
+          <UiCardTitle class="text-sm font-medium">Pending</UiCardTitle>
+          <Clock class="h-4 w-4 text-yellow-500" />
+        </UiCardHeader>
+        <UiCardContent>
+          <div class="text-2xl font-bold">{{ stats.pending }}</div>
+          <p class="text-xs text-muted-foreground">Awaiting metadata</p>
+        </UiCardContent>
+      </UiCard>
+    </div>
+
+    <!-- Recent Activity Preview -->
+    <div class="space-y-4">
+      <div class="flex items-center justify-between">
+         <h2 class="text-xl font-semibold">Library Activity</h2>
+         <NuxtLink to="/history">
+           <Button variant="outline">View Full History</Button>
+         </NuxtLink>
+      </div>
+      
+      <div v-if="loading" class="h-24 bg-muted animate-pulse rounded-lg" />
+      <div v-else-if="history.length === 0" class="text-center py-12 bg-muted/20 rounded-lg">
+         <p class="text-muted-foreground">No books scanned yet.</p>
+         <Button class="mt-4" as-child>
+           <NuxtLink to="/scan/mobile">Start Scanning</NuxtLink>
+         </Button>
+      </div>
+      <div v-else class="grid gap-2">
+         <!-- Simple list of last 3 items -->
+         <div v-for="scan in history.slice(0, 3)" :key="scan.id" class="flex items-center justify-between p-4 border rounded-lg bg-card">
+           <div class="flex items-center gap-3">
+             <div class="h-10 w-10 bg-primary/10 rounded-md flex items-center justify-center">
+               <Book class="h-5 w-5 text-primary" />
+             </div>
+             <div>
+               <p class="font-medium line-clamp-1">{{ scan.title || 'Unknown Title' }}</p>
+               <p class="text-xs text-muted-foreground">{{ new Date(scan.created_at).toLocaleDateString() }}</p>
+             </div>
+           </div>
+           <UiBadge>{{ scan.status }}</UiBadge>
+         </div>
       </div>
     </div>
 
-    <!-- Profile Content -->
-    <div v-else-if="profile" class="space-y-8">
-      <!-- Profile Header -->
-      <ProfileHeader :profile="profile" />
-
-      <!-- Stats -->
-      <ProfileStats 
-        :total-scans="stats.totalScans"
-        :this-month="stats.thisMonth"
-        :success-rate="stats.successRate"
-      />
-
-      <!-- Settings -->
-      <ProfileSettings 
-        @logout="handleLogout"
-        @delete-account="handleDeleteAccount"
-      />
-    </div>
-
-    <!-- Fallback if no profile -->
-    <div v-else class="flex h-[450px] shrink-0 items-center justify-center rounded-md border border-dashed">
-      <div class="mx-auto flex max-w-[420px] flex-col items-center justify-center text-center">
-        <div class="flex h-20 w-20 items-center justify-center rounded-full bg-muted">
-          <AlertCircle class="h-10 w-10 text-muted-foreground" />
-        </div>
-        <h3 class="mt-4 text-lg font-semibold">Profile not found</h3>
-        <p class="mb-4 mt-2 text-sm text-muted-foreground">
-          Please sign in to view your profile settings.
-        </p>
-      </div>
-    </div>
-  </main>
+  </div>
 </template>

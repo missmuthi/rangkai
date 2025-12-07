@@ -111,10 +111,21 @@ onMounted(() => {
       </div>
     </div>
 
-    <!-- Quick Stats -->
-    <div class="fixed bottom-0 inset-x-0 bg-gray-800 p-4 flex justify-between text-sm">
-      <span>Last: {{ lastScan || '—' }}</span>
-      <NuxtLink to="/history" class="text-indigo-400">View History →</NuxtLink>
+    <!-- Navigation Footer -->
+    <div class="fixed bottom-0 inset-x-0 bg-gray-900 border-t border-gray-800 p-3 flex justify-around items-center text-sm z-10 pb-6 sm:pb-3">
+      <NuxtLink to="/dashboard" class="flex flex-col items-center gap-1 text-gray-400 hover:text-white transition-colors p-2">
+        <component :is="resolveComponent('LucideHome')" class="h-5 w-5" />
+        <span class="text-xs">Home</span>
+      </NuxtLink>
+      
+      <div class="flex flex-col items-center gap-1 px-4 border-l border-r border-gray-800">
+         <span class="text-xs text-gray-500 font-mono">{{ lastScan || 'Ready to Scan' }}</span>
+      </div>
+
+      <NuxtLink to="/history" class="flex flex-col items-center gap-1 text-gray-400 hover:text-white transition-colors p-2">
+        <component :is="resolveComponent('LucideHistory')" class="h-5 w-5" />
+        <span class="text-xs">History</span>
+      </NuxtLink>
     </div>
   </div>
 </template>
