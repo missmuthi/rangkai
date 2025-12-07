@@ -159,7 +159,7 @@ export default defineEventHandler(async (event): Promise<BookResponse> => {
         if (existingScan.classificationTrust) metadata.classificationTrust = existingScan.classificationTrust as "high" | "medium" | "low"
         if (existingScan.isAiEnhanced) metadata.isAiEnhanced = existingScan.isAiEnhanced
         
-        // Handle aiLog safely (handle string vs object mismatch)
+        // Handle aiLog safely (handle string vs object mismatch and legacy formats)
         if (existingScan.aiLog) {
             if (typeof existingScan.aiLog === 'string') {
                 try {
@@ -169,6 +169,20 @@ export default defineEventHandler(async (event): Promise<BookResponse> => {
                 }
             } else {
                 metadata.aiLog = existingScan.aiLog
+            }
+            
+            // Normalize legacy format: array of strings → array of objects
+            if (Array.isArray(metadata.aiLog) && metadata.aiLog.length > 0) {
+                const firstItem = metadata.aiLog[0]
+                // If it's an array of strings (legacy), convert to new format
+                if (typeof firstItem === 'string') {
+                    const legacyChanges = metadata.aiLog as unknown as string[]
+                    metadata.aiLog = [{
+                        timestamp: new Date().toISOString(),
+                        model: 'legacy',
+                        changes: legacyChanges
+                    }]
+                }
             }
         }
         // source is not in Scan type yet in strict mode unless we updated types, 
