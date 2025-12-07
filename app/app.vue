@@ -11,5 +11,7 @@ await fetchUser()
 </script>
 
 <template>
-  <NuxtPage />
+  <NuxtLayout>
+    <NuxtPage />
+  </NuxtLayout>
 </template>
