@@ -1,4 +1,8 @@
 <script setup lang="ts">
+/**
+ * History Page - shadcn/Vercel Dashboard Style
+ * Optimized for UX: flat hierarchy, proper action priority, distinct empty states
+ */
 import type { Scan } from '~/types'
 
 definePageMeta({
@@ -10,20 +14,17 @@ const { exportToCSV } = useSlimsExport()
 
 // Filter state
 const filters = ref<{ status?: string; dateRange?: string; search?: string }>({})
-
-// Selection state for bulk actions
 const selectedIds = ref<string[]>([])
 
 // Computed stats
-const stats = computed(() => {
-  const total = history.value.length
-  const completed = history.value.filter(s => s.status === 'complete').length
-  const pending = history.value.filter(s => s.status === 'pending').length
-  const errors = history.value.filter(s => s.status === 'error').length
-  return { total, completed, pending, errors }
-})
+const stats = computed(() => ({
+  total: history.value.length,
+  completed: history.value.filter(s => s.status === 'complete').length,
+  pending: history.value.filter(s => s.status === 'pending').length,
+  errors: history.value.filter(s => s.status === 'error').length
+}))
 
-// Filtered history
+// Filter logic
 const filteredHistory = computed(() => {
   let result = history.value
 
@@ -42,14 +43,15 @@ const filteredHistory = computed(() => {
 
   if (filters.value.dateRange) {
     const now = new Date()
-    const ranges: Record<string, Date> = {
-      today: new Date(now.setHours(0, 0, 0, 0)),
-      week: new Date(now.setDate(now.getDate() - 7)),
-      month: new Date(now.setMonth(now.getMonth() - 1)),
-      year: new Date(now.setFullYear(now.getFullYear() - 1))
+    const ranges: Record<string, number> = {
+      today: 0,
+      week: 7,
+      month: 30,
+      year: 365
     }
-    const cutoff = ranges[filters.value.dateRange]
-    if (cutoff) {
+    const days = ranges[filters.value.dateRange]
+    if (days !== undefined) {
+      const cutoff = new Date(now.getTime() - days * 24 * 60 * 60 * 1000)
       result = result.filter(s => new Date(s.created_at) >= cutoff)
     }
   }
@@ -57,32 +59,16 @@ const filteredHistory = computed(() => {
   return result
 })
 
-function handleFilter(newFilters: typeof filters.value) {
-  filters.value = newFilters
-}
-
-function handleSelectAll() {
-  selectedIds.value = filteredHistory.value.map(s => s.id)
-}
-
-function handleClearSelection() {
-  selectedIds.value = []
-}
-
-async function handleDeleteSelected() {
-  // TODO: Implement bulk delete
-  console.log('Delete selected:', selectedIds.value)
-  selectedIds.value = []
-}
-
-function handleExportSelected() {
-  const selected = history.value.filter(s => selectedIds.value.includes(s.id))
-  exportToCSV(selected)
-  selectedIds.value = []
-}
+// UX Helpers
+const hasData = computed(() => history.value.length > 0)
+const isFilteredEmpty = computed(() => hasData.value && filteredHistory.value.length === 0)
 
 function handleExportAll() {
   exportToCSV(history.value)
+}
+
+function clearFilters() {
+  filters.value = {}
 }
 
 onMounted(() => {
@@ -91,78 +77,171 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="container mx-auto px-4 py-8 max-w-6xl">
+  <div class="flex-1 space-y-8 p-4 md:p-8 pt-6">
     <!-- Header -->
-    <header class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
       <div>
-        <h1 class="text-3xl font-bold text-gray-900 dark:text-white">Scan History</h1>
-        <p class="text-gray-500 dark:text-gray-400 mt-1">Manage your scanned books</p>
+        <h2 class="text-3xl font-bold tracking-tight text-gray-900 dark:text-white">Dashboard</h2>
+        <p class="text-gray-500 dark:text-gray-400">
+          Manage your scanned book metadata and export status.
+        </p>
       </div>
-      <button
-        class="px-5 py-2.5 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium flex items-center gap-2"
-        @click="handleExportAll"
-      >
-        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-        </svg>
-        Export All
-      </button>
-    </header>
-
-    <!-- Stats -->
-    <div class="mb-6">
-      <HistoryStats
-        :total-scans="stats.total"
-        :completed-scans="stats.completed"
-        :pending-scans="stats.pending"
-        :error-scans="stats.errors"
-      />
-    </div>
-
-    <!-- Filters -->
-    <div class="mb-4">
-      <HistoryFilters @filter="handleFilter" />
-    </div>
-
-    <!-- Bulk Actions -->
-    <div class="mb-4">
-      <HistoryBulkActions
-        :selected-ids="selectedIds"
-        :total-count="filteredHistory.length"
-        @select-all="handleSelectAll"
-        @clear-selection="handleClearSelection"
-        @delete-selected="handleDeleteSelected"
-        @export-selected="handleExportSelected"
-      />
-    </div>
-
-    <!-- Loading State -->
-    <div v-if="loading" class="text-center py-12">
-      <div class="animate-spin w-10 h-10 border-4 border-indigo-600 border-t-transparent rounded-full mx-auto" />
-      <p class="text-gray-500 mt-4">Loading history...</p>
-    </div>
-
-    <!-- Empty State -->
-    <div v-else-if="filteredHistory.length === 0" class="text-center py-16 bg-white dark:bg-gray-800 rounded-xl">
-      <svg class="w-16 h-16 mx-auto text-gray-300 dark:text-gray-600 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-      </svg>
-      <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-2">No scans found</h3>
-      <p class="text-gray-500 dark:text-gray-400 mb-6">Start scanning books to see them here</p>
-      <NuxtLink
-        to="/scan/mobile"
-        class="inline-flex items-center px-6 py-3 bg-indigo-600 text-white font-medium rounded-lg hover:bg-indigo-700 transition-colors"
-      >
-        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" />
+      <div class="flex items-center gap-2">
+        <button 
+          v-if="hasData" 
+          class="inline-flex items-center px-4 py-2 text-sm font-medium border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+          @click="handleExportAll"
+        >
+          <!-- Download Icon -->
+          <svg class="mr-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
           </svg>
-        Start Scanning
-      </NuxtLink>
+          Export All
+        </button>
+        
+        <NuxtLink 
+          to="/scan/mobile"
+          class="inline-flex items-center px-4 py-2 text-sm font-medium bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
+        >
+          <!-- ScanBarcode Icon -->
+          <svg class="mr-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" />
+          </svg>
+          Start Scanning
+        </NuxtLink>
+      </div>
     </div>
 
-    <!-- History Table -->
-    <div v-else>
-      <HistoryTable />
+    <!-- Stats Cards -->
+    <div v-if="hasData || loading" class="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+      <UiCard>
+        <UiCardHeader>
+          <UiCardTitle>Total Scans</UiCardTitle>
+          <!-- BookOpen Icon -->
+          <svg class="h-4 w-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+          </svg>
+        </UiCardHeader>
+        <UiCardContent>
+          <div class="text-2xl font-bold text-gray-900 dark:text-white">{{ stats.total }}</div>
+          <p class="text-xs text-gray-500 dark:text-gray-400">Lifetime volume</p>
+        </UiCardContent>
+      </UiCard>
+
+      <UiCard>
+        <UiCardHeader>
+          <UiCardTitle>Completed</UiCardTitle>
+          <!-- CheckCircle Icon -->
+          <svg class="h-4 w-4 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+        </UiCardHeader>
+        <UiCardContent>
+          <div class="text-2xl font-bold text-gray-900 dark:text-white">{{ stats.completed }}</div>
+          <p class="text-xs text-gray-500 dark:text-gray-400">Ready for export</p>
+        </UiCardContent>
+      </UiCard>
+
+      <UiCard>
+        <UiCardHeader>
+          <UiCardTitle>Pending</UiCardTitle>
+          <!-- Clock Icon -->
+          <svg class="h-4 w-4 text-yellow-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+        </UiCardHeader>
+        <UiCardContent>
+          <div class="text-2xl font-bold text-gray-900 dark:text-white">{{ stats.pending }}</div>
+          <p class="text-xs text-gray-500 dark:text-gray-400">Awaiting metadata</p>
+        </UiCardContent>
+      </UiCard>
+
+      <UiCard>
+        <UiCardHeader>
+          <UiCardTitle>Errors</UiCardTitle>
+          <!-- AlertCircle Icon -->
+          <svg class="h-4 w-4 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+        </UiCardHeader>
+        <UiCardContent>
+          <div class="text-2xl font-bold text-gray-900 dark:text-white">{{ stats.errors }}</div>
+          <p class="text-xs text-gray-500 dark:text-gray-400">Requires attention</p>
+        </UiCardContent>
+      </UiCard>
+    </div>
+
+    <!-- Content Area -->
+    <div class="space-y-4">
+      <!-- Search Bar (only shown when has data) -->
+      <div v-if="hasData" class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div class="flex items-center gap-2 w-full sm:w-auto">
+          <div class="relative w-full sm:w-[300px]">
+            <!-- Search Icon -->
+            <svg class="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
+            <UiInput 
+              v-model="filters.search" 
+              placeholder="Search by title or ISBN..." 
+              class="pl-10" 
+            />
+          </div>
+        </div>
+      </div>
+
+      <!-- Loading State -->
+      <div v-if="loading" class="flex items-center justify-center h-64 border rounded-lg border-dashed bg-gray-50/50 dark:bg-gray-800/50">
+        <div class="flex flex-col items-center gap-2">
+          <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600" />
+          <p class="text-sm text-gray-500 dark:text-gray-400">Syncing history...</p>
+        </div>
+      </div>
+
+      <!-- Empty State A: No Data At All -->
+      <div v-else-if="!hasData" class="flex h-[450px] shrink-0 items-center justify-center rounded-lg border border-dashed border-gray-300 dark:border-gray-700">
+        <div class="mx-auto flex max-w-[420px] flex-col items-center justify-center text-center">
+          <div class="flex h-20 w-20 items-center justify-center rounded-full bg-gray-100 dark:bg-gray-800">
+            <!-- ScanBarcode Icon -->
+            <svg class="h-10 w-10 text-indigo-600 dark:text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" />
+            </svg>
+          </div>
+          <h3 class="mt-4 text-lg font-semibold text-gray-900 dark:text-white">No books scanned</h3>
+          <p class="mb-4 mt-2 text-sm text-gray-500 dark:text-gray-400">
+            You haven't scanned any books yet. Start scanning to populate your library metadata.
+          </p>
+          <NuxtLink 
+            to="/scan/mobile"
+            class="inline-flex items-center px-6 py-3 text-sm font-medium bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
+          >
+            Start Scanning
+          </NuxtLink>
+        </div>
+      </div>
+
+      <!-- Empty State B: Search/Filter Found Nothing -->
+      <div v-else-if="isFilteredEmpty" class="flex flex-col items-center justify-center h-64 border rounded-lg bg-gray-50/50 dark:bg-gray-800/50">
+        <!-- Search Icon -->
+        <svg class="h-10 w-10 text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+        </svg>
+        <h3 class="text-lg font-medium text-gray-900 dark:text-white">No results found</h3>
+        <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
+          No books match "<strong>{{ filters.search }}</strong>". Try adjusting your filters.
+        </p>
+        <button 
+          class="mt-3 text-sm text-indigo-600 dark:text-indigo-400 hover:underline"
+          @click="clearFilters"
+        >
+          Clear Filters
+        </button>
+      </div>
+
+      <!-- Data Table -->
+      <div v-else class="rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
+        <HistoryTable />
+      </div>
     </div>
   </div>
 </template>
