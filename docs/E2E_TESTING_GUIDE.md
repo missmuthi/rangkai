@@ -63,6 +63,18 @@ The `real-isbn-scan.spec.ts` validates the complete book scanning workflow:
 - **Title**: "I Don't Want to Talk About It"
 - **Author**: Terrence Real
 
+### AI Clean Persistence Test (`ai-clean-persistence.spec.ts`)
+
+Validates that "AI Clean" data allows User Overrides to persist:
+
+1.  Scan/Search for a book (e.g., `9780684854670` - _The Noonday Demon_).
+2.  Click "AI Clean".
+3.  Verify "AI Enhanced" badge appears.
+4.  Refresh the page.
+5.  **Verify Badge Persists**.
+6.  Verify `source` is "openlibrary" or "ai" (not "google").
+7.  Go to History -> Verify "DDC" column is populated.
+
 ---
 
 ## Mock vs Integration Mode

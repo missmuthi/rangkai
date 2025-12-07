@@ -21,6 +21,20 @@ Before writing code, assess:
 3.  **SEO Check:** Is this a public page?
     - _Constraint:_ Missing `<main>`, `<h1>`, or `useHead` metadata is a critical failure.
 
+### Phase 1.5: 🏗️ API Architecture & Data Handling
+
+Consider the following architectural principles for data interaction:
+
+1.  **Data Persistence (Scan Overrides):**
+    - `GET /api/book/[isbn]`: Fetches merged metadata. Prioritizes **User Scan Overrides** >> **Cached Book Data** >> **External APIs**.
+2.  **Legacy Data Handling:**
+    - The `/api/book` endpoint includes a **Normalization Layer** to handle:
+      - Double-encoded JSON strings (legacy `authors`/`categories`).
+      - Legacy `aiLog` arrays (strings vs objects).
+3.  **Source Tracking & Refactoring:**
+    - External APIs (Google, OL) are unreliable. Always wrap them in try/catch and use fallbacks.
+    - **Refactoring Note**: Future iterations should split `GET` (Clean Metadata) and `POST` (Save Scan) to fully leverage Edge caching.
+
 ### Phase 2: 🎨 Design System Enforcement (Visual Linting)
 
 You must enforce the "Rangkai Aesthetic" (Vercel-like, clean, open):

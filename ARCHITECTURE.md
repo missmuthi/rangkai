@@ -42,7 +42,9 @@ Rangkai follows a **3-tier serverless architecture**:
 │  │             │  │             │  │                    │  │
 │  │ • Users     │  │ • Book data │  │                    │  │
 │  │ • Scans     │  │ • Sessions  │  │                    │  │
-│  │ • Sessions  │  │ (24h TTL)   │  │                    │  │
+│  │   (w/ source│  │ (24h TTL)   │  │                    │  │
+│  │    tracking)│  │             │  │                    │  │
+│  │ • Sessions  │  │             │  │                    │  │
 │  └─────────────┘  └─────────────┘  └────────────────────┘  │
 └─────────────────────────────────────────────────────────────┘
 ```
@@ -80,12 +82,18 @@ Rangkai follows a **3-tier serverless architecture**:
 | `/api/auth/google`          | GET      | OAuth initiation             |
 | `/api/auth/callback/google` | GET      | OAuth callback               |
 | `/api/auth/sign-out`        | POST     | Logout                       |
+| `/api/ai/clean`             | POST     | AI Metadata Normalization    |
 
 ---
 
 ## Data Flow
 
-### Book Metadata Fetch (Cache Miss)
+### Book Metadata Fetch (Waterfall Strategy)
+
+Rangkai uses a **Waterfall merge strategy** to fetch book data:
+**User Scan Override** (Highest) -> **KV Cache** -> **External APIs** (Google/OL)
+
+This ensures that once a user uses "AI Clean", that specific version persists for them.
 
 ```
 ┌─────┐    ┌─────────┐    ┌────────┐    ┌─────┐

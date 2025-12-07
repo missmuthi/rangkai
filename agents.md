@@ -12,18 +12,18 @@ Rangkai is a book metadata harvester for Indonesian librarians, migrating from S
 
 ### Tech Stack
 
-| Layer | Technology | Purpose |
-|-------|------------|---------|
-| **Framework** | Nuxt 3.17+ (Nuxt 4 compat mode) | SSR, routing, server functions |
-| **Runtime** | NuxtHub + Cloudflare | Edge computing, CDN |
-| **Database** | D1 via `hubDatabase()` | Relational data storage |
-| **Cache** | KV via `hubKV()` | Book metadata caching |
-| **Storage** | R2 via `hubBlob()` | Image/file storage |
-| **ORM** | Drizzle ORM | Type-safe database queries |
-| **Auth** | Better Auth | Session management |
-| **State** | Vue 3 refs + composables | Client-side reactivity |
-| **Styling** | Tailwind CSS | Utility-first styling |
-| **Package Manager** | pnpm | Dependency management |
+| Layer               | Technology                      | Purpose                        |
+| ------------------- | ------------------------------- | ------------------------------ |
+| **Framework**       | Nuxt 3.17+ (Nuxt 4 compat mode) | SSR, routing, server functions |
+| **Runtime**         | NuxtHub + Cloudflare            | Edge computing, CDN            |
+| **Database**        | D1 via `hubDatabase()`          | Relational data storage        |
+| **Cache**           | KV via `hubKV()`                | Book metadata caching          |
+| **Storage**         | R2 via `hubBlob()`              | Image/file storage             |
+| **ORM**             | Drizzle ORM                     | Type-safe database queries     |
+| **Auth**            | Better Auth                     | Session management             |
+| **State**           | Vue 3 refs + composables        | Client-side reactivity         |
+| **Styling**         | Tailwind CSS                    | Utility-first styling          |
+| **Package Manager** | pnpm                            | Dependency management          |
 
 ---
 
@@ -90,6 +90,7 @@ rangkai/
 **When to Use:** Frontend development, component creation, page routing, client-side state.
 
 **Key Responsibilities:**
+
 - Build Vue 3 components using Composition API
 - Implement pages in `app/pages/` with proper routing
 - Create composables in `app/composables/` for shared state
@@ -120,26 +121,29 @@ const isEmpty = computed(() => !scans.value?.length)
 ```typescript
 // ✅ Composable pattern (app/composables/useHistory.ts)
 export function useHistory() {
-  const items = ref<BookData[]>([])
-  
+  const items = ref<BookData[]>([]);
+
   const add = (book: BookData) => {
-    items.value = [book, ...items.value].slice(0, 50)
+    items.value = [book, ...items.value].slice(0, 50);
     if (import.meta.client) {
-      localStorage.setItem('history', JSON.stringify(items.value))
+      localStorage.setItem("history", JSON.stringify(items.value));
     }
-  }
-  
-  return { items: readonly(items), add }
+  };
+
+  return { items: readonly(items), add };
 }
 ```
 
 **Rules:**
+
 - ✅ Use `<script setup lang="ts">` for all components
 - ✅ Use `useFetch()` or `useAsyncData()` for data fetching
 - ✅ Use `defineProps()` and `defineEmits()` for component APIs
 - ✅ Use `computed()` and `watch()` for reactivity
 - ❌ NEVER use Options API
 - ❌ NEVER access server-only code in client components
+- ⚠️ **Legacy Data Support:** Always check `aiLog` format. It can be `string[]` (legacy) or `Object[]` (new). Use the existing normalization logic in `api/book/[isbn].get.ts` as a reference.
+- ⚠️ **Data Persistence:** When fetching book details, ALWAYS merge `scans` table data (User Overrides) on top of cached book data. "User intent beats cache."
 
 ---
 
@@ -148,6 +152,7 @@ export function useHistory() {
 **When to Use:** API endpoints, server middleware, database operations, caching.
 
 **Key Responsibilities:**
+
 - Create API endpoints in `server/api/`
 - Implement server middleware for auth/logging
 - Handle database operations with Drizzle ORM
@@ -159,68 +164,70 @@ export function useHistory() {
 ```typescript
 // ✅ API endpoint with DB (server/api/scans.get.ts)
 export default eventHandler(async (event) => {
-  const user = event.context.user
-  if (!user) throw createError({ statusCode: 401, message: 'Unauthorized' })
-  
-  const db = useDrizzle()
-  const scans = await db.select().from(tables.scans)
+  const user = event.context.user;
+  if (!user) throw createError({ statusCode: 401, message: "Unauthorized" });
+
+  const db = useDrizzle();
+  const scans = await db
+    .select()
+    .from(tables.scans)
     .where(eq(tables.scans.userId, user.id))
-    .orderBy(desc(tables.scans.createdAt))
-  
-  return scans
-})
+    .orderBy(desc(tables.scans.createdAt));
+
+  return scans;
+});
 ```
 
 ```typescript
 // ✅ API with KV cache (server/api/book/[isbn].get.ts)
 export default eventHandler(async (event) => {
-  const isbn = getRouterParam(event, 'isbn')
-  if (!isbn) throw createError({ statusCode: 400, message: 'ISBN required' })
-  
+  const isbn = getRouterParam(event, "isbn");
+  if (!isbn) throw createError({ statusCode: 400, message: "ISBN required" });
+
   // Check cache first
-  const cached = await hubKV().get<BookData>(`book:${isbn}`)
-  if (cached) return cached
-  
+  const cached = await hubKV().get<BookData>(`book:${isbn}`);
+  if (cached) return cached;
+
   // Fetch and cache
-  const book = await fetchBookMetadata(isbn)
-  await hubKV().set(`book:${isbn}`, book, { ttl: 86400 })
-  
-  return book
-})
+  const book = await fetchBookMetadata(isbn);
+  await hubKV().set(`book:${isbn}`, book, { ttl: 86400 });
+
+  return book;
+});
 ```
 
 ```typescript
 // ✅ Server middleware (server/middleware/auth.ts)
 export default eventHandler(async (event) => {
-  if (import.meta.prerender) return
-  
-  const publicRoutes = ['/api/health', '/api/auth', '/login', '/']
-  if (publicRoutes.some(r => event.path.startsWith(r))) return
-  
-  const session = await getSession(event)
+  if (import.meta.prerender) return;
+
+  const publicRoutes = ["/api/health", "/api/auth", "/login", "/"];
+  if (publicRoutes.some((r) => event.path.startsWith(r))) return;
+
+  const session = await getSession(event);
   if (!session) {
-    if (event.path.startsWith('/api/')) {
-      throw createError({ statusCode: 401, message: 'Unauthorized' })
+    if (event.path.startsWith("/api/")) {
+      throw createError({ statusCode: 401, message: "Unauthorized" });
     }
-    return sendRedirect(event, '/login')
+    return sendRedirect(event, "/login");
   }
-  
-  event.context.session = session
-  event.context.user = session.user
-})
+
+  event.context.session = session;
+  event.context.user = session.user;
+});
 ```
 
 **NuxtHub API Reference:**
 
-| Method | SvelteKit Equivalent | NuxtHub Pattern |
-|--------|---------------------|-----------------|
-| Database | `platform.env.DB` | `hubDatabase()` or `useDrizzle()` |
-| KV Cache | `platform.env.BOOK_CACHE` | `hubKV()` |
-| Blob Storage | N/A | `hubBlob()` |
-| Get Param | `event.params.id` | `getRouterParam(event, 'id')` |
-| Get Body | `await request.json()` | `await readBody(event)` |
-| Throw Error | `throw error(404)` | `throw createError({ statusCode: 404 })` |
-| Redirect | `throw redirect(302, url)` | `return sendRedirect(event, url)` |
+| Method       | SvelteKit Equivalent       | NuxtHub Pattern                          |
+| ------------ | -------------------------- | ---------------------------------------- |
+| Database     | `platform.env.DB`          | `hubDatabase()` or `useDrizzle()`        |
+| KV Cache     | `platform.env.BOOK_CACHE`  | `hubKV()`                                |
+| Blob Storage | N/A                        | `hubBlob()`                              |
+| Get Param    | `event.params.id`          | `getRouterParam(event, 'id')`            |
+| Get Body     | `await request.json()`     | `await readBody(event)`                  |
+| Throw Error  | `throw error(404)`         | `throw createError({ statusCode: 404 })` |
+| Redirect     | `throw redirect(302, url)` | `return sendRedirect(event, url)`        |
 
 ---
 
@@ -229,6 +236,7 @@ export default eventHandler(async (event) => {
 **When to Use:** Schema design, migrations, Drizzle queries.
 
 **Key Responsibilities:**
+
 - Design and maintain Drizzle schema
 - Create database migrations
 - Optimize queries for D1 (SQLite)
@@ -238,39 +246,42 @@ export default eventHandler(async (event) => {
 
 ```typescript
 // ✅ Drizzle schema (server/database/schema.ts)
-import { sqliteTable, text, integer } from 'drizzle-orm/sqlite-core'
+import { sqliteTable, text, integer } from "drizzle-orm/sqlite-core";
 
-export const users = sqliteTable('users', {
-  id: text('id').primaryKey(),
-  email: text('email').notNull().unique(),
-  name: text('name'),
-  createdAt: integer('created_at', { mode: 'timestamp' }).notNull()
-})
+export const users = sqliteTable("users", {
+  id: text("id").primaryKey(),
+  email: text("email").notNull().unique(),
+  name: text("name"),
+  createdAt: integer("created_at", { mode: "timestamp" }).notNull(),
+});
 
-export const scans = sqliteTable('scans', {
-  id: integer('id').primaryKey({ autoIncrement: true }),
-  userId: text('user_id').notNull().references(() => users.id),
-  isbn: text('isbn').notNull(),
-  title: text('title').notNull(),
-  metadata: text('metadata', { mode: 'json' }),
-  createdAt: integer('created_at', { mode: 'timestamp' }).notNull()
-})
+export const scans = sqliteTable("scans", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  userId: text("user_id")
+    .notNull()
+    .references(() => users.id),
+  isbn: text("isbn").notNull(),
+  title: text("title").notNull(),
+  metadata: text("metadata", { mode: "json" }),
+  createdAt: integer("created_at", { mode: "timestamp" }).notNull(),
+});
 ```
 
 ```typescript
 // ✅ useDrizzle helper (server/utils/drizzle.ts)
-import { drizzle } from 'drizzle-orm/d1'
-export { sql, eq, and, or, desc } from 'drizzle-orm'
-import * as schema from '../database/schema'
+import { drizzle } from "drizzle-orm/d1";
+export { sql, eq, and, or, desc } from "drizzle-orm";
+import * as schema from "../database/schema";
 
-export const tables = schema
+export const tables = schema;
 
 export function useDrizzle() {
-  return drizzle(hubDatabase(), { schema })
+  return drizzle(hubDatabase(), { schema });
 }
 ```
 
 **Commands:**
+
 ```bash
 # Generate migration from schema changes
 pnpm db:generate
@@ -287,6 +298,7 @@ pnpm db:generate
 **When to Use:** Deployment, CI/CD, environment configuration.
 
 **Key Responsibilities:**
+
 - Configure `nuxt.config.ts` for NuxtHub
 - Set up environment variables
 - Manage Cloudflare bindings
@@ -297,35 +309,32 @@ pnpm db:generate
 ```typescript
 // nuxt.config.ts
 export default defineNuxtConfig({
-  compatibilityDate: '2025-04-25',
+  compatibilityDate: "2025-04-25",
   future: { compatibilityVersion: 4 },
-  
-  modules: [
-    '@nuxthub/core',
-    '@nuxt/eslint',
-    '@nuxtjs/tailwindcss',
-  ],
-  
+
+  modules: ["@nuxthub/core", "@nuxt/eslint", "@nuxtjs/tailwindcss"],
+
   hub: {
-    database: true,  // D1 database
-    kv: true,        // KV storage
-    blob: true,      // R2 storage
-    cache: true,     // Edge caching
+    database: true, // D1 database
+    kv: true, // KV storage
+    blob: true, // R2 storage
+    cache: true, // Edge caching
   },
-  
+
   runtimeConfig: {
-    openaiApiKey: '',           // Server-only
-    betterAuthSecret: '',
+    openaiApiKey: "", // Server-only
+    betterAuthSecret: "",
     public: {
-      appUrl: '',               // Client-accessible
-    }
+      appUrl: "", // Client-accessible
+    },
   },
-  
+
   devtools: { enabled: true },
-})
+});
 ```
 
 **Deployment Commands:**
+
 ```bash
 # Development
 pnpm dev                    # Local dev server
@@ -342,6 +351,7 @@ pnpm deploy                 # Deploy to NuxtHub (deprecated) or use Cloudflare C
 ## 📋 Code Style Rules
 
 ### TypeScript
+
 ```typescript
 // ✅ Good: Explicit types
 function fetchBook(isbn: string): Promise<BookData> { ... }
@@ -351,23 +361,25 @@ function fetchBook(isbn) { ... }
 ```
 
 ### Vue Components
+
 ```vue
 <!-- ✅ Good: script setup with TypeScript -->
 <script setup lang="ts">
-const props = defineProps<{ book: BookData }>()
-const emit = defineEmits<{ select: [book: BookData] }>()
+const props = defineProps<{ book: BookData }>();
+const emit = defineEmits<{ select: [book: BookData] }>();
 </script>
 
 <!-- ❌ Bad: Options API -->
 <script>
 export default {
-  props: ['book'],
-  emits: ['select']
-}
+  props: ["book"],
+  emits: ["select"],
+};
 </script>
 ```
 
 ### API Endpoints
+
 ```typescript
 // ✅ Good: Method-specific files
 // server/api/books/[id].get.ts
@@ -419,7 +431,8 @@ Rules:
 Example entry (already captured as `0.0.1` in `changelog.md`):
 
 ### 0.0.1 — 2025-12-03
- - Added initial `agents.md` and `instructions.md` docs (NuxtHub migration guidance)
+
+- Added initial `agents.md` and `instructions.md` docs (NuxtHub migration guidance)
 
 Use this file and rules to keep a human-friendly summary of project changes.
 

@@ -1,22 +1,35 @@
+### 0.0.5 — 2025-12-08
+
+- Fixed: Critical `aiLog` crash by normalizing legacy string arrays to object format
+- Fixed: Persistence of AI-cleaned data (DDC, LCC, Source) on History and Book Detail pages
+- Fixed: Component crashes due to double-encoded JSON in `authors` and `categories` fields
+- Changed: Updated `BookMetadata` types to support `ai` and `local_cache` sources
+- Added: `source` column to `scans` table via migration `0008`
+- Added: Robust data normalization layer in `server/api/book/[isbn].get.ts`
+
 ### 0.0.4 — 2025-12-07
- - Fixed: Corrected toWebRequest imports in auth routes (from 'better-auth/h3' to 'h3')
- - Deployed: Updated deployment to Cloudflare Pages with import fixes
+
+- Fixed: Corrected toWebRequest imports in auth routes (from 'better-auth/h3' to 'h3')
+- Deployed: Updated deployment to Cloudflare Pages with import fixes
 
 ### 0.0.3 — 2025-12-07
- - Fixed: Auth routing by adding missing toWebRequest import and explicit sign-in provider route
- - Deployed: Manual deployment to Cloudflare Pages to resolve 404 on auth endpoints
+
+- Fixed: Auth routing by adding missing toWebRequest import and explicit sign-in provider route
+- Deployed: Manual deployment to Cloudflare Pages to resolve 404 on auth endpoints
 
 ### 0.0.2 — 2025-12-03
- - Added: Phase 1 NuxtHub migration dependencies (drizzle-orm, zod, tailwindcss, html5-qrcode, better-auth)
- - Added: Dev dependencies (drizzle-kit, vitest, @playwright/test, @vite-pwa/nuxt, @nuxtjs/tailwindcss)
- - Added: `server/db/schema.ts` with Drizzle schema (scans, users, sessions tables)
- - Added: `server/utils/db.ts` wrapper exporting useDb() helper
- - Added: `server/api/health.get.ts` endpoint for DB connectivity validation
- - Changed: Added pnpm override for ms@^2.1.3 to fix @nuxthub/core build compatibility
- - Changed: Upgraded @nuxthub/core to 0.9.1, nuxt to 3.20.1
+
+- Added: Phase 1 NuxtHub migration dependencies (drizzle-orm, zod, tailwindcss, html5-qrcode, better-auth)
+- Added: Dev dependencies (drizzle-kit, vitest, @playwright/test, @vite-pwa/nuxt, @nuxtjs/tailwindcss)
+- Added: `server/db/schema.ts` with Drizzle schema (scans, users, sessions tables)
+- Added: `server/utils/db.ts` wrapper exporting useDb() helper
+- Added: `server/api/health.get.ts` endpoint for DB connectivity validation
+- Changed: Added pnpm override for ms@^2.1.3 to fix @nuxthub/core build compatibility
+- Changed: Upgraded @nuxthub/core to 0.9.1, nuxt to 3.20.1
 
 ### 0.0.1 — 2025-12-03
- - Added initial `agents.md` and `instructions.md` docs (NuxtHub migration guidance)
+
+- Added initial `agents.md` and `instructions.md` docs (NuxtHub migration guidance)
 
 ---
 
