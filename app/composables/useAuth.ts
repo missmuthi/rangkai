@@ -38,7 +38,7 @@ export const useAuth = () => {
           credentials: 'include',
         }
       )
-      
+
       if (response?.session && response?.user) {
         state.value.session = response.session
         state.value.user = response.user
@@ -85,10 +85,14 @@ export const useAuth = () => {
 
   // OAuth Sign In (Google, GitHub, etc.)
   function signInWithOAuth(provider: 'google' | 'github') {
-    // Better Auth uses /api/auth/sign-in/{provider} for OAuth
-    // The callback will redirect to the callbackURL query parameter
-    const callbackURL = encodeURIComponent(baseURL + '/scan/mobile')
-    window.location.href = `/api/auth/sign-in/${provider}?callbackURL=${callbackURL}`
+    // Better Auth uses /api/auth/sign-in/social for OAuth
+    // We strictly use window.location.href for the redirect to the provider
+    const params = new URLSearchParams({
+      provider,
+      callbackURL: baseURL + '/scan/mobile',
+    })
+
+    window.location.href = `/api/auth/sign-in/social?${params.toString()}`
   }
 
   // Legacy Google login method

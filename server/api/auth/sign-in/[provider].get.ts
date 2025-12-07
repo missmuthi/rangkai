@@ -1,4 +1,4 @@
-import { toWebRequest } from 'better-auth/h3'
+import { toWebRequest } from 'h3'
 
 export default defineEventHandler(async (event) => {
   const provider = getRouterParam(event, 'provider')
