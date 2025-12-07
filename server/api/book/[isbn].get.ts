@@ -152,9 +152,22 @@ export default defineEventHandler(async (event): Promise<BookResponse> => {
         if (existingScan.subjects) metadata.subjects = existingScan.subjects
         if (existingScan.classificationTrust) metadata.classificationTrust = existingScan.classificationTrust as "high" | "medium" | "low"
         if (existingScan.isAiEnhanced) metadata.isAiEnhanced = existingScan.isAiEnhanced
+        
+        // Handle aiLog safely (handle string vs object mismatch)
+        if (existingScan.aiLog) {
+            if (typeof existingScan.aiLog === 'string') {
+                try {
+                    metadata.aiLog = JSON.parse(existingScan.aiLog)
+                } catch {
+                    metadata.aiLog = []
+                }
+            } else {
+                metadata.aiLog = existingScan.aiLog
+            }
+        }
         // source is not in Scan type yet in strict mode unless we updated types, 
         // but we migrated DB. We can cast or access if convenient.
-        // @ts-expect-error source is available in DB but maybe not in strict type yet
+        
         if (existingScan.source) metadata.source = existingScan.source
         
         // Also title/authors if you want full overrides, but start with bibliographic

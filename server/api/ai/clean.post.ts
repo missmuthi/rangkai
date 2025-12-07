@@ -217,7 +217,11 @@ ${ragContext}`
     enhancedData.authors = authors
 
     if (!enhancedData.aiLog || !Array.isArray(enhancedData.aiLog)) {
-      enhancedData.aiLog = ['AI classification applied']
+      enhancedData.aiLog = [{
+        timestamp: new Date().toISOString(),
+        provider: 'groq-llama-3',
+        changes: ['AI classification applied']
+      }]
     }
 
     console.info(`[AI Clean] ✓ AI Success - DDC: ${enhancedData.ddc}, LCC: ${enhancedData.lcc}`)
@@ -249,7 +253,7 @@ ${ragContext}`
       callNumber: enhancedData.callNumber || metadata.callNumber || null,
       subjects: enhancedData.subjects || metadata.subjects || null,
       classificationTrust: enhancedData.classificationTrust || metadata.classificationTrust || null,
-      aiLog: JSON.stringify(enhancedData.aiLog || ['AI classification applied']),
+      aiLog: enhancedData.aiLog, // Pass as object/array, let Drizzle/Nuxt handle it
       isAiEnhanced: true,
       enhancedAt: enhancedData.enhancedAt
     }

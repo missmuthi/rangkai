@@ -27,7 +27,7 @@ export interface BookMetadata {
   isAiEnhanced?: boolean
   enhancedAt?: number | null
   aiLog?: Array<{
-    timestamp: number
+    timestamp: number | string
     model: string
     changes: string[]
   }>

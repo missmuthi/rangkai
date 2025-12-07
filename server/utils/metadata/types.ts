@@ -14,7 +14,7 @@ export interface BookMetadata {
   categories: string[]
   language: string | null
   thumbnail: string | null
-  source: 'google' | 'openlibrary' | 'loc' | 'database'
+  source: 'google' | 'openlibrary' | 'loc' | 'database' | 'ai' | 'local_cache' | string
   // SLiMS Bibliographic Fields
   ddc?: string | null              // Dewey Decimal Classification
   lcc?: string | null              // Library of Congress Classification
@@ -30,7 +30,7 @@ export interface BookMetadata {
   isAiEnhanced?: boolean
   enhancedAt?: number | null       // Unix timestamp
   aiLog?: Array<{
-    timestamp: number
+    timestamp: number | string
     model: string
     changes: string[]
   }>
