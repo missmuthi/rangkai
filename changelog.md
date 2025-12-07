@@ -1,3 +1,7 @@
+### 0.0.3 — 2025-12-07
+ - Fixed: Auth routing by adding missing toWebRequest import and explicit sign-in provider route
+ - Deployed: Manual deployment to Cloudflare Pages to resolve 404 on auth endpoints
+
 ### 0.0.2 — 2025-12-03
  - Added: Phase 1 NuxtHub migration dependencies (drizzle-orm, zod, tailwindcss, html5-qrcode, better-auth)
  - Added: Dev dependencies (drizzle-kit, vitest, @playwright/test, @vite-pwa/nuxt, @nuxtjs/tailwindcss)
