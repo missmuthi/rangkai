@@ -1,3 +1,7 @@
+### 0.0.4 — 2025-12-07
+ - Fixed: Corrected toWebRequest imports in auth routes (from 'better-auth/h3' to 'h3')
+ - Deployed: Updated deployment to Cloudflare Pages with import fixes
+
 ### 0.0.3 — 2025-12-07
  - Fixed: Auth routing by adding missing toWebRequest import and explicit sign-in provider route
  - Deployed: Manual deployment to Cloudflare Pages to resolve 404 on auth endpoints
