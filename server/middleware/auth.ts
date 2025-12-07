@@ -1,6 +1,6 @@
 import type { InferSelectModel } from 'drizzle-orm'
 import { drizzle } from 'drizzle-orm/d1'
-import { hubDatabase } from '#imports'
+
 import * as schema from '../db/schema'
 import { getSession } from '../utils/session'
 import { isRateLimited } from '../utils/rate-limit'

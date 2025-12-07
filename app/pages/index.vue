@@ -44,7 +44,7 @@ function handleScan(isbn: string) {
           v-if="!isAuthenticated" 
           variant="default" 
           class="h-12 px-8 text-lg"
-          @click="navigateTo('/auth/login')"
+          @click="navigateTo('/login')"
         >
           <LogIn class="mr-2 h-5 w-5" />
           Sign In

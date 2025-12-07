@@ -1,6 +1,6 @@
 import { drizzle } from 'drizzle-orm/d1'
 import * as schema from '../../db/schema'
-import { hubDatabase } from '#imports'
+
 import { deleteSession } from '../../utils/session'
 
 export default defineEventHandler(async (event) => {

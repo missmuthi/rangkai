@@ -1,7 +1,7 @@
 import { drizzle } from 'drizzle-orm/d1'
 import * as schema from '../../../db/schema'
 import { eq } from 'drizzle-orm'
-import { hubDatabase } from '#imports'
+
 import { createSession, generateState } from '../../../utils/session'
 
 // Type for Google User Info

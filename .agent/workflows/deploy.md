@@ -37,7 +37,7 @@ description: Pre-Flight Release Sequence for Rangkai (Nuxt on Cloudflare Pages)
 
 ### 5. The Deployment (Only if Steps 1-4 Passed)
 
-- **Command**: `npx wrangler pages deploy dist --project-name rangkai-d3k`
+- **Command**: `npx wrangler pages deploy dist --project-name rangkai`
 - **Post-Deploy**: Output live URL.
 
 ---

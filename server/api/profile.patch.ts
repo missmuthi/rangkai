@@ -27,7 +27,7 @@ export default defineEventHandler(async (event) => {
     })
   }
 
-  const updateData: Record<string, string | Date> = {
+  const updateData: Record<string, string | Date | null> = {
     updatedAt: new Date(),
   }
 

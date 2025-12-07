@@ -61,7 +61,6 @@ export const useAuth = () => {
   // Email/Password Sign Up
   async function signUp(email: string, password: string, name: string) {
     const response = await $fetch('/api/auth/sign-up/email', {
-      // @ts-expect-error - Route handled by [...all].ts but masked by [provider].get.ts types
       method: 'POST' as const,
       body: { email, password, name },
       credentials: 'include',
@@ -73,7 +72,6 @@ export const useAuth = () => {
   // Email/Password Sign In
   async function signIn(email: string, password: string) {
     const response = await $fetch('/api/auth/sign-in/email', {
-      // @ts-expect-error - Route handled by [...all].ts but masked by [provider].get.ts types
       method: 'POST' as const,
       body: { email, password },
       credentials: 'include',
