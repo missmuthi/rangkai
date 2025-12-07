@@ -205,3 +205,97 @@ book-scanner-app/
 > - Use `<script setup lang="ts">`.
 > - Use logic from `useScanner`, `useBookSearch` composables.
 > - Never place complex business logic in the template; use computed properties.
+
+---
+
+## 7. 🎨 Design System & UI Guidelines
+
+**Aesthetic:** Clean, "Vercel-like" dashboard style with strict visual consistency.
+
+### Core Principles
+
+| Principle         | Rule                                                                                        |
+| ----------------- | ------------------------------------------------------------------------------------------- |
+| **No Boxing**     | Avoid heavy background containers. Use whitespace to separate sections, not colored boxes.  |
+| **Hierarchy**     | Use font weight + color (`text-foreground` vs `text-muted-foreground`), not just font size. |
+| **Clean Layouts** | Avoid nested borders. No bordered box inside a Card unless absolutely necessary.            |
+
+### Layout Standards
+
+```vue
+<!-- Page Container -->
+<div class="flex-1 space-y-8 p-8 pt-6">
+
+  <!-- Page Header -->
+  <div>
+    <h2 class="text-3xl font-bold tracking-tight">Title</h2>
+    <p class="text-muted-foreground">Subtitle</p>
+  </div>
+
+  <!-- Content Sections: space-y-4 -->
+  <!-- Major Sections: space-y-8 -->
+</div>
+```
+
+### Component Rules (shadcn-vue)
+
+#### Buttons
+
+| Variant       | Usage                              | Example            |
+| ------------- | ---------------------------------- | ------------------ |
+| `default`     | Primary action (only ONE per view) | "Start Scanning"   |
+| `outline`     | Secondary actions                  | "Export", "Cancel" |
+| `destructive` | Irreversible deletions only        | "Delete Account"   |
+
+> ⚠️ **Never** use arbitrary colors like `bg-green-600`. Use theme variants.
+
+#### Cards (Stats)
+
+```vue
+<UiCard>
+  <UiCardHeader>
+    <UiCardTitle>Total Scans</UiCardTitle>
+    <Icon class="h-4 w-4 text-muted-foreground" />
+  </UiCardHeader>
+  <UiCardContent>
+    <div class="text-2xl font-bold">{{ count }}</div>
+    <p class="text-xs text-muted-foreground">Description</p>
+  </UiCardContent>
+</UiCard>
+```
+
+#### Empty States
+
+```vue
+<!-- Container: dashed border, centered content -->
+<div class="border border-dashed rounded-md h-[400px] flex items-center justify-center">
+  <div class="text-center max-w-[420px]">
+    <Icon class="h-10 w-10 text-muted-foreground mx-auto" />
+    <h3 class="mt-4 text-lg font-semibold">Title</h3>
+    <p class="text-sm text-muted-foreground">Description</p>
+    <Button class="mt-4">Primary Action</Button>
+  </div>
+</div>
+```
+
+#### Tables
+
+- Headers: `text-muted-foreground font-medium`
+- Rows: No zebra striping. Use `hover:bg-muted/50` for hover states.
+
+### Iconography
+
+| Context                 | Size        | Color                                     |
+| ----------------------- | ----------- | ----------------------------------------- |
+| Inline (buttons, cards) | `h-4 w-4`   | `text-muted-foreground`                   |
+| Large (empty states)    | `h-10 w-10` | `text-muted-foreground` or `text-primary` |
+| Active/Brand            | Any         | `text-primary`                            |
+
+**Library:** `lucide-vue-next`
+
+### Code Style Checklist
+
+- [x] `<script setup lang="ts">`
+- [x] Specific shadcn imports: `import { Button } from '@/components/ui/button'`
+- [x] Derived state via `computed()`
+- [x] No business logic in templates
