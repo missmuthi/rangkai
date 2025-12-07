@@ -89,7 +89,7 @@ export default defineEventHandler(async (event): Promise<BookResponse> => {
       const newBook = {
         id: crypto.randomUUID(),
         isbn: cleanIsbn,
-        title: metadata.title || 'Unknown Title',
+        title: metadata.title ?? 'Unknown Title',
         authors: JSON.stringify(metadata.authors),
         publisher: metadata.publisher,
         publishedDate: metadata.publishedDate,
