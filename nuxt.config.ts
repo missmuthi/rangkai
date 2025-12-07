@@ -24,39 +24,95 @@ export default defineNuxtConfig({
     blob: false, // Disabled - R2 not enabled on account
     cache: false, // Re-disabled: Breaks build due to 'ms' dependency issue in @nuxthub/core
   },
-  // PWA Configuration
+  // PWA Configuration (Progressive Web App)
   pwa: {
-    registerType: 'autoUpdate',
+    registerType: 'prompt', // Manual update control (better UX for scanner)
     manifest: {
-      name: 'Rangkai Book Scanner',
+      name: 'Rangkai',
       short_name: 'Rangkai',
-      description: 'Scan and catalog books with ISBN barcodes',
-      theme_color: '#003049', // deep-space-blue
-      background_color: '#ffffff',
-      display: 'standalone',
-      orientation: 'portrait',
+      description: 'Book metadata scanner for Indonesian librarians',
+      theme_color: '#0f172a', // Dark mode background (slate-900)
+      background_color: '#0f172a',
+      display: 'standalone', // Fullscreen for camera (no browser UI)
+      orientation: 'portrait', // Lock orientation for scanner stability
+      start_url: '/',
+      scope: '/',
       icons: [
         {
-          src: '/icon-192x192.png',
+          src: '/pwa-192x192.png',
           sizes: '192x192',
-          type: 'image/png'
+          type: 'image/png',
+          purpose: 'any'
         },
         {
-          src: '/icon-512x512.png',
+          src: '/pwa-512x512.png',
           sizes: '512x512',
-          type: 'image/png'
+          type: 'image/png',
+          purpose: 'any'
+        },
+        {
+          src: '/pwa-maskable-192x192.png',
+          sizes: '192x192',
+          type: 'image/png',
+          purpose: 'maskable' // For Android adaptive icons
+        },
+        {
+          src: '/pwa-maskable-512x512.png',
+          sizes: '512x512',
+          type: 'image/png',
+          purpose: 'maskable'
         }
       ]
     },
     workbox: {
-      navigateFallback: '/',
-      globPatterns: ['**/*.{js,css,html,png,svg,ico}']
+      // Use GenerateSW for automatic service worker
+      globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
+      // Cache strategy for app shell (instant load)
+      runtimeCaching: [
+        {
+          urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
+          handler: 'CacheFirst',
+          options: {
+            cacheName: 'google-fonts-cache',
+            expiration: {
+              maxEntries: 10,
+              maxAgeSeconds: 60 * 60 * 24 * 365 // 1 year
+            },
+            cacheableResponse: {
+              statuses: [0, 200]
+            }
+          }
+        },
+        {
+          urlPattern: /^https:\/\/fonts\.gstatic\.com\/.*/i,
+          handler: 'CacheFirst',
+          options: {
+            cacheName: 'gstatic-fonts-cache',
+            expiration: {
+              maxEntries: 10,
+              maxAgeSeconds: 60 * 60 * 24 * 365
+            },
+            cacheableResponse: {
+              statuses: [0, 200]
+            }
+          }
+        },
+        {
+          // CRITICAL: Exclude API routes from cache (always fetch fresh data)
+          urlPattern: /^https?:\/\/.*\/api\/.*/i,
+          handler: 'NetworkOnly'
+        }
+      ],
+      navigateFallback: undefined, // Don't cache navigation (avoid stale pages)
+      cleanupOutdatedCaches: true
     },
     client: {
-      installPrompt: true
+      installPrompt: true, // Show install prompt
+      periodicSyncForUpdates: 3600 // Check for updates every hour
     },
     devOptions: {
-      enabled: true,
+      enabled: true, // Enable PWA in dev mode for testing
+      suppressWarnings: true,
       type: 'module'
     }
   },
