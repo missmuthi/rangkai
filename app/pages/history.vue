@@ -28,7 +28,6 @@ useHead({
 })
 
 const { history, loading, error, fetchHistory } = useHistory()
-const { exportToCSV } = useSlimsExport()
 
 // Filter state
 const filters = ref<{ status?: string; dateRange?: string; search?: string }>({})
@@ -82,7 +81,9 @@ const hasData = computed(() => history.value.length > 0)
 const isFilteredEmpty = computed(() => hasData.value && filteredHistory.value.length === 0)
 
 function handleExportAll() {
-  exportToCSV(history.value)
+  // Use server-side export endpoint for better compatibility
+  // This works reliably across all browsers including Brave
+  window.location.href = '/api/scans/export'
 }
 
 function clearFilters() {

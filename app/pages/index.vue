@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ArrowRight, Upload, Camera, Database, Download, LogIn, Sparkles } from 'lucide-vue-next'
+import { ArrowRight, Download, LogIn } from 'lucide-vue-next'
 import Button from '@/components/ui/Button.vue'
 import Card from '@/components/ui/Card.vue'
 import CardContent from '@/components/ui/CardContent.vue'
@@ -145,5 +145,8 @@ function handleScan(isbn: string) {
         </Card>
       </div>
     </section>
+
+    <!-- Footer -->
+    <LayoutFooter />
   </main>
 </template>

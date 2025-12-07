@@ -44,7 +44,7 @@ function formatDate(dateString: string | number | Date | null | undefined): stri
       day: 'numeric',
       year: 'numeric'
     }).format(date)
-  } catch (e) {
+  } catch {
     return 'Invalid date'
   }
 }
@@ -80,18 +80,19 @@ function formatDate(dateString: string | number | Date | null | undefined): stri
       <li
         v-for="scan in filteredScans"
         :key="scan.id"
+        data-testid="scan-item"
         class="group bg-white dark:bg-gray-800 p-3 rounded-lg shadow-sm border border-gray-100 dark:border-gray-700 hover:border-indigo-500 dark:hover:border-indigo-400 transition-colors cursor-pointer flex gap-4 relative"
         @click="navigateTo(`/book/${scan.isbn}`)"
       >
         <!-- Cover Thumbnail -->
         <div class="w-12 h-16 shrink-0 bg-gray-100 dark:bg-gray-700 rounded overflow-hidden">
-          <img 
+      <img 
             v-if="scan.thumbnail"
             :src="`/api/image-proxy?url=${encodeURIComponent(scan.thumbnail)}`" 
             :alt="scan.title || 'Cover'"
             class="w-full h-full object-cover"
             loading="lazy"
-          />
+          >
           <div v-else class="w-full h-full flex items-center justify-center text-gray-400">
             <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
