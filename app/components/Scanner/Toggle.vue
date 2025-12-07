@@ -27,6 +27,7 @@ const mode = computed({
       :class="mode === 'camera' 
         ? 'bg-white dark:bg-gray-700 text-indigo-600 dark:text-indigo-400 shadow-sm' 
         : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'"
+      aria-label="Switch to Camera Mode"
       @click="mode = 'camera'"
     >
       <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -43,6 +44,7 @@ const mode = computed({
       :class="mode === 'manual' 
         ? 'bg-white dark:bg-gray-700 text-indigo-600 dark:text-indigo-400 shadow-sm' 
         : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'"
+      aria-label="Switch to Manual Input Mode"
       @click="mode = 'manual'"
     >
       <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

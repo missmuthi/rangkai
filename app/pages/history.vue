@@ -17,7 +17,8 @@ import {
 import Button from '@/components/ui/Button.vue'
 
 definePageMeta({
-  middleware: 'auth'
+  middleware: 'auth',
+  layout: 'app'
 })
 
 useHead({

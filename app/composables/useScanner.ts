@@ -1,4 +1,4 @@
-import { Html5Qrcode, type Html5QrcodeCameraScanConfig, type Html5QrcodeFullConfig } from 'html5-qrcode'
+import type { Html5Qrcode, Html5QrcodeCameraScanConfig, Html5QrcodeFullConfig } from 'html5-qrcode'
 
 export function useScanner() {
   const isScanning = ref(false)
@@ -20,6 +20,9 @@ export function useScanner() {
       if (scanner.value) {
         await stopScanner()
       }
+
+      // Dynamic import to reduce bundle size
+      const { Html5Qrcode } = await import('html5-qrcode')
 
       const instance = new Html5Qrcode(elementId, { 
         verbose: false,
