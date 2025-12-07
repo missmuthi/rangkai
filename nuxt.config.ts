@@ -22,7 +22,7 @@ export default defineNuxtConfig({
     database: true,
     kv: true,
     blob: false, // Disabled - R2 not enabled on account
-    cache: true,
+    cache: false, // Re-disabled: Breaks build due to 'ms' dependency issue in @nuxthub/core
   },
   // PWA Configuration
   pwa: {
@@ -64,9 +64,6 @@ export default defineNuxtConfig({
     experimental: {
       // Enable Server API documentation within NuxtHub
       openAPI: true
-    },
-    prerender: {
-      routes: ['/']
     }
   },
   // Development

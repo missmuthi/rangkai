@@ -9,7 +9,8 @@ export function useHistory() {
     loading.value = true
     error.value = null
     try {
-      history.value = await $fetch<Scan[]>('/api/scans')
+      const response = await $fetch<{ scans: Scan[]; count: number }>('/api/scans')
+      history.value = response.scans || []
     } catch (e: unknown) {
       const err = e as { data?: { message?: string } }
       error.value = err.data?.message || 'Failed to fetch history'

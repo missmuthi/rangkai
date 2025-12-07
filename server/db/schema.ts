@@ -99,6 +99,21 @@ export const books = sqliteTable('books', {
   language: text('language'), // ISO language code
   previewLink: text('previewLink'), // Google Books preview URL
   infoLink: text('infoLink'), // More info URL
+  // SLiMS Bibliographic Fields
+  ddc: text('ddc'), // Dewey Decimal Classification
+  lcc: text('lcc'), // Library of Congress Classification
+  callNumber: text('call_number'), // Full shelf filing code
+  subjects: text('subjects'), // Semicolon-separated subject headings
+  series: text('series'), // Series title if applicable
+  edition: text('edition'), // Edition info (e.g., "3rd Edition")
+  collation: text('collation'), // Physical description (e.g., "416 p.")
+  gmd: text('gmd').default('text'), // General Material Designation
+  publishPlace: text('publish_place'), // Place of publication
+  classificationTrust: text('classification_trust'), // "high" | "medium" | "low"
+  // AI Enhancement
+  isAiEnhanced: integer('is_ai_enhanced', { mode: 'boolean' }).default(false),
+  enhancedAt: integer('enhanced_at', { mode: 'timestamp' }),
+  aiLog: text('ai_log'), // JSON array of AI changes
   // Metadata source tracking
   source: text('source').default('google_books'), // 'google_books', 'open_library', 'manual'
   rawMetadata: text('rawMetadata'), // Original API response as JSON string
@@ -107,6 +122,8 @@ export const books = sqliteTable('books', {
 }, (table) => [
   uniqueIndex('idx_books_isbn').on(table.isbn),
   index('idx_books_title').on(table.title),
+  index('idx_books_ddc').on(table.ddc),
+  index('idx_books_lcc').on(table.lcc),
 ])
 
 /**
@@ -123,6 +140,22 @@ export const scans = sqliteTable('scans', {
   authors: text('authors'), // Manual entry
   publisher: text('publisher'),
   description: text('description'),
+  // SLiMS Bibliographic Fields
+  ddc: text('ddc'),
+  lcc: text('lcc'),
+  callNumber: text('call_number'),
+  subjects: text('subjects'),
+  series: text('series'),
+  edition: text('edition'),
+  collation: text('collation'),
+  gmd: text('gmd').default('text'),
+  publishPlace: text('publish_place'),
+  classificationTrust: text('classification_trust'),
+  // AI Enhancement
+  isAiEnhanced: integer('is_ai_enhanced', { mode: 'boolean' }).default(false),
+  enhancedAt: integer('enhanced_at', { mode: 'timestamp' }),
+  aiLog: text('ai_log'),
+  jsonData: text('json_data'), // Full MergedBookData as JSON
   // Scan-specific data
   status: text('status').notNull().default('pending'), // 'pending', 'complete', 'error', 'exported'
   notes: text('notes'), // User notes
@@ -135,6 +168,8 @@ export const scans = sqliteTable('scans', {
   index('idx_scans_isbn').on(table.isbn),
   index('idx_scans_status').on(table.status),
   index('idx_scans_createdAt').on(table.createdAt),
+  index('idx_scans_ddc').on(table.ddc),
+  index('idx_scans_lcc').on(table.lcc),
 ])
 
 // =============================================================================

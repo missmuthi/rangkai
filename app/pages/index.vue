@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ScanBarcode, History, LogIn, ArrowRight } from 'lucide-vue-next'
+import { ScanBarcode, LogIn, ArrowRight } from 'lucide-vue-next'
 import Button from '@/components/ui/Button.vue'
 import Card from '@/components/ui/Card.vue'
 import CardContent from '@/components/ui/CardContent.vue'

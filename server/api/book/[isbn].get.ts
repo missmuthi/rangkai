@@ -23,7 +23,7 @@ interface BookResponse {
   scan_id: string | null
   source: string
   cached: boolean
-  meta?: any
+  meta?: unknown
 }
 
 export default defineEventHandler(async (event): Promise<BookResponse> => {
@@ -51,7 +51,7 @@ export default defineEventHandler(async (event): Promise<BookResponse> => {
 
   let metadata: BookMetadata | null = null
   let isCached = false
-  let meta = {}
+  let meta: unknown = {}
 
   if (bookRecord) {
     // Cache Hit in DB

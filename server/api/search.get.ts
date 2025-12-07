@@ -6,7 +6,7 @@
  *   - limit: Max results (default 50)
  */
 
-import { like, or, desc, eq } from 'drizzle-orm'
+import { like, or, desc } from 'drizzle-orm'
 import { scans } from '../db/schema'
 import { requireAuth } from '../utils/auth'
 
@@ -31,14 +31,15 @@ export default defineEventHandler(async (event) => {
   // Search in user's scans
   const searchPattern = `%${searchTerm}%`
   
-  const results = await db
-    .select()
-    .from(scans)
-    .where(
-      eq(scans.userId, user.id)
-    )
-    .orderBy(desc(scans.createdAt))
-    .limit(limit)
+  const results = await db.query.scans.findMany({
+    where: (scans, { like, or }) => or(
+      like(scans.title, searchPattern),
+      like(scans.authors, searchPattern),
+      like(scans.isbn, searchPattern)
+    ),
+    orderBy: (scans, { desc }) => [desc(scans.createdAt)],
+    limit: limit
+  })
 
   // Filter in JS since D1 doesn't support complex LIKE with OR well
   const filtered = results.filter(scan => {

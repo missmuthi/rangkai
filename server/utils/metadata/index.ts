@@ -11,7 +11,7 @@ export * from './types'
  * Fetch book metadata from multiple sources in parallel and merge results
  * Priority: Google Books > OpenLibrary > Library of Congress
  */
-export async function fetchBookByIsbn(isbn: string): Promise<{ data: BookMetadata | null, meta: any }> {
+export async function fetchBookByIsbn(isbn: string): Promise<{ data: BookMetadata | null, meta: unknown }> {
   const startTime = Date.now()
   
   // Run all fetchers in parallel
@@ -23,7 +23,7 @@ export async function fetchBookByIsbn(isbn: string): Promise<{ data: BookMetadat
 
   // Process results
   const successfulResults: MetadataFetchResult[] = []
-  const errors: any[] = []
+  const errors: unknown[] = []
 
   results.forEach(result => {
     if (result.status === 'fulfilled') {
@@ -65,7 +65,7 @@ export async function fetchBookByIsbn(isbn: string): Promise<{ data: BookMetadat
     for (const source of sources) {
       if (source && source[key] !== null && source[key] !== undefined) {
         // Special checks for arrays (empty arrays don't count)
-        if (Array.isArray(source[key]) && (source[key] as any).length === 0) continue
+        if (Array.isArray(source[key]) && (source[key] as unknown[]).length === 0) continue
         return source[key]
       }
     }
