@@ -1,0 +1,726 @@
+{
+  "testName": "Real ISBN Scan Workflow",
+  "timestamp": "2025-12-07T09:09:44.991Z",
+  "duration": 11944,
+  "status": "FAIL",
+  "isbn": "9780684835396",
+  "expectedTitle": "I Don't Want to Talk About It",
+  "expectedAuthor": "Terrence Real",
+  "usedMocks": true,
+  "finalUrl": "http://localhost:3000/scan/mobile",
+  "viewport": {
+    "width": 1280,
+    "height": 720
+  },
+  "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.7499.4 Safari/537.36",
+  "steps": [
+    {
+      "name": "1. Navigate to scan page",
+      "status": "PASS",
+      "duration": 1672
+    },
+    {
+      "name": "2. Wait for scanner UI to load",
+      "status": "FAIL",
+      "duration": 10008,
+      "error": "page.waitForSelector: Timeout 10000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('[data-testid=\"isbn-input\"], input[placeholder*=\"ISBN\"], input[placeholder*=\"Search\"]') to be visible\u001b[22m\n",
+      "errorStack": "page.waitForSelector: Timeout 10000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('[data-testid=\"isbn-input\"], input[placeholder*=\"ISBN\"], input[placeholder*=\"Search\"]') to be visible\u001b[22m\n\n    at action (/home/mikhailryu/projects/rangkai/tests/e2e/real-isbn-scan.spec.ts:70:18)\n    at recordStep (/home/mikhailryu/projects/rangkai/tests/e2e/real-isbn-scan.spec.ts:50:15)\n    at /home/mikhailryu/projects/rangkai/tests/e2e/real-isbn-scan.spec.ts:68:11",
+      "screenshot": "test-results/e2e-reports/error-step-2-1765098596803.png"
+    }
+  ],
+  "apiCalls": [
+    {
+      "type": "request",
+      "url": "http://localhost:3000/_nuxt/@fs/home/mikhailryu/projects/rangkai/node_modules/@vue/devtools-api/lib/esm/api/index.js?v=707853b8",
+      "method": "GET",
+      "headers": {
+        "accept": "*/*",
+        "accept-language": "en-US",
+        "origin": "http://localhost:3000",
+        "referer": "http://localhost:3000/_nuxt/@fs/home/mikhailryu/projects/rangkai/node_modules/@vue/devtools-api/lib/esm/index.js?v=707853b8",
+        "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.7499.4 Safari/537.36",
+        "sec-ch-ua": "\"HeadlessChrome\";v=\"143\", \"Chromium\";v=\"143\", \"Not A(Brand\";v=\"24\"",
+        "sec-ch-ua-mobile": "?0",
+        "sec-ch-ua-platform": "\"Windows\""
+      }
+    },
+    {
+      "type": "response",
+      "url": "http://localhost:3000/_nuxt/@fs/home/mikhailryu/projects/rangkai/node_modules/@vue/devtools-api/lib/esm/api/index.js?v=707853b8",
+      "status": 200,
+      "statusText": "OK"
+    },
+    {
+      "type": "request",
+      "url": "http://localhost:3000/_nuxt/@fs/home/mikhailryu/projects/rangkai/node_modules/@vue/devtools-api/lib/esm/api/api.js?v=707853b8",
+      "method": "GET",
+      "headers": {
+        "accept": "*/*",
+        "accept-language": "en-US",
+        "origin": "http://localhost:3000",
+        "referer": "http://localhost:3000/_nuxt/@fs/home/mikhailryu/projects/rangkai/node_modules/@vue/devtools-api/lib/esm/api/index.js?v=707853b8",
+        "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.7499.4 Safari/537.36",
+        "sec-ch-ua": "\"HeadlessChrome\";v=\"143\", \"Chromium\";v=\"143\", \"Not A(Brand\";v=\"24\"",
+        "sec-ch-ua-mobile": "?0",
+        "sec-ch-ua-platform": "\"Windows\""
+      }
+    },
+    {
+      "type": "request",
+      "url": "http://localhost:3000/_nuxt/@fs/home/mikhailryu/projects/rangkai/node_modules/@vue/devtools-api/lib/esm/api/app.js?v=707853b8",
+      "method": "GET",
+      "headers": {
+        "accept": "*/*",
+        "accept-language": "en-US",
+        "origin": "http://localhost:3000",
+        "referer": "http://localhost:3000/_nuxt/@fs/home/mikhailryu/projects/rangkai/node_modules/@vue/devtools-api/lib/esm/api/index.js?v=707853b8",
+        "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.7499.4 Safari/537.36",
+        "sec-ch-ua": "\"HeadlessChrome\";v=\"143\", \"Chromium\";v=\"143\", \"Not A(Brand\";v=\"24\"",
+        "sec-ch-ua-mobile": "?0",
+        "sec-ch-ua-platform": "\"Windows\""
+      }
+    },
+    {
+      "type": "request",
+      "url": "http://localhost:3000/_nuxt/@fs/home/mikhailryu/projects/rangkai/node_modules/@vue/devtools-api/lib/esm/api/component.js?v=707853b8",
+      "method": "GET",
+      "headers": {
+        "accept": "*/*",
+        "accept-language": "en-US",
+        "origin": "http://localhost:3000",
+        "referer": "http://localhost:3000/_nuxt/@fs/home/mikhailryu/projects/rangkai/node_modules/@vue/devtools-api/lib/esm/api/index.js?v=707853b8",
+        "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.7499.4 Safari/537.36",
+        "sec-ch-ua": "\"HeadlessChrome\";v=\"143\", \"Chromium\";v=\"143\", \"Not A(Brand\";v=\"24\"",
+        "sec-ch-ua-mobile": "?0",
+        "sec-ch-ua-platform": "\"Windows\""
+      }
+    },
+    {
+      "type": "request",
+      "url": "http://localhost:3000/_nuxt/@fs/home/mikhailryu/projects/rangkai/node_modules/@vue/devtools-api/lib/esm/api/context.js?v=707853b8",
+      "method": "GET",
+      "headers": {
+        "accept": "*/*",
+        "accept-language": "en-US",
+        "origin": "http://localhost:3000",
+        "referer": "http://localhost:3000/_nuxt/@fs/home/mikhailryu/projects/rangkai/node_modules/@vue/devtools-api/lib/esm/api/index.js?v=707853b8",
+        "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.7499.4 Safari/537.36",
+        "sec-ch-ua": "\"HeadlessChrome\";v=\"143\", \"Chromium\";v=\"143\", \"Not A(Brand\";v=\"24\"",
+        "sec-ch-ua-mobile": "?0",
+        "sec-ch-ua-platform": "\"Windows\""
+      }
+    },
+    {
+      "type": "request",
+      "url": "http://localhost:3000/_nuxt/@fs/home/mikhailryu/projects/rangkai/node_modules/@vue/devtools-api/lib/esm/api/hooks.js?v=707853b8",
+      "method": "GET",
+      "headers": {
+        "accept": "*/*",
+        "accept-language": "en-US",
+        "origin": "http://localhost:3000",
+        "referer": "http://localhost:3000/_nuxt/@fs/home/mikhailryu/projects/rangkai/node_modules/@vue/devtools-api/lib/esm/api/index.js?v=707853b8",
+        "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.7499.4 Safari/537.36",
+        "sec-ch-ua": "\"HeadlessChrome\";v=\"143\", \"Chromium\";v=\"143\", \"Not A(Brand\";v=\"24\"",
+        "sec-ch-ua-mobile": "?0",
+        "sec-ch-ua-platform": "\"Windows\""
+      }
+    },
+    {
+      "type": "request",
+      "url": "http://localhost:3000/_nuxt/@fs/home/mikhailryu/projects/rangkai/node_modules/@vue/devtools-api/lib/esm/api/util.js?v=707853b8",
+      "method": "GET",
+      "headers": {
+        "accept": "*/*",
+        "accept-language": "en-US",
+        "origin": "http://localhost:3000",
+        "referer": "http://localhost:3000/_nuxt/@fs/home/mikhailryu/projects/rangkai/node_modules/@vue/devtools-api/lib/esm/api/index.js?v=707853b8",
+        "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.7499.4 Safari/537.36",
+        "sec-ch-ua": "\"HeadlessChrome\";v=\"143\", \"Chromium\";v=\"143\", \"Not A(Brand\";v=\"24\"",
+        "sec-ch-ua-mobile": "?0",
+        "sec-ch-ua-platform": "\"Windows\""
+      }
+    },
+    {
+      "type": "response",
+      "url": "http://localhost:3000/_nuxt/@fs/home/mikhailryu/projects/rangkai/node_modules/@vue/devtools-api/lib/esm/api/app.js?v=707853b8",
+      "status": 200,
+      "statusText": "OK"
+    },
+    {
+      "type": "response",
+      "url": "http://localhost:3000/_nuxt/@fs/home/mikhailryu/projects/rangkai/node_modules/@vue/devtools-api/lib/esm/api/api.js?v=707853b8",
+      "status": 200,
+      "statusText": "OK"
+    },
+    {
+      "type": "response",
+      "url": "http://localhost:3000/_nuxt/@fs/home/mikhailryu/projects/rangkai/node_modules/@vue/devtools-api/lib/esm/api/component.js?v=707853b8",
+      "status": 200,
+      "statusText": "OK"
+    },
+    {
+      "type": "response",
+      "url": "http://localhost:3000/_nuxt/@fs/home/mikhailryu/projects/rangkai/node_modules/@vue/devtools-api/lib/esm/api/context.js?v=707853b8",
+      "status": 200,
+      "statusText": "OK"
+    },
+    {
+      "type": "response",
+      "url": "http://localhost:3000/_nuxt/@fs/home/mikhailryu/projects/rangkai/node_modules/@vue/devtools-api/lib/esm/api/hooks.js?v=707853b8",
+      "status": 200,
+      "statusText": "OK"
+    },
+    {
+      "type": "response",
+      "url": "http://localhost:3000/_nuxt/@fs/home/mikhailryu/projects/rangkai/node_modules/@vue/devtools-api/lib/esm/api/util.js?v=707853b8",
+      "status": 200,
+      "statusText": "OK"
+    },
+    {
+      "type": "request",
+      "url": "http://localhost:3000/api/auth-session",
+      "method": "GET",
+      "headers": {
+        "accept": "*/*",
+        "accept-language": "en-US",
+        "referer": "http://localhost:3000/login?redirect=/scan/mobile",
+        "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.7499.4 Safari/537.36",
+        "sec-ch-ua": "\"HeadlessChrome\";v=\"143\", \"Chromium\";v=\"143\", \"Not A(Brand\";v=\"24\"",
+        "sec-ch-ua-mobile": "?0",
+        "sec-ch-ua-platform": "\"Windows\""
+      }
+    },
+    {
+      "type": "response",
+      "url": "http://localhost:3000/api/auth-session",
+      "status": 200,
+      "statusText": "OK"
+    },
+    {
+      "type": "request",
+      "url": "http://localhost:3000/api/auth-session",
+      "method": "GET",
+      "headers": {
+        "accept": "*/*",
+        "accept-language": "en-US",
+        "referer": "http://localhost:3000/login?redirect=/scan/mobile",
+        "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.7499.4 Safari/537.36",
+        "sec-ch-ua": "\"HeadlessChrome\";v=\"143\", \"Chromium\";v=\"143\", \"Not A(Brand\";v=\"24\"",
+        "sec-ch-ua-mobile": "?0",
+        "sec-ch-ua-platform": "\"Windows\""
+      }
+    },
+    {
+      "type": "response",
+      "url": "http://localhost:3000/api/auth-session",
+      "status": 200,
+      "statusText": "OK"
+    },
+    {
+      "type": "request",
+      "url": "http://localhost:3000/_nuxt/@fs/home/mikhailryu/projects/rangkai/node_modules/@vue/devtools-api/lib/esm/api/index.js?v=d1de9113",
+      "method": "GET",
+      "headers": {
+        "accept": "*/*",
+        "accept-language": "en-US",
+        "origin": "http://localhost:3000",
+        "referer": "http://localhost:3000/_nuxt/@fs/home/mikhailryu/projects/rangkai/node_modules/@vue/devtools-api/lib/esm/index.js?v=d1de9113",
+        "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.7499.4 Safari/537.36",
+        "sec-ch-ua": "\"HeadlessChrome\";v=\"143\", \"Chromium\";v=\"143\", \"Not A(Brand\";v=\"24\"",
+        "sec-ch-ua-mobile": "?0",
+        "sec-ch-ua-platform": "\"Windows\""
+      }
+    },
+    {
+      "type": "response",
+      "url": "http://localhost:3000/_nuxt/@fs/home/mikhailryu/projects/rangkai/node_modules/@vue/devtools-api/lib/esm/api/index.js?v=d1de9113",
+      "status": 200,
+      "statusText": "OK"
+    },
+    {
+      "type": "request",
+      "url": "http://localhost:3000/_nuxt/@fs/home/mikhailryu/projects/rangkai/node_modules/@vue/devtools-api/lib/esm/api/api.js?v=d1de9113",
+      "method": "GET",
+      "headers": {
+        "accept": "*/*",
+        "accept-language": "en-US",
+        "origin": "http://localhost:3000",
+        "referer": "http://localhost:3000/_nuxt/@fs/home/mikhailryu/projects/rangkai/node_modules/@vue/devtools-api/lib/esm/api/index.js?v=d1de9113",
+        "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.7499.4 Safari/537.36",
+        "sec-ch-ua": "\"HeadlessChrome\";v=\"143\", \"Chromium\";v=\"143\", \"Not A(Brand\";v=\"24\"",
+        "sec-ch-ua-mobile": "?0",
+        "sec-ch-ua-platform": "\"Windows\""
+      }
+    },
+    {
+      "type": "request",
+      "url": "http://localhost:3000/_nuxt/@fs/home/mikhailryu/projects/rangkai/node_modules/@vue/devtools-api/lib/esm/api/app.js?v=d1de9113",
+      "method": "GET",
+      "headers": {
+        "accept": "*/*",
+        "accept-language": "en-US",
+        "origin": "http://localhost:3000",
+        "referer": "http://localhost:3000/_nuxt/@fs/home/mikhailryu/projects/rangkai/node_modules/@vue/devtools-api/lib/esm/api/index.js?v=d1de9113",
+        "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.7499.4 Safari/537.36",
+        "sec-ch-ua": "\"HeadlessChrome\";v=\"143\", \"Chromium\";v=\"143\", \"Not A(Brand\";v=\"24\"",
+        "sec-ch-ua-mobile": "?0",
+        "sec-ch-ua-platform": "\"Windows\""
+      }
+    },
+    {
+      "type": "request",
+      "url": "http://localhost:3000/_nuxt/@fs/home/mikhailryu/projects/rangkai/node_modules/@vue/devtools-api/lib/esm/api/component.js?v=d1de9113",
+      "method": "GET",
+      "headers": {
+        "accept": "*/*",
+        "accept-language": "en-US",
+        "origin": "http://localhost:3000",
+        "referer": "http://localhost:3000/_nuxt/@fs/home/mikhailryu/projects/rangkai/node_modules/@vue/devtools-api/lib/esm/api/index.js?v=d1de9113",
+        "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.7499.4 Safari/537.36",
+        "sec-ch-ua": "\"HeadlessChrome\";v=\"143\", \"Chromium\";v=\"143\", \"Not A(Brand\";v=\"24\"",
+        "sec-ch-ua-mobile": "?0",
+        "sec-ch-ua-platform": "\"Windows\""
+      }
+    },
+    {
+      "type": "request",
+      "url": "http://localhost:3000/_nuxt/@fs/home/mikhailryu/projects/rangkai/node_modules/@vue/devtools-api/lib/esm/api/context.js?v=d1de9113",
+      "method": "GET",
+      "headers": {
+        "accept": "*/*",
+        "accept-language": "en-US",
+        "origin": "http://localhost:3000",
+        "referer": "http://localhost:3000/_nuxt/@fs/home/mikhailryu/projects/rangkai/node_modules/@vue/devtools-api/lib/esm/api/index.js?v=d1de9113",
+        "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.7499.4 Safari/537.36",
+        "sec-ch-ua": "\"HeadlessChrome\";v=\"143\", \"Chromium\";v=\"143\", \"Not A(Brand\";v=\"24\"",
+        "sec-ch-ua-mobile": "?0",
+        "sec-ch-ua-platform": "\"Windows\""
+      }
+    },
+    {
+      "type": "request",
+      "url": "http://localhost:3000/_nuxt/@fs/home/mikhailryu/projects/rangkai/node_modules/@vue/devtools-api/lib/esm/api/hooks.js?v=d1de9113",
+      "method": "GET",
+      "headers": {
+        "accept": "*/*",
+        "accept-language": "en-US",
+        "origin": "http://localhost:3000",
+        "referer": "http://localhost:3000/_nuxt/@fs/home/mikhailryu/projects/rangkai/node_modules/@vue/devtools-api/lib/esm/api/index.js?v=d1de9113",
+        "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.7499.4 Safari/537.36",
+        "sec-ch-ua": "\"HeadlessChrome\";v=\"143\", \"Chromium\";v=\"143\", \"Not A(Brand\";v=\"24\"",
+        "sec-ch-ua-mobile": "?0",
+        "sec-ch-ua-platform": "\"Windows\""
+      }
+    },
+    {
+      "type": "request",
+      "url": "http://localhost:3000/_nuxt/@fs/home/mikhailryu/projects/rangkai/node_modules/@vue/devtools-api/lib/esm/api/util.js?v=d1de9113",
+      "method": "GET",
+      "headers": {
+        "accept": "*/*",
+        "accept-language": "en-US",
+        "origin": "http://localhost:3000",
+        "referer": "http://localhost:3000/_nuxt/@fs/home/mikhailryu/projects/rangkai/node_modules/@vue/devtools-api/lib/esm/api/index.js?v=d1de9113",
+        "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.7499.4 Safari/537.36",
+        "sec-ch-ua": "\"HeadlessChrome\";v=\"143\", \"Chromium\";v=\"143\", \"Not A(Brand\";v=\"24\"",
+        "sec-ch-ua-mobile": "?0",
+        "sec-ch-ua-platform": "\"Windows\""
+      }
+    },
+    {
+      "type": "response",
+      "url": "http://localhost:3000/_nuxt/@fs/home/mikhailryu/projects/rangkai/node_modules/@vue/devtools-api/lib/esm/api/api.js?v=d1de9113",
+      "status": 200,
+      "statusText": "OK"
+    },
+    {
+      "type": "response",
+      "url": "http://localhost:3000/_nuxt/@fs/home/mikhailryu/projects/rangkai/node_modules/@vue/devtools-api/lib/esm/api/app.js?v=d1de9113",
+      "status": 200,
+      "statusText": "OK"
+    },
+    {
+      "type": "response",
+      "url": "http://localhost:3000/_nuxt/@fs/home/mikhailryu/projects/rangkai/node_modules/@vue/devtools-api/lib/esm/api/component.js?v=d1de9113",
+      "status": 200,
+      "statusText": "OK"
+    },
+    {
+      "type": "response",
+      "url": "http://localhost:3000/_nuxt/@fs/home/mikhailryu/projects/rangkai/node_modules/@vue/devtools-api/lib/esm/api/context.js?v=d1de9113",
+      "status": 200,
+      "statusText": "OK"
+    },
+    {
+      "type": "response",
+      "url": "http://localhost:3000/_nuxt/@fs/home/mikhailryu/projects/rangkai/node_modules/@vue/devtools-api/lib/esm/api/hooks.js?v=d1de9113",
+      "status": 200,
+      "statusText": "OK"
+    },
+    {
+      "type": "response",
+      "url": "http://localhost:3000/_nuxt/@fs/home/mikhailryu/projects/rangkai/node_modules/@vue/devtools-api/lib/esm/api/util.js?v=d1de9113",
+      "status": 200,
+      "statusText": "OK"
+    },
+    {
+      "type": "request",
+      "url": "http://localhost:3000/api/auth-session",
+      "method": "GET",
+      "headers": {
+        "accept": "*/*",
+        "accept-language": "en-US",
+        "referer": "http://localhost:3000/login?redirect=/scan/mobile",
+        "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.7499.4 Safari/537.36",
+        "sec-ch-ua": "\"HeadlessChrome\";v=\"143\", \"Chromium\";v=\"143\", \"Not A(Brand\";v=\"24\"",
+        "sec-ch-ua-mobile": "?0",
+        "sec-ch-ua-platform": "\"Windows\""
+      }
+    },
+    {
+      "type": "response",
+      "url": "http://localhost:3000/api/auth-session",
+      "status": 200,
+      "statusText": "OK"
+    },
+    {
+      "type": "request",
+      "url": "http://localhost:3000/api/auth-session",
+      "method": "GET",
+      "headers": {
+        "accept": "*/*",
+        "accept-language": "en-US",
+        "referer": "http://localhost:3000/login?redirect=/scan/mobile",
+        "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.7499.4 Safari/537.36",
+        "sec-ch-ua": "\"HeadlessChrome\";v=\"143\", \"Chromium\";v=\"143\", \"Not A(Brand\";v=\"24\"",
+        "sec-ch-ua-mobile": "?0",
+        "sec-ch-ua-platform": "\"Windows\""
+      }
+    },
+    {
+      "type": "response",
+      "url": "http://localhost:3000/api/auth-session",
+      "status": 200,
+      "statusText": "OK"
+    },
+    {
+      "type": "request",
+      "url": "http://localhost:3000/_nuxt/@fs/home/mikhailryu/projects/rangkai/node_modules/@vue/devtools-api/lib/esm/api/index.js?v=ef0eaad4",
+      "method": "GET",
+      "headers": {
+        "accept": "*/*",
+        "accept-language": "en-US",
+        "origin": "http://localhost:3000",
+        "referer": "http://localhost:3000/_nuxt/@fs/home/mikhailryu/projects/rangkai/node_modules/@vue/devtools-api/lib/esm/index.js?v=ef0eaad4",
+        "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.7499.4 Safari/537.36",
+        "sec-ch-ua": "\"HeadlessChrome\";v=\"143\", \"Chromium\";v=\"143\", \"Not A(Brand\";v=\"24\"",
+        "sec-ch-ua-mobile": "?0",
+        "sec-ch-ua-platform": "\"Windows\""
+      }
+    },
+    {
+      "type": "response",
+      "url": "http://localhost:3000/_nuxt/@fs/home/mikhailryu/projects/rangkai/node_modules/@vue/devtools-api/lib/esm/api/index.js?v=ef0eaad4",
+      "status": 200,
+      "statusText": "OK"
+    },
+    {
+      "type": "request",
+      "url": "http://localhost:3000/_nuxt/@fs/home/mikhailryu/projects/rangkai/node_modules/@vue/devtools-api/lib/esm/api/api.js?v=ef0eaad4",
+      "method": "GET",
+      "headers": {
+        "accept": "*/*",
+        "accept-language": "en-US",
+        "origin": "http://localhost:3000",
+        "referer": "http://localhost:3000/_nuxt/@fs/home/mikhailryu/projects/rangkai/node_modules/@vue/devtools-api/lib/esm/api/index.js?v=ef0eaad4",
+        "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.7499.4 Safari/537.36",
+        "sec-ch-ua": "\"HeadlessChrome\";v=\"143\", \"Chromium\";v=\"143\", \"Not A(Brand\";v=\"24\"",
+        "sec-ch-ua-mobile": "?0",
+        "sec-ch-ua-platform": "\"Windows\""
+      }
+    },
+    {
+      "type": "request",
+      "url": "http://localhost:3000/_nuxt/@fs/home/mikhailryu/projects/rangkai/node_modules/@vue/devtools-api/lib/esm/api/app.js?v=ef0eaad4",
+      "method": "GET",
+      "headers": {
+        "accept": "*/*",
+        "accept-language": "en-US",
+        "origin": "http://localhost:3000",
+        "referer": "http://localhost:3000/_nuxt/@fs/home/mikhailryu/projects/rangkai/node_modules/@vue/devtools-api/lib/esm/api/index.js?v=ef0eaad4",
+        "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.7499.4 Safari/537.36",
+        "sec-ch-ua": "\"HeadlessChrome\";v=\"143\", \"Chromium\";v=\"143\", \"Not A(Brand\";v=\"24\"",
+        "sec-ch-ua-mobile": "?0",
+        "sec-ch-ua-platform": "\"Windows\""
+      }
+    },
+    {
+      "type": "request",
+      "url": "http://localhost:3000/_nuxt/@fs/home/mikhailryu/projects/rangkai/node_modules/@vue/devtools-api/lib/esm/api/component.js?v=ef0eaad4",
+      "method": "GET",
+      "headers": {
+        "accept": "*/*",
+        "accept-language": "en-US",
+        "origin": "http://localhost:3000",
+        "referer": "http://localhost:3000/_nuxt/@fs/home/mikhailryu/projects/rangkai/node_modules/@vue/devtools-api/lib/esm/api/index.js?v=ef0eaad4",
+        "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.7499.4 Safari/537.36",
+        "sec-ch-ua": "\"HeadlessChrome\";v=\"143\", \"Chromium\";v=\"143\", \"Not A(Brand\";v=\"24\"",
+        "sec-ch-ua-mobile": "?0",
+        "sec-ch-ua-platform": "\"Windows\""
+      }
+    },
+    {
+      "type": "request",
+      "url": "http://localhost:3000/_nuxt/@fs/home/mikhailryu/projects/rangkai/node_modules/@vue/devtools-api/lib/esm/api/context.js?v=ef0eaad4",
+      "method": "GET",
+      "headers": {
+        "accept": "*/*",
+        "accept-language": "en-US",
+        "origin": "http://localhost:3000",
+        "referer": "http://localhost:3000/_nuxt/@fs/home/mikhailryu/projects/rangkai/node_modules/@vue/devtools-api/lib/esm/api/index.js?v=ef0eaad4",
+        "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.7499.4 Safari/537.36",
+        "sec-ch-ua": "\"HeadlessChrome\";v=\"143\", \"Chromium\";v=\"143\", \"Not A(Brand\";v=\"24\"",
+        "sec-ch-ua-mobile": "?0",
+        "sec-ch-ua-platform": "\"Windows\""
+      }
+    },
+    {
+      "type": "request",
+      "url": "http://localhost:3000/_nuxt/@fs/home/mikhailryu/projects/rangkai/node_modules/@vue/devtools-api/lib/esm/api/hooks.js?v=ef0eaad4",
+      "method": "GET",
+      "headers": {
+        "accept": "*/*",
+        "accept-language": "en-US",
+        "origin": "http://localhost:3000",
+        "referer": "http://localhost:3000/_nuxt/@fs/home/mikhailryu/projects/rangkai/node_modules/@vue/devtools-api/lib/esm/api/index.js?v=ef0eaad4",
+        "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.7499.4 Safari/537.36",
+        "sec-ch-ua": "\"HeadlessChrome\";v=\"143\", \"Chromium\";v=\"143\", \"Not A(Brand\";v=\"24\"",
+        "sec-ch-ua-mobile": "?0",
+        "sec-ch-ua-platform": "\"Windows\""
+      }
+    },
+    {
+      "type": "request",
+      "url": "http://localhost:3000/_nuxt/@fs/home/mikhailryu/projects/rangkai/node_modules/@vue/devtools-api/lib/esm/api/util.js?v=ef0eaad4",
+      "method": "GET",
+      "headers": {
+        "accept": "*/*",
+        "accept-language": "en-US",
+        "origin": "http://localhost:3000",
+        "referer": "http://localhost:3000/_nuxt/@fs/home/mikhailryu/projects/rangkai/node_modules/@vue/devtools-api/lib/esm/api/index.js?v=ef0eaad4",
+        "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.7499.4 Safari/537.36",
+        "sec-ch-ua": "\"HeadlessChrome\";v=\"143\", \"Chromium\";v=\"143\", \"Not A(Brand\";v=\"24\"",
+        "sec-ch-ua-mobile": "?0",
+        "sec-ch-ua-platform": "\"Windows\""
+      }
+    },
+    {
+      "type": "response",
+      "url": "http://localhost:3000/_nuxt/@fs/home/mikhailryu/projects/rangkai/node_modules/@vue/devtools-api/lib/esm/api/api.js?v=ef0eaad4",
+      "status": 200,
+      "statusText": "OK"
+    },
+    {
+      "type": "response",
+      "url": "http://localhost:3000/_nuxt/@fs/home/mikhailryu/projects/rangkai/node_modules/@vue/devtools-api/lib/esm/api/app.js?v=ef0eaad4",
+      "status": 200,
+      "statusText": "OK"
+    },
+    {
+      "type": "response",
+      "url": "http://localhost:3000/_nuxt/@fs/home/mikhailryu/projects/rangkai/node_modules/@vue/devtools-api/lib/esm/api/hooks.js?v=ef0eaad4",
+      "status": 200,
+      "statusText": "OK"
+    },
+    {
+      "type": "response",
+      "url": "http://localhost:3000/_nuxt/@fs/home/mikhailryu/projects/rangkai/node_modules/@vue/devtools-api/lib/esm/api/context.js?v=ef0eaad4",
+      "status": 200,
+      "statusText": "OK"
+    },
+    {
+      "type": "response",
+      "url": "http://localhost:3000/_nuxt/@fs/home/mikhailryu/projects/rangkai/node_modules/@vue/devtools-api/lib/esm/api/util.js?v=ef0eaad4",
+      "status": 200,
+      "statusText": "OK"
+    },
+    {
+      "type": "response",
+      "url": "http://localhost:3000/_nuxt/@fs/home/mikhailryu/projects/rangkai/node_modules/@vue/devtools-api/lib/esm/api/component.js?v=ef0eaad4",
+      "status": 200,
+      "statusText": "OK"
+    },
+    {
+      "type": "request",
+      "url": "http://localhost:3000/api/auth-session",
+      "method": "GET",
+      "headers": {
+        "accept": "*/*",
+        "accept-language": "en-US",
+        "referer": "http://localhost:3000/login?redirect=/scan/mobile",
+        "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.7499.4 Safari/537.36",
+        "sec-ch-ua": "\"HeadlessChrome\";v=\"143\", \"Chromium\";v=\"143\", \"Not A(Brand\";v=\"24\"",
+        "sec-ch-ua-mobile": "?0",
+        "sec-ch-ua-platform": "\"Windows\""
+      }
+    },
+    {
+      "type": "response",
+      "url": "http://localhost:3000/api/auth-session",
+      "status": 200,
+      "statusText": "OK"
+    },
+    {
+      "type": "request",
+      "url": "http://localhost:3000/api/auth-session",
+      "method": "GET",
+      "headers": {
+        "accept": "*/*",
+        "accept-language": "en-US",
+        "referer": "http://localhost:3000/login?redirect=/scan/mobile",
+        "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.7499.4 Safari/537.36",
+        "sec-ch-ua": "\"HeadlessChrome\";v=\"143\", \"Chromium\";v=\"143\", \"Not A(Brand\";v=\"24\"",
+        "sec-ch-ua-mobile": "?0",
+        "sec-ch-ua-platform": "\"Windows\""
+      }
+    },
+    {
+      "type": "response",
+      "url": "http://localhost:3000/api/auth-session",
+      "status": 200,
+      "statusText": "OK"
+    }
+  ],
+  "consoleMessages": [
+    {
+      "timestamp": "2025-12-07T09:09:46.254Z",
+      "type": "debug",
+      "text": "[vite] connecting..."
+    },
+    {
+      "timestamp": "2025-12-07T09:09:46.415Z",
+      "type": "debug",
+      "text": "[vite] connected."
+    },
+    {
+      "timestamp": "2025-12-07T09:09:46.828Z",
+      "type": "info",
+      "text": "<Suspense> is an experimental feature and its API will likely change."
+    },
+    {
+      "timestamp": "2025-12-07T09:09:46.976Z",
+      "type": "log",
+      "text": "✨ %cNuxt DevTools %c Press Shift + Alt + D to open DevTools color: black; border-radius: 3px 0 0 3px; padding: 2px 2px 1px 10px; background: #00DC82 border-radius: 0 3px 3px 0; padding: 2px 10px 1px 2px; background: #00DC8220 "
+    },
+    {
+      "timestamp": "2025-12-07T09:09:48.802Z",
+      "type": "debug",
+      "text": "[vite] connecting..."
+    },
+    {
+      "timestamp": "2025-12-07T09:09:49.150Z",
+      "type": "debug",
+      "text": "[vite] connected."
+    },
+    {
+      "timestamp": "2025-12-07T09:09:50.115Z",
+      "type": "info",
+      "text": "<Suspense> is an experimental feature and its API will likely change."
+    },
+    {
+      "timestamp": "2025-12-07T09:09:50.387Z",
+      "type": "log",
+      "text": "✨ %cNuxt DevTools %c Press Shift + Alt + D to open DevTools color: black; border-radius: 3px 0 0 3px; padding: 2px 2px 1px 10px; background: #00DC82 border-radius: 0 3px 3px 0; padding: 2px 10px 1px 2px; background: #00DC8220 "
+    },
+    {
+      "timestamp": "2025-12-07T09:09:50.521Z",
+      "type": "warning",
+      "text": "[Vue warn]: Failed to resolve component: LucideHome\nIf this is a native custom element, make sure to exclude it from component resolution via compilerOptions.isCustomElement. \n  at <RouterLink ref=fn to=\"/dashboard\" activeClass=undefined  ... > \n  at <NuxtLink to=\"/dashboard\" class=\"flex flex-col items-center gap-1 text-gray-400 hover:text-white transition-colors p-2\" > \n  at <Mobile onVnodeUnmounted=fn<onVnodeUnmounted> ref=Ref< undefined > > \n  at <RouteProvider key=\"/scan/mobile\" vnode= {__v_isVNode: true, __v_skip: true, type: Object, props: Object, key: null} route= {fullPath: /scan/mobile, path: /scan/mobile, query: Object, hash: , name: scan-mobile}  ... > \n  at <RouterView name=undefined route=undefined > \n  at <NuxtPage > \n  at <Scanner ref=Ref< undefined > > \n  at <AsyncComponentWrapper ref=Ref< undefined > > \n  at <LayoutLoader key=\"scanner\" layoutProps= {ref: RefImpl} name=\"scanner\" > \n  at <NuxtLayoutProvider layoutProps= {ref: RefImpl} key=\"scanner\" name=\"scanner\"  ... > \n  at <NuxtLayout > \n  at <App key=4 > \n  at <NuxtRoot>"
+    },
+    {
+      "timestamp": "2025-12-07T09:09:50.523Z",
+      "type": "warning",
+      "text": "[Vue warn]: Failed to resolve component: LucideHistory\nIf this is a native custom element, make sure to exclude it from component resolution via compilerOptions.isCustomElement. \n  at <RouterLink ref=fn to=\"/history\" activeClass=undefined  ... > \n  at <NuxtLink to=\"/history\" class=\"flex flex-col items-center gap-1 text-gray-400 hover:text-white transition-colors p-2\" > \n  at <Mobile onVnodeUnmounted=fn<onVnodeUnmounted> ref=Ref< undefined > > \n  at <RouteProvider key=\"/scan/mobile\" vnode= {__v_isVNode: true, __v_skip: true, type: Object, props: Object, key: null} route= {fullPath: /scan/mobile, path: /scan/mobile, query: Object, hash: , name: scan-mobile}  ... > \n  at <RouterView name=undefined route=undefined > \n  at <NuxtPage > \n  at <Scanner ref=Ref< undefined > > \n  at <AsyncComponentWrapper ref=Ref< undefined > > \n  at <LayoutLoader key=\"scanner\" layoutProps= {ref: RefImpl} name=\"scanner\" > \n  at <NuxtLayoutProvider layoutProps= {ref: RefImpl} key=\"scanner\" name=\"scanner\"  ... > \n  at <NuxtLayout > \n  at <App key=4 > \n  at <NuxtRoot>"
+    },
+    {
+      "timestamp": "2025-12-07T09:09:50.593Z",
+      "type": "warning",
+      "text": "[Vue warn]: Failed to resolve component: LucideHome\nIf this is a native custom element, make sure to exclude it from component resolution via compilerOptions.isCustomElement. \n  at <RouterLink ref=fn to=\"/dashboard\" activeClass=undefined  ... > \n  at <NuxtLink to=\"/dashboard\" class=\"flex flex-col items-center gap-1 text-gray-400 hover:text-white transition-colors p-2\" > \n  at <Mobile onVnodeUnmounted=fn<onVnodeUnmounted> ref=Ref< Proxy(Object) > > \n  at <RouteProvider key=\"/scan/mobile\" vnode= {__v_isVNode: true, __v_skip: true, type: Object, props: Object, key: null} route= {fullPath: /scan/mobile, path: /scan/mobile, query: Object, hash: , name: scan-mobile}  ... > \n  at <RouterView name=undefined route=undefined > \n  at <NuxtPage > \n  at <Scanner ref=Ref< Proxy(Object) > > \n  at <AsyncComponentWrapper ref=Ref< Proxy(Object) > > \n  at <LayoutLoader key=\"scanner\" layoutProps= {ref: RefImpl} name=\"scanner\" > \n  at <NuxtLayoutProvider layoutProps= {ref: RefImpl} key=\"scanner\" name=\"scanner\"  ... > \n  at <NuxtLayout > \n  at <App key=4 > \n  at <NuxtRoot>"
+    },
+    {
+      "timestamp": "2025-12-07T09:09:50.593Z",
+      "type": "warning",
+      "text": "[Vue warn]: Failed to resolve component: LucideHistory\nIf this is a native custom element, make sure to exclude it from component resolution via compilerOptions.isCustomElement. \n  at <RouterLink ref=fn to=\"/history\" activeClass=undefined  ... > \n  at <NuxtLink to=\"/history\" class=\"flex flex-col items-center gap-1 text-gray-400 hover:text-white transition-colors p-2\" > \n  at <Mobile onVnodeUnmounted=fn<onVnodeUnmounted> ref=Ref< Proxy(Object) > > \n  at <RouteProvider key=\"/scan/mobile\" vnode= {__v_isVNode: true, __v_skip: true, type: Object, props: Object, key: null} route= {fullPath: /scan/mobile, path: /scan/mobile, query: Object, hash: , name: scan-mobile}  ... > \n  at <RouterView name=undefined route=undefined > \n  at <NuxtPage > \n  at <Scanner ref=Ref< Proxy(Object) > > \n  at <AsyncComponentWrapper ref=Ref< Proxy(Object) > > \n  at <LayoutLoader key=\"scanner\" layoutProps= {ref: RefImpl} name=\"scanner\" > \n  at <NuxtLayoutProvider layoutProps= {ref: RefImpl} key=\"scanner\" name=\"scanner\"  ... > \n  at <NuxtLayout > \n  at <App key=4 > \n  at <NuxtRoot>"
+    },
+    {
+      "timestamp": "2025-12-07T09:09:50.697Z",
+      "type": "error",
+      "text": "Failed to load resource: the server responded with a status of 404 (Page not found: /sounds/beep.mp3)"
+    },
+    {
+      "timestamp": "2025-12-07T09:09:50.833Z",
+      "type": "warning",
+      "text": "Failed to start camera"
+    },
+    {
+      "timestamp": "2025-12-07T09:09:51.993Z",
+      "type": "debug",
+      "text": "[vite] connecting..."
+    },
+    {
+      "timestamp": "2025-12-07T09:09:52.206Z",
+      "type": "debug",
+      "text": "[vite] connected."
+    },
+    {
+      "timestamp": "2025-12-07T09:09:52.952Z",
+      "type": "info",
+      "text": "<Suspense> is an experimental feature and its API will likely change."
+    },
+    {
+      "timestamp": "2025-12-07T09:09:53.101Z",
+      "type": "log",
+      "text": "✨ %cNuxt DevTools %c Press Shift + Alt + D to open DevTools color: black; border-radius: 3px 0 0 3px; padding: 2px 2px 1px 10px; background: #00DC82 border-radius: 0 3px 3px 0; padding: 2px 10px 1px 2px; background: #00DC8220 "
+    },
+    {
+      "timestamp": "2025-12-07T09:09:53.198Z",
+      "type": "warning",
+      "text": "[Vue warn]: Failed to resolve component: LucideHome\nIf this is a native custom element, make sure to exclude it from component resolution via compilerOptions.isCustomElement. \n  at <RouterLink ref=fn to=\"/dashboard\" activeClass=undefined  ... > \n  at <NuxtLink to=\"/dashboard\" class=\"flex flex-col items-center gap-1 text-gray-400 hover:text-white transition-colors p-2\" > \n  at <Mobile onVnodeUnmounted=fn<onVnodeUnmounted> ref=Ref< undefined > > \n  at <RouteProvider key=\"/scan/mobile\" vnode= {__v_isVNode: true, __v_skip: true, type: Object, props: Object, key: null} route= {fullPath: /scan/mobile, path: /scan/mobile, query: Object, hash: , name: scan-mobile}  ... > \n  at <RouterView name=undefined route=undefined > \n  at <NuxtPage > \n  at <Scanner ref=Ref< undefined > > \n  at <AsyncComponentWrapper ref=Ref< undefined > > \n  at <LayoutLoader key=\"scanner\" layoutProps= {ref: RefImpl} name=\"scanner\" > \n  at <NuxtLayoutProvider layoutProps= {ref: RefImpl} key=\"scanner\" name=\"scanner\"  ... > \n  at <NuxtLayout > \n  at <App key=4 > \n  at <NuxtRoot>"
+    },
+    {
+      "timestamp": "2025-12-07T09:09:53.200Z",
+      "type": "warning",
+      "text": "[Vue warn]: Failed to resolve component: LucideHistory\nIf this is a native custom element, make sure to exclude it from component resolution via compilerOptions.isCustomElement. \n  at <RouterLink ref=fn to=\"/history\" activeClass=undefined  ... > \n  at <NuxtLink to=\"/history\" class=\"flex flex-col items-center gap-1 text-gray-400 hover:text-white transition-colors p-2\" > \n  at <Mobile onVnodeUnmounted=fn<onVnodeUnmounted> ref=Ref< undefined > > \n  at <RouteProvider key=\"/scan/mobile\" vnode= {__v_isVNode: true, __v_skip: true, type: Object, props: Object, key: null} route= {fullPath: /scan/mobile, path: /scan/mobile, query: Object, hash: , name: scan-mobile}  ... > \n  at <RouterView name=undefined route=undefined > \n  at <NuxtPage > \n  at <Scanner ref=Ref< undefined > > \n  at <AsyncComponentWrapper ref=Ref< undefined > > \n  at <LayoutLoader key=\"scanner\" layoutProps= {ref: RefImpl} name=\"scanner\" > \n  at <NuxtLayoutProvider layoutProps= {ref: RefImpl} key=\"scanner\" name=\"scanner\"  ... > \n  at <NuxtLayout > \n  at <App key=4 > \n  at <NuxtRoot>"
+    },
+    {
+      "timestamp": "2025-12-07T09:09:53.232Z",
+      "type": "warning",
+      "text": "[Vue warn]: Failed to resolve component: LucideHome\nIf this is a native custom element, make sure to exclude it from component resolution via compilerOptions.isCustomElement. \n  at <RouterLink ref=fn to=\"/dashboard\" activeClass=undefined  ... > \n  at <NuxtLink to=\"/dashboard\" class=\"flex flex-col items-center gap-1 text-gray-400 hover:text-white transition-colors p-2\" > \n  at <Mobile onVnodeUnmounted=fn<onVnodeUnmounted> ref=Ref< Proxy(Object) > > \n  at <RouteProvider key=\"/scan/mobile\" vnode= {__v_isVNode: true, __v_skip: true, type: Object, props: Object, key: null} route= {fullPath: /scan/mobile, path: /scan/mobile, query: Object, hash: , name: scan-mobile}  ... > \n  at <RouterView name=undefined route=undefined > \n  at <NuxtPage > \n  at <Scanner ref=Ref< Proxy(Object) > > \n  at <AsyncComponentWrapper ref=Ref< Proxy(Object) > > \n  at <LayoutLoader key=\"scanner\" layoutProps= {ref: RefImpl} name=\"scanner\" > \n  at <NuxtLayoutProvider layoutProps= {ref: RefImpl} key=\"scanner\" name=\"scanner\"  ... > \n  at <NuxtLayout > \n  at <App key=4 > \n  at <NuxtRoot>"
+    },
+    {
+      "timestamp": "2025-12-07T09:09:53.232Z",
+      "type": "warning",
+      "text": "[Vue warn]: Failed to resolve component: LucideHistory\nIf this is a native custom element, make sure to exclude it from component resolution via compilerOptions.isCustomElement. \n  at <RouterLink ref=fn to=\"/history\" activeClass=undefined  ... > \n  at <NuxtLink to=\"/history\" class=\"flex flex-col items-center gap-1 text-gray-400 hover:text-white transition-colors p-2\" > \n  at <Mobile onVnodeUnmounted=fn<onVnodeUnmounted> ref=Ref< Proxy(Object) > > \n  at <RouteProvider key=\"/scan/mobile\" vnode= {__v_isVNode: true, __v_skip: true, type: Object, props: Object, key: null} route= {fullPath: /scan/mobile, path: /scan/mobile, query: Object, hash: , name: scan-mobile}  ... > \n  at <RouterView name=undefined route=undefined > \n  at <NuxtPage > \n  at <Scanner ref=Ref< Proxy(Object) > > \n  at <AsyncComponentWrapper ref=Ref< Proxy(Object) > > \n  at <LayoutLoader key=\"scanner\" layoutProps= {ref: RefImpl} name=\"scanner\" > \n  at <NuxtLayoutProvider layoutProps= {ref: RefImpl} key=\"scanner\" name=\"scanner\"  ... > \n  at <NuxtLayout > \n  at <App key=4 > \n  at <NuxtRoot>"
+    },
+    {
+      "timestamp": "2025-12-07T09:09:53.273Z",
+      "type": "warning",
+      "text": "Failed to start camera"
+    },
+    {
+      "timestamp": "2025-12-07T09:09:53.470Z",
+      "type": "error",
+      "text": "Failed to load resource: the server responded with a status of 404 (Page not found: /sounds/beep.mp3)"
+    }
+  ],
+  "networkErrors": [
+    "GET http://localhost:3000/_nuxt/@fs/home/mikhailryu/projects/rangkai/node_modules/@vue/runtime-dom/dist/runtime-dom.esm-bundler.js?v=d1de9113: net::ERR_ABORTED",
+    "GET http://localhost:3000/_nuxt/@fs/home/mikhailryu/projects/rangkai/node_modules/@vue/runtime-dom/dist/runtime-dom.esm-bundler.js?v=ef0eaad4: net::ERR_ABORTED"
+  ],
+  "summary": {
+    "totalSteps": 2,
+    "passedSteps": 1,
+    "failedSteps": 1,
+    "skippedSteps": 0
+  }
+}

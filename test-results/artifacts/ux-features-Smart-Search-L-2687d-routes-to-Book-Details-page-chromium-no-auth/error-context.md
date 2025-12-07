@@ -1,0 +1,53 @@
+# Page snapshot
+
+```yaml
+- generic [ref=e1]:
+  - generic [ref=e3]:
+    - complementary [ref=e4]:
+      - link "Rangkai" [ref=e6] [cursor=pointer]:
+        - /url: /dashboard
+        - img [ref=e8]
+        - generic [ref=e10]: Rangkai
+      - navigation [ref=e11]:
+        - link "Dashboard" [ref=e12] [cursor=pointer]:
+          - /url: /dashboard
+          - img [ref=e13]
+          - text: Dashboard
+        - link "History" [ref=e18] [cursor=pointer]:
+          - /url: /history
+          - img [ref=e19]
+          - text: History
+        - link "Settings" [ref=e23] [cursor=pointer]:
+          - /url: /settings
+          - img [ref=e24]
+          - text: Settings
+      - paragraph [ref=e28]: © 2025 Rangkai
+    - generic [ref=e29]:
+      - banner [ref=e30]:
+        - heading "Dashboard" [level=1] [ref=e31]
+      - main [ref=e32]:
+        - generic [ref=e34]:
+          - heading "What are you reading?" [level=1] [ref=e35]
+          - paragraph [ref=e36]: Catalog your library by scanning ISBNs or searching manually.
+          - generic [ref=e37]:
+            - img [ref=e39]
+            - textbox "Search by Title, Author, or ISBN..." [active] [ref=e42]
+            - button "Open Camera Scanner" [ref=e44] [cursor=pointer]:
+              - img [ref=e45]
+  - generic:
+    - img
+  - generic:
+    - generic:
+      - generic:
+        - button "Go to parent" [disabled]
+        - button "Open in editor"
+        - button "Close"
+  - generic [ref=e48]:
+    - button "Toggle Nuxt DevTools" [ref=e49] [cursor=pointer]:
+      - img [ref=e50]
+    - generic "Page load time" [ref=e53]:
+      - generic [ref=e54]: "211"
+      - generic [ref=e55]: ms
+    - button "Toggle Component Inspector" [ref=e57] [cursor=pointer]:
+      - img [ref=e58]
+```

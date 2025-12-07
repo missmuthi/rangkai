@@ -1,0 +1,18 @@
+{
+  "isbn": "9780684835396",
+  "title": "I Don't Want to Talk About It",
+  "subtitle": "Overcoming the Secret Legacy of Male Depression",
+  "authors": ["Terrence Real"],
+  "publisher": "Scribner",
+  "publishedDate": "1998-02-17",
+  "description": "A groundbreaking book about male depression, offering new understanding and hope for men, the women who love them, and for the helping professionals who treat them.",
+  "pageCount": 432,
+  "categories": ["Psychology", "Self-Help", "Mental Health"],
+  "language": "en",
+  "thumbnail": "https://books.google.com/books/content?id=EXAMPLE&printsec=frontcover&img=1&zoom=1",
+  "source": "google",
+  "classifications": {
+    "ddc": "616.8527",
+    "lcc": "RC537"
+  }
+}

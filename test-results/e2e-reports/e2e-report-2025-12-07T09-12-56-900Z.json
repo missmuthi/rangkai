@@ -1,0 +1,643 @@
+{
+  "testName": "Real ISBN Scan Workflow",
+  "timestamp": "2025-12-07T09:12:20.321Z",
+  "duration": 36579,
+  "status": "PASS",
+  "isbn": "9780684835396",
+  "expectedTitle": "I Don't Want to Talk About It",
+  "expectedAuthor": "Terrence Real",
+  "usedMocks": true,
+  "finalUrl": "http://localhost:3000/history",
+  "viewport": {
+    "width": 1280,
+    "height": 720
+  },
+  "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.7499.4 Safari/537.36",
+  "steps": [
+    {
+      "name": "1. Navigate to dashboard",
+      "status": "PASS",
+      "duration": 468
+    },
+    {
+      "name": "2. Wait for search UI to load",
+      "status": "PASS",
+      "duration": 584
+    },
+    {
+      "name": "3. Enter ISBN and navigate to book details",
+      "status": "PASS",
+      "duration": 33077
+    },
+    {
+      "name": "4. Verify navigation to book details page",
+      "status": "PASS",
+      "duration": 5
+    },
+    {
+      "name": "5. Wait for page content to load",
+      "status": "PASS",
+      "duration": 503
+    },
+    {
+      "name": "6. Verify book metadata appears on page",
+      "status": "PASS",
+      "duration": 16
+    },
+    {
+      "name": "7. Check for book-related UI elements",
+      "status": "PASS",
+      "duration": 6
+    },
+    {
+      "name": "8. Capture book details screenshot",
+      "status": "PASS",
+      "duration": 46
+    },
+    {
+      "name": "9. Navigate to history page",
+      "status": "PASS",
+      "duration": 858
+    },
+    {
+      "name": "10. Verify history page loads",
+      "status": "PASS",
+      "duration": 990
+    },
+    {
+      "name": "11. Verify no critical errors in flow",
+      "status": "PASS",
+      "duration": 0
+    }
+  ],
+  "apiCalls": [
+    {
+      "type": "request",
+      "url": "http://localhost:3000/_nuxt/@fs/home/mikhailryu/projects/rangkai/node_modules/@vue/devtools-api/lib/esm/api/index.js?v=ef0eaad4",
+      "method": "GET",
+      "headers": {
+        "accept": "*/*",
+        "accept-language": "en-US",
+        "origin": "http://localhost:3000",
+        "referer": "http://localhost:3000/_nuxt/@fs/home/mikhailryu/projects/rangkai/node_modules/@vue/devtools-api/lib/esm/index.js?v=ef0eaad4",
+        "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.7499.4 Safari/537.36",
+        "sec-ch-ua": "\"HeadlessChrome\";v=\"143\", \"Chromium\";v=\"143\", \"Not A(Brand\";v=\"24\"",
+        "sec-ch-ua-mobile": "?0",
+        "sec-ch-ua-platform": "\"Windows\""
+      }
+    },
+    {
+      "type": "response",
+      "url": "http://localhost:3000/_nuxt/@fs/home/mikhailryu/projects/rangkai/node_modules/@vue/devtools-api/lib/esm/api/index.js?v=ef0eaad4",
+      "status": 200,
+      "statusText": "OK"
+    },
+    {
+      "type": "request",
+      "url": "http://localhost:3000/_nuxt/@fs/home/mikhailryu/projects/rangkai/node_modules/@vue/devtools-api/lib/esm/api/api.js?v=ef0eaad4",
+      "method": "GET",
+      "headers": {
+        "accept": "*/*",
+        "accept-language": "en-US",
+        "origin": "http://localhost:3000",
+        "referer": "http://localhost:3000/_nuxt/@fs/home/mikhailryu/projects/rangkai/node_modules/@vue/devtools-api/lib/esm/api/index.js?v=ef0eaad4",
+        "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.7499.4 Safari/537.36",
+        "sec-ch-ua": "\"HeadlessChrome\";v=\"143\", \"Chromium\";v=\"143\", \"Not A(Brand\";v=\"24\"",
+        "sec-ch-ua-mobile": "?0",
+        "sec-ch-ua-platform": "\"Windows\""
+      }
+    },
+    {
+      "type": "request",
+      "url": "http://localhost:3000/_nuxt/@fs/home/mikhailryu/projects/rangkai/node_modules/@vue/devtools-api/lib/esm/api/app.js?v=ef0eaad4",
+      "method": "GET",
+      "headers": {
+        "accept": "*/*",
+        "accept-language": "en-US",
+        "origin": "http://localhost:3000",
+        "referer": "http://localhost:3000/_nuxt/@fs/home/mikhailryu/projects/rangkai/node_modules/@vue/devtools-api/lib/esm/api/index.js?v=ef0eaad4",
+        "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.7499.4 Safari/537.36",
+        "sec-ch-ua": "\"HeadlessChrome\";v=\"143\", \"Chromium\";v=\"143\", \"Not A(Brand\";v=\"24\"",
+        "sec-ch-ua-mobile": "?0",
+        "sec-ch-ua-platform": "\"Windows\""
+      }
+    },
+    {
+      "type": "request",
+      "url": "http://localhost:3000/_nuxt/@fs/home/mikhailryu/projects/rangkai/node_modules/@vue/devtools-api/lib/esm/api/component.js?v=ef0eaad4",
+      "method": "GET",
+      "headers": {
+        "accept": "*/*",
+        "accept-language": "en-US",
+        "origin": "http://localhost:3000",
+        "referer": "http://localhost:3000/_nuxt/@fs/home/mikhailryu/projects/rangkai/node_modules/@vue/devtools-api/lib/esm/api/index.js?v=ef0eaad4",
+        "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.7499.4 Safari/537.36",
+        "sec-ch-ua": "\"HeadlessChrome\";v=\"143\", \"Chromium\";v=\"143\", \"Not A(Brand\";v=\"24\"",
+        "sec-ch-ua-mobile": "?0",
+        "sec-ch-ua-platform": "\"Windows\""
+      }
+    },
+    {
+      "type": "request",
+      "url": "http://localhost:3000/_nuxt/@fs/home/mikhailryu/projects/rangkai/node_modules/@vue/devtools-api/lib/esm/api/context.js?v=ef0eaad4",
+      "method": "GET",
+      "headers": {
+        "accept": "*/*",
+        "accept-language": "en-US",
+        "origin": "http://localhost:3000",
+        "referer": "http://localhost:3000/_nuxt/@fs/home/mikhailryu/projects/rangkai/node_modules/@vue/devtools-api/lib/esm/api/index.js?v=ef0eaad4",
+        "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.7499.4 Safari/537.36",
+        "sec-ch-ua": "\"HeadlessChrome\";v=\"143\", \"Chromium\";v=\"143\", \"Not A(Brand\";v=\"24\"",
+        "sec-ch-ua-mobile": "?0",
+        "sec-ch-ua-platform": "\"Windows\""
+      }
+    },
+    {
+      "type": "request",
+      "url": "http://localhost:3000/_nuxt/@fs/home/mikhailryu/projects/rangkai/node_modules/@vue/devtools-api/lib/esm/api/hooks.js?v=ef0eaad4",
+      "method": "GET",
+      "headers": {
+        "accept": "*/*",
+        "accept-language": "en-US",
+        "origin": "http://localhost:3000",
+        "referer": "http://localhost:3000/_nuxt/@fs/home/mikhailryu/projects/rangkai/node_modules/@vue/devtools-api/lib/esm/api/index.js?v=ef0eaad4",
+        "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.7499.4 Safari/537.36",
+        "sec-ch-ua": "\"HeadlessChrome\";v=\"143\", \"Chromium\";v=\"143\", \"Not A(Brand\";v=\"24\"",
+        "sec-ch-ua-mobile": "?0",
+        "sec-ch-ua-platform": "\"Windows\""
+      }
+    },
+    {
+      "type": "request",
+      "url": "http://localhost:3000/_nuxt/@fs/home/mikhailryu/projects/rangkai/node_modules/@vue/devtools-api/lib/esm/api/util.js?v=ef0eaad4",
+      "method": "GET",
+      "headers": {
+        "accept": "*/*",
+        "accept-language": "en-US",
+        "origin": "http://localhost:3000",
+        "referer": "http://localhost:3000/_nuxt/@fs/home/mikhailryu/projects/rangkai/node_modules/@vue/devtools-api/lib/esm/api/index.js?v=ef0eaad4",
+        "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.7499.4 Safari/537.36",
+        "sec-ch-ua": "\"HeadlessChrome\";v=\"143\", \"Chromium\";v=\"143\", \"Not A(Brand\";v=\"24\"",
+        "sec-ch-ua-mobile": "?0",
+        "sec-ch-ua-platform": "\"Windows\""
+      }
+    },
+    {
+      "type": "response",
+      "url": "http://localhost:3000/_nuxt/@fs/home/mikhailryu/projects/rangkai/node_modules/@vue/devtools-api/lib/esm/api/api.js?v=ef0eaad4",
+      "status": 200,
+      "statusText": "OK"
+    },
+    {
+      "type": "response",
+      "url": "http://localhost:3000/_nuxt/@fs/home/mikhailryu/projects/rangkai/node_modules/@vue/devtools-api/lib/esm/api/app.js?v=ef0eaad4",
+      "status": 200,
+      "statusText": "OK"
+    },
+    {
+      "type": "response",
+      "url": "http://localhost:3000/_nuxt/@fs/home/mikhailryu/projects/rangkai/node_modules/@vue/devtools-api/lib/esm/api/component.js?v=ef0eaad4",
+      "status": 200,
+      "statusText": "OK"
+    },
+    {
+      "type": "response",
+      "url": "http://localhost:3000/_nuxt/@fs/home/mikhailryu/projects/rangkai/node_modules/@vue/devtools-api/lib/esm/api/hooks.js?v=ef0eaad4",
+      "status": 200,
+      "statusText": "OK"
+    },
+    {
+      "type": "response",
+      "url": "http://localhost:3000/_nuxt/@fs/home/mikhailryu/projects/rangkai/node_modules/@vue/devtools-api/lib/esm/api/util.js?v=ef0eaad4",
+      "status": 200,
+      "statusText": "OK"
+    },
+    {
+      "type": "response",
+      "url": "http://localhost:3000/_nuxt/@fs/home/mikhailryu/projects/rangkai/node_modules/@vue/devtools-api/lib/esm/api/context.js?v=ef0eaad4",
+      "status": 200,
+      "statusText": "OK"
+    },
+    {
+      "type": "request",
+      "url": "http://localhost:3000/api/auth-session",
+      "method": "GET",
+      "headers": {
+        "accept": "*/*",
+        "accept-language": "en-US",
+        "referer": "http://localhost:3000/dashboard",
+        "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.7499.4 Safari/537.36",
+        "sec-ch-ua": "\"HeadlessChrome\";v=\"143\", \"Chromium\";v=\"143\", \"Not A(Brand\";v=\"24\"",
+        "sec-ch-ua-mobile": "?0",
+        "sec-ch-ua-platform": "\"Windows\""
+      }
+    },
+    {
+      "type": "response",
+      "url": "http://localhost:3000/api/auth-session",
+      "status": 200,
+      "statusText": "OK"
+    },
+    {
+      "type": "request",
+      "url": "http://localhost:3000/api/auth-session",
+      "method": "GET",
+      "headers": {
+        "accept": "*/*",
+        "accept-language": "en-US",
+        "referer": "http://localhost:3000/dashboard",
+        "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.7499.4 Safari/537.36",
+        "sec-ch-ua": "\"HeadlessChrome\";v=\"143\", \"Chromium\";v=\"143\", \"Not A(Brand\";v=\"24\"",
+        "sec-ch-ua-mobile": "?0",
+        "sec-ch-ua-platform": "\"Windows\""
+      }
+    },
+    {
+      "type": "response",
+      "url": "http://localhost:3000/api/auth-session",
+      "status": 200,
+      "statusText": "OK"
+    },
+    {
+      "type": "request",
+      "url": "http://localhost:3000/api/scans",
+      "method": "GET",
+      "headers": {
+        "accept": "*/*",
+        "accept-language": "en-US",
+        "referer": "http://localhost:3000/dashboard",
+        "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.7499.4 Safari/537.36",
+        "sec-ch-ua": "\"HeadlessChrome\";v=\"143\", \"Chromium\";v=\"143\", \"Not A(Brand\";v=\"24\"",
+        "sec-ch-ua-mobile": "?0",
+        "sec-ch-ua-platform": "\"Windows\""
+      }
+    },
+    {
+      "type": "response",
+      "url": "http://localhost:3000/api/scans",
+      "status": 200,
+      "statusText": "OK"
+    },
+    {
+      "type": "request",
+      "url": "http://localhost:3000/_nuxt/@fs/home/mikhailryu/projects/rangkai/node_modules/@vue/devtools-api/lib/esm/api/index.js?v=ef0eaad4",
+      "method": "GET",
+      "headers": {
+        "accept": "*/*",
+        "accept-language": "en-US",
+        "origin": "http://localhost:3000",
+        "referer": "http://localhost:3000/_nuxt/@fs/home/mikhailryu/projects/rangkai/node_modules/@vue/devtools-api/lib/esm/index.js?v=ef0eaad4",
+        "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.7499.4 Safari/537.36",
+        "sec-ch-ua": "\"HeadlessChrome\";v=\"143\", \"Chromium\";v=\"143\", \"Not A(Brand\";v=\"24\"",
+        "sec-ch-ua-mobile": "?0",
+        "sec-ch-ua-platform": "\"Windows\""
+      }
+    },
+    {
+      "type": "response",
+      "url": "http://localhost:3000/_nuxt/@fs/home/mikhailryu/projects/rangkai/node_modules/@vue/devtools-api/lib/esm/api/index.js?v=ef0eaad4",
+      "status": 200,
+      "statusText": "OK"
+    },
+    {
+      "type": "request",
+      "url": "http://localhost:3000/_nuxt/@fs/home/mikhailryu/projects/rangkai/node_modules/@vue/devtools-api/lib/esm/api/api.js?v=ef0eaad4",
+      "method": "GET",
+      "headers": {
+        "accept": "*/*",
+        "accept-language": "en-US",
+        "origin": "http://localhost:3000",
+        "referer": "http://localhost:3000/_nuxt/@fs/home/mikhailryu/projects/rangkai/node_modules/@vue/devtools-api/lib/esm/api/index.js?v=ef0eaad4",
+        "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.7499.4 Safari/537.36",
+        "sec-ch-ua": "\"HeadlessChrome\";v=\"143\", \"Chromium\";v=\"143\", \"Not A(Brand\";v=\"24\"",
+        "sec-ch-ua-mobile": "?0",
+        "sec-ch-ua-platform": "\"Windows\""
+      }
+    },
+    {
+      "type": "request",
+      "url": "http://localhost:3000/_nuxt/@fs/home/mikhailryu/projects/rangkai/node_modules/@vue/devtools-api/lib/esm/api/app.js?v=ef0eaad4",
+      "method": "GET",
+      "headers": {
+        "accept": "*/*",
+        "accept-language": "en-US",
+        "origin": "http://localhost:3000",
+        "referer": "http://localhost:3000/_nuxt/@fs/home/mikhailryu/projects/rangkai/node_modules/@vue/devtools-api/lib/esm/api/index.js?v=ef0eaad4",
+        "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.7499.4 Safari/537.36",
+        "sec-ch-ua": "\"HeadlessChrome\";v=\"143\", \"Chromium\";v=\"143\", \"Not A(Brand\";v=\"24\"",
+        "sec-ch-ua-mobile": "?0",
+        "sec-ch-ua-platform": "\"Windows\""
+      }
+    },
+    {
+      "type": "request",
+      "url": "http://localhost:3000/_nuxt/@fs/home/mikhailryu/projects/rangkai/node_modules/@vue/devtools-api/lib/esm/api/component.js?v=ef0eaad4",
+      "method": "GET",
+      "headers": {
+        "accept": "*/*",
+        "accept-language": "en-US",
+        "origin": "http://localhost:3000",
+        "referer": "http://localhost:3000/_nuxt/@fs/home/mikhailryu/projects/rangkai/node_modules/@vue/devtools-api/lib/esm/api/index.js?v=ef0eaad4",
+        "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.7499.4 Safari/537.36",
+        "sec-ch-ua": "\"HeadlessChrome\";v=\"143\", \"Chromium\";v=\"143\", \"Not A(Brand\";v=\"24\"",
+        "sec-ch-ua-mobile": "?0",
+        "sec-ch-ua-platform": "\"Windows\""
+      }
+    },
+    {
+      "type": "request",
+      "url": "http://localhost:3000/_nuxt/@fs/home/mikhailryu/projects/rangkai/node_modules/@vue/devtools-api/lib/esm/api/context.js?v=ef0eaad4",
+      "method": "GET",
+      "headers": {
+        "accept": "*/*",
+        "accept-language": "en-US",
+        "origin": "http://localhost:3000",
+        "referer": "http://localhost:3000/_nuxt/@fs/home/mikhailryu/projects/rangkai/node_modules/@vue/devtools-api/lib/esm/api/index.js?v=ef0eaad4",
+        "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.7499.4 Safari/537.36",
+        "sec-ch-ua": "\"HeadlessChrome\";v=\"143\", \"Chromium\";v=\"143\", \"Not A(Brand\";v=\"24\"",
+        "sec-ch-ua-mobile": "?0",
+        "sec-ch-ua-platform": "\"Windows\""
+      }
+    },
+    {
+      "type": "request",
+      "url": "http://localhost:3000/_nuxt/@fs/home/mikhailryu/projects/rangkai/node_modules/@vue/devtools-api/lib/esm/api/hooks.js?v=ef0eaad4",
+      "method": "GET",
+      "headers": {
+        "accept": "*/*",
+        "accept-language": "en-US",
+        "origin": "http://localhost:3000",
+        "referer": "http://localhost:3000/_nuxt/@fs/home/mikhailryu/projects/rangkai/node_modules/@vue/devtools-api/lib/esm/api/index.js?v=ef0eaad4",
+        "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.7499.4 Safari/537.36",
+        "sec-ch-ua": "\"HeadlessChrome\";v=\"143\", \"Chromium\";v=\"143\", \"Not A(Brand\";v=\"24\"",
+        "sec-ch-ua-mobile": "?0",
+        "sec-ch-ua-platform": "\"Windows\""
+      }
+    },
+    {
+      "type": "request",
+      "url": "http://localhost:3000/_nuxt/@fs/home/mikhailryu/projects/rangkai/node_modules/@vue/devtools-api/lib/esm/api/util.js?v=ef0eaad4",
+      "method": "GET",
+      "headers": {
+        "accept": "*/*",
+        "accept-language": "en-US",
+        "origin": "http://localhost:3000",
+        "referer": "http://localhost:3000/_nuxt/@fs/home/mikhailryu/projects/rangkai/node_modules/@vue/devtools-api/lib/esm/api/index.js?v=ef0eaad4",
+        "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.7499.4 Safari/537.36",
+        "sec-ch-ua": "\"HeadlessChrome\";v=\"143\", \"Chromium\";v=\"143\", \"Not A(Brand\";v=\"24\"",
+        "sec-ch-ua-mobile": "?0",
+        "sec-ch-ua-platform": "\"Windows\""
+      }
+    },
+    {
+      "type": "response",
+      "url": "http://localhost:3000/_nuxt/@fs/home/mikhailryu/projects/rangkai/node_modules/@vue/devtools-api/lib/esm/api/api.js?v=ef0eaad4",
+      "status": 200,
+      "statusText": "OK"
+    },
+    {
+      "type": "response",
+      "url": "http://localhost:3000/_nuxt/@fs/home/mikhailryu/projects/rangkai/node_modules/@vue/devtools-api/lib/esm/api/app.js?v=ef0eaad4",
+      "status": 200,
+      "statusText": "OK"
+    },
+    {
+      "type": "response",
+      "url": "http://localhost:3000/_nuxt/@fs/home/mikhailryu/projects/rangkai/node_modules/@vue/devtools-api/lib/esm/api/component.js?v=ef0eaad4",
+      "status": 200,
+      "statusText": "OK"
+    },
+    {
+      "type": "response",
+      "url": "http://localhost:3000/_nuxt/@fs/home/mikhailryu/projects/rangkai/node_modules/@vue/devtools-api/lib/esm/api/context.js?v=ef0eaad4",
+      "status": 200,
+      "statusText": "OK"
+    },
+    {
+      "type": "response",
+      "url": "http://localhost:3000/_nuxt/@fs/home/mikhailryu/projects/rangkai/node_modules/@vue/devtools-api/lib/esm/api/hooks.js?v=ef0eaad4",
+      "status": 200,
+      "statusText": "OK"
+    },
+    {
+      "type": "response",
+      "url": "http://localhost:3000/_nuxt/@fs/home/mikhailryu/projects/rangkai/node_modules/@vue/devtools-api/lib/esm/api/util.js?v=ef0eaad4",
+      "status": 200,
+      "statusText": "OK"
+    },
+    {
+      "type": "request",
+      "url": "http://localhost:3000/api/auth-session",
+      "method": "GET",
+      "headers": {
+        "accept": "*/*",
+        "accept-language": "en-US",
+        "referer": "http://localhost:3000/login?redirect=/history",
+        "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.7499.4 Safari/537.36",
+        "sec-ch-ua": "\"HeadlessChrome\";v=\"143\", \"Chromium\";v=\"143\", \"Not A(Brand\";v=\"24\"",
+        "sec-ch-ua-mobile": "?0",
+        "sec-ch-ua-platform": "\"Windows\""
+      }
+    },
+    {
+      "type": "response",
+      "url": "http://localhost:3000/api/auth-session",
+      "status": 200,
+      "statusText": "OK"
+    },
+    {
+      "type": "request",
+      "url": "http://localhost:3000/api/auth-session",
+      "method": "GET",
+      "headers": {
+        "accept": "*/*",
+        "accept-language": "en-US",
+        "referer": "http://localhost:3000/login?redirect=/history",
+        "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.7499.4 Safari/537.36",
+        "sec-ch-ua": "\"HeadlessChrome\";v=\"143\", \"Chromium\";v=\"143\", \"Not A(Brand\";v=\"24\"",
+        "sec-ch-ua-mobile": "?0",
+        "sec-ch-ua-platform": "\"Windows\""
+      }
+    },
+    {
+      "type": "response",
+      "url": "http://localhost:3000/api/auth-session",
+      "status": 200,
+      "statusText": "OK"
+    },
+    {
+      "type": "request",
+      "url": "http://localhost:3000/api/scans",
+      "method": "GET",
+      "headers": {
+        "accept": "*/*",
+        "accept-language": "en-US",
+        "referer": "http://localhost:3000/history",
+        "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.7499.4 Safari/537.36",
+        "sec-ch-ua": "\"HeadlessChrome\";v=\"143\", \"Chromium\";v=\"143\", \"Not A(Brand\";v=\"24\"",
+        "sec-ch-ua-mobile": "?0",
+        "sec-ch-ua-platform": "\"Windows\""
+      }
+    },
+    {
+      "type": "response",
+      "url": "http://localhost:3000/api/scans",
+      "status": 200,
+      "statusText": "OK"
+    }
+  ],
+  "consoleMessages": [
+    {
+      "timestamp": "2025-12-07T09:12:20.453Z",
+      "type": "debug",
+      "text": "[vite] connecting..."
+    },
+    {
+      "timestamp": "2025-12-07T09:12:20.492Z",
+      "type": "debug",
+      "text": "[vite] connected."
+    },
+    {
+      "timestamp": "2025-12-07T09:12:20.905Z",
+      "type": "warning",
+      "text": "%cssr:warn%c [Vue Router warn]: No match found for location with path \"/settings\" \n      background: #f39c12;\n      border-radius: 0.5em;\n      color: white;\n      font-weight: bold;\n      padding: 2px 0.5em;\n      \n  at warn$1 (node_modules/vue-router/dist/devtools-BLCumUwL.mjs)\n  at Object.resolve (node_modules/vue-router/dist/vue-router.mjs)\n  at ComputedRefImpl.fn (node_modules/vue-router/dist/vue-router.mjs)\n"
+    },
+    {
+      "timestamp": "2025-12-07T09:12:20.931Z",
+      "type": "info",
+      "text": "<Suspense> is an experimental feature and its API will likely change."
+    },
+    {
+      "timestamp": "2025-12-07T09:12:21.129Z",
+      "type": "log",
+      "text": "✨ %cNuxt DevTools %c Press Shift + Alt + D to open DevTools color: black; border-radius: 3px 0 0 3px; padding: 2px 2px 1px 10px; background: #00DC82 border-radius: 0 3px 3px 0; padding: 2px 10px 1px 2px; background: #00DC8220 "
+    },
+    {
+      "timestamp": "2025-12-07T09:12:21.174Z",
+      "type": "warning",
+      "text": "[Vue warn]: Hydration node mismatch:\n- rendered on server: JSHandle@node  \n- expected on client: a \n  at <RouterLink ref=fn to=\"/dashboard\" activeClass=undefined  ... > \n  at <NuxtLink to=\"/dashboard\" class=\"flex items-center gap-3 hover:opacity-80 transition-opacity\" > \n  at <LayoutAppLayout page-title=\"Dashboard\" > \n  at <App ref=Ref< undefined > > \n  at <AsyncComponentWrapper ref=Ref< undefined > > \n  at <LayoutLoader key=\"app\" layoutProps= {ref: RefImpl} name=\"app\" > \n  at <NuxtLayoutProvider layoutProps= {ref: RefImpl} key=\"app\" name=\"app\"  ... > \n  at <NuxtLayout > \n  at <App key=4 > \n  at <NuxtRoot>"
+    },
+    {
+      "timestamp": "2025-12-07T09:12:21.174Z",
+      "type": "error",
+      "text": "Hydration completed but contains mismatches."
+    },
+    {
+      "timestamp": "2025-12-07T09:12:21.175Z",
+      "type": "warning",
+      "text": "[Vue warn]: Hydration children mismatch on JSHandle@node \nServer rendered element contains more child nodes than client vdom. \n  at <LayoutAppLayout page-title=\"Dashboard\" > \n  at <App ref=Ref< undefined > > \n  at <AsyncComponentWrapper ref=Ref< undefined > > \n  at <LayoutLoader key=\"app\" layoutProps= {ref: RefImpl} name=\"app\" > \n  at <NuxtLayoutProvider layoutProps= {ref: RefImpl} key=\"app\" name=\"app\"  ... > \n  at <NuxtLayout > \n  at <App key=4 > \n  at <NuxtRoot>"
+    },
+    {
+      "timestamp": "2025-12-07T09:12:21.201Z",
+      "type": "warning",
+      "text": "[Vue warn]: Hydration node mismatch:\n- rendered on server: JSHandle@node  \n- expected on client: Symbol(v-cmt) \n  at <DashboardView > \n  at <Dashboard onVnodeUnmounted=fn<onVnodeUnmounted> ref=Ref< undefined > > \n  at <RouteProvider key=\"/dashboard\" vnode= {__v_isVNode: true, __v_skip: true, type: Object, props: Object, key: null} route= {fullPath: /dashboard, hash: , query: Object, name: dashboard, path: /dashboard}  ... > \n  at <RouterView name=undefined route=undefined > \n  at <NuxtPage > \n  at <LayoutAppLayout page-title=\"Dashboard\" > \n  at <App ref=Ref< undefined > > \n  at <AsyncComponentWrapper ref=Ref< undefined > > \n  at <LayoutLoader key=\"app\" layoutProps= {ref: RefImpl} name=\"app\" > \n  at <NuxtLayoutProvider layoutProps= {ref: RefImpl} key=\"app\" name=\"app\"  ... > \n  at <NuxtLayout > \n  at <App key=4 > \n  at <NuxtRoot>"
+    },
+    {
+      "timestamp": "2025-12-07T09:12:21.203Z",
+      "type": "warning",
+      "text": "[Vue warn]: Hydration children mismatch on JSHandle@node \nServer rendered element contains fewer child nodes than client vdom. \n  at <DashboardView > \n  at <Dashboard onVnodeUnmounted=fn<onVnodeUnmounted> ref=Ref< undefined > > \n  at <RouteProvider key=\"/dashboard\" vnode= {__v_isVNode: true, __v_skip: true, type: Object, props: Object, key: null} route= {fullPath: /dashboard, hash: , query: Object, name: dashboard, path: /dashboard}  ... > \n  at <RouterView name=undefined route=undefined > \n  at <NuxtPage > \n  at <LayoutAppLayout page-title=\"Dashboard\" > \n  at <App ref=Ref< undefined > > \n  at <AsyncComponentWrapper ref=Ref< undefined > > \n  at <LayoutLoader key=\"app\" layoutProps= {ref: RefImpl} name=\"app\" > \n  at <NuxtLayoutProvider layoutProps= {ref: RefImpl} key=\"app\" name=\"app\"  ... > \n  at <NuxtLayout > \n  at <App key=4 > \n  at <NuxtRoot>"
+    },
+    {
+      "timestamp": "2025-12-07T09:12:21.225Z",
+      "type": "warning",
+      "text": "[Vue warn]: Hydration class mismatch on JSHandle@node \n  - rendered on server: class=\"flex flex-1 items-center justify-center\"\n  - expected on client: class=\"flex flex-1 flex-col items-center justify-center p-4 sm:p-8 space-y-12 min-h-[80vh]\"\n  Note: this mismatch is check-only. The DOM will not be rectified in production due to performance overhead.\n  You should fix the source of the mismatch. \n  at <DashboardView > \n  at <Dashboard onVnodeUnmounted=fn<onVnodeUnmounted> ref=Ref< undefined > > \n  at <RouteProvider key=\"/dashboard\" vnode= {__v_isVNode: true, __v_skip: true, type: Object, props: Object, key: null} route= {fullPath: /dashboard, hash: , query: Object, name: dashboard, path: /dashboard}  ... > \n  at <RouterView name=undefined route=undefined > \n  at <NuxtPage > \n  at <LayoutAppLayout page-title=\"Dashboard\" > \n  at <App ref=Ref< undefined > > \n  at <AsyncComponentWrapper ref=Ref< undefined > > \n  at <LayoutLoader key=\"app\" layoutProps= {ref: RefImpl} name=\"app\" > \n  at <NuxtLayoutProvider layoutProps= {ref: RefImpl} key=\"app\" name=\"app\"  ... > \n  at <NuxtLayout > \n  at <App key=4 > \n  at <NuxtRoot>"
+    },
+    {
+      "timestamp": "2025-12-07T09:12:21.578Z",
+      "type": "warning",
+      "text": "[Vue warn]: Failed to resolve component: Button\nIf this is a native custom element, make sure to exclude it from component resolution via compilerOptions.isCustomElement. \n  at <[isbn] onVnodeUnmounted=fn<onVnodeUnmounted> ref=Ref< undefined > > \n  at <RouteProvider key=\"/book/9780684835396()\" vnode= {__v_isVNode: true, __v_skip: true, type: Object, props: Object, key: null} route= {fullPath: /book/9780684835396, path: /book/9780684835396, query: Object, hash: , name: book-isbn}  ... > \n  at <RouterView name=undefined route=undefined > \n  at <NuxtPage > \n  at <Default ref=Ref< Proxy(Object) > > \n  at <AsyncComponentWrapper ref=Ref< Proxy(Object) > > \n  at <LayoutLoader key=\"default\" layoutProps= {ref: RefImpl} name=\"default\" > \n  at <NuxtLayoutProvider layoutProps= {ref: RefImpl} key=\"default\" name=\"default\"  ... > \n  at <NuxtLayout > \n  at <App key=4 > \n  at <NuxtRoot>"
+    },
+    {
+      "timestamp": "2025-12-07T09:12:21.581Z",
+      "type": "warning",
+      "text": "[Vue warn]: Failed to resolve component: LucideBook\nIf this is a native custom element, make sure to exclude it from component resolution via compilerOptions.isCustomElement. \n  at <[isbn] onVnodeUnmounted=fn<onVnodeUnmounted> ref=Ref< undefined > > \n  at <RouteProvider key=\"/book/9780684835396()\" vnode= {__v_isVNode: true, __v_skip: true, type: Object, props: Object, key: null} route= {fullPath: /book/9780684835396, path: /book/9780684835396, query: Object, hash: , name: book-isbn}  ... > \n  at <RouterView name=undefined route=undefined > \n  at <NuxtPage > \n  at <Default ref=Ref< Proxy(Object) > > \n  at <AsyncComponentWrapper ref=Ref< Proxy(Object) > > \n  at <LayoutLoader key=\"default\" layoutProps= {ref: RefImpl} name=\"default\" > \n  at <NuxtLayoutProvider layoutProps= {ref: RefImpl} key=\"default\" name=\"default\"  ... > \n  at <NuxtLayout > \n  at <App key=4 > \n  at <NuxtRoot>"
+    },
+    {
+      "timestamp": "2025-12-07T09:12:21.582Z",
+      "type": "warning",
+      "text": "[Vue Router warn]: No match found for location with path \"/about\""
+    },
+    {
+      "timestamp": "2025-12-07T09:12:21.582Z",
+      "type": "warning",
+      "text": "[Vue Router warn]: No match found for location with path \"/about\""
+    },
+    {
+      "timestamp": "2025-12-07T09:12:21.583Z",
+      "type": "warning",
+      "text": "[Vue Router warn]: No match found for location with path \"/privacy\""
+    },
+    {
+      "timestamp": "2025-12-07T09:12:21.583Z",
+      "type": "warning",
+      "text": "[Vue Router warn]: No match found for location with path \"/privacy\""
+    },
+    {
+      "timestamp": "2025-12-07T09:12:21.583Z",
+      "type": "warning",
+      "text": "[Vue Router warn]: No match found for location with path \"/terms\""
+    },
+    {
+      "timestamp": "2025-12-07T09:12:21.583Z",
+      "type": "warning",
+      "text": "[Vue Router warn]: No match found for location with path \"/terms\""
+    },
+    {
+      "timestamp": "2025-12-07T09:12:21.634Z",
+      "type": "warning",
+      "text": "[Vue Router warn]: No match found for location with path \"/about\""
+    },
+    {
+      "timestamp": "2025-12-07T09:12:21.634Z",
+      "type": "warning",
+      "text": "[Vue Router warn]: No match found for location with path \"/privacy\""
+    },
+    {
+      "timestamp": "2025-12-07T09:12:21.634Z",
+      "type": "warning",
+      "text": "[Vue Router warn]: No match found for location with path \"/terms\""
+    },
+    {
+      "timestamp": "2025-12-07T09:12:21.635Z",
+      "type": "warning",
+      "text": "[Vue Router warn]: No match found for location with path \"/about\""
+    },
+    {
+      "timestamp": "2025-12-07T09:12:21.635Z",
+      "type": "warning",
+      "text": "[Vue Router warn]: No match found for location with path \"/privacy\""
+    },
+    {
+      "timestamp": "2025-12-07T09:12:21.635Z",
+      "type": "warning",
+      "text": "[Vue Router warn]: No match found for location with path \"/terms\""
+    },
+    {
+      "timestamp": "2025-12-07T09:12:55.457Z",
+      "type": "debug",
+      "text": "[vite] connecting..."
+    },
+    {
+      "timestamp": "2025-12-07T09:12:55.475Z",
+      "type": "debug",
+      "text": "[vite] connected."
+    },
+    {
+      "timestamp": "2025-12-07T09:12:55.932Z",
+      "type": "info",
+      "text": "<Suspense> is an experimental feature and its API will likely change."
+    },
+    {
+      "timestamp": "2025-12-07T09:12:56.063Z",
+      "type": "log",
+      "text": "✨ %cNuxt DevTools %c Press Shift + Alt + D to open DevTools color: black; border-radius: 3px 0 0 3px; padding: 2px 2px 1px 10px; background: #00DC82 border-radius: 0 3px 3px 0; padding: 2px 10px 1px 2px; background: #00DC8220 "
+    }
+  ],
+  "networkErrors": [],
+  "summary": {
+    "totalSteps": 11,
+    "passedSteps": 11,
+    "failedSteps": 0,
+    "skippedSteps": 0
+  }
+}
