@@ -291,3 +291,34 @@ export type NewBook = typeof books.$inferInsert
 
 export type Scan = typeof scans.$inferSelect
 export type NewScan = typeof scans.$inferInsert
+
+export type ScansHistory = typeof scansHistory.$inferSelect
+export type NewScansHistory = typeof scansHistory.$inferInsert
+
+// ============================================================================
+// CLASSIFICATION CACHE TABLE (RAG System)
+// =============================================================================
+
+/**
+ * Classification Cache - RAG system for fast book classification lookups
+ * Stores verified classifications to avoid redundant API calls
+ */
+export const classificationCache = sqliteTable('classification_cache', {
+  isbn: text('isbn').primaryKey(),
+  title: text('title').notNull(),
+  authors: text('authors'),
+  ddc: text('ddc'), // Dewey Decimal Classification
+  lcc: text('lcc'), // Library of Congress Classification
+  callNumber: text('call_number'),
+  subjects: text('subjects'), // Semicolon-separated
+  source: text('source').notNull(), // 'manual', 'ai', 'openlibrary', 'local_cache'
+  verified: integer('verified', { mode: 'boolean' }).default(false).notNull(),
+  createdAt: integer('created_at', { mode: 'timestamp' }).notNull(),
+  updatedAt: integer('updated_at', { mode: 'timestamp' }).notNull()
+}, (table) => ({
+  ddcIdx: index('idx_classification_ddc').on(table.ddc),
+  titleIdx: index('idx_classification_title').on(table.title)
+}))
+
+export type ClassificationCache = typeof classificationCache.$inferSelect
+export type NewClassificationCache = typeof classificationCache.$inferInsert

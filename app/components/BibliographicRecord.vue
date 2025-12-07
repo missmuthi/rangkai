@@ -1,0 +1,220 @@
+<script setup lang="ts">
+/**
+ * BibliographicRecord.vue - Shared SLiMS Record Display
+ * Used in Modal and Book Details Page
+ */
+import type { BookMetadata } from '~/types'
+import { Building2, Users, AlertTriangle, Check, Copy, Sparkles, ExternalLink } from 'lucide-vue-next'
+
+const props = defineProps<{
+  book: BookMetadata
+}>()
+
+// Copy state
+const copiedField = ref<string | null>(null)
+
+async function copyToClipboard(text: string | null | undefined, fieldName: string) {
+  if (!text) return
+  await navigator.clipboard.writeText(text)
+  copiedField.value = fieldName
+  setTimeout(() => { copiedField.value = null }, 2000)
+}
+
+// Trust badge helpers
+const trustBadge = computed(() => {
+  if (props.book.classificationTrust === 'high') {
+    return { label: 'Library of Congress Verified', icon: Building2, class: 'text-emerald-600 bg-emerald-50 dark:bg-emerald-950/30' }
+  } else if (props.book.classificationTrust === 'medium') {
+    return { label: 'Community Data', icon: Users, class: 'text-blue-600 bg-blue-50 dark:bg-blue-950/30' }
+  } else {
+    return { label: 'Estimated Classification', icon: AlertTriangle, class: 'text-amber-600 bg-amber-50 dark:bg-amber-950/30' }
+  }
+})
+
+// ISBD formatted publisher string
+const publisherString = computed(() => {
+  const parts = []
+  if (props.book.publishPlace) parts.push(props.book.publishPlace)
+  if (props.book.publisher) parts.push(props.book.publisher)
+  if (props.book.publishedDate) {
+    const year = props.book.publishedDate.match(/\d{4}/)?.[0]
+    if (year) parts.push(year)
+  }
+  return parts.length > 0 ? parts.join(' : ') : props.book.publisher || '-'
+})
+
+// Cover image with fallback
+const coverUrl = computed(() => {
+  if (props.book.thumbnail) {
+    return `/api/image-proxy?url=${encodeURIComponent(props.book.thumbnail)}`
+  }
+  return '/images/no-cover.svg'
+})
+</script>
+
+<template>
+  <div class="grid md:grid-cols-[1fr_280px] gap-8">
+    <!-- Left Column: Bibliographic Data -->
+    <div class="space-y-1">
+      <!-- Title -->
+      <div class="grid grid-cols-[140px_1fr] py-2 border-b border-gray-100 dark:border-gray-800">
+        <span class="text-sm font-medium text-muted-foreground">Title</span>
+        <div class="flex items-center gap-2">
+          <span class="text-sm font-semibold text-gray-900 dark:text-gray-100">{{ book.title || '-' }}</span>
+          <button v-if="book.title" @click="copyToClipboard(book.title, 'title')" class="p-1 rounded opacity-0 hover:opacity-100 transition-opacity group-hover:opacity-60">
+            <Check v-if="copiedField === 'title'" class="w-3.5 h-3.5 text-green-500" />
+            <Copy v-else class="w-3.5 h-3.5 text-muted-foreground" />
+          </button>
+        </div>
+      </div>
+
+      <!-- Series -->
+      <div v-if="book.series" class="grid grid-cols-[140px_1fr] py-2 border-b border-gray-100 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-800/30">
+        <span class="text-sm font-medium text-muted-foreground">Series</span>
+        <span class="text-sm text-gray-900 dark:text-gray-100">{{ book.series }}</span>
+      </div>
+
+      <!-- Call Number -->
+      <div class="grid grid-cols-[140px_1fr] py-2 border-b border-gray-100 dark:border-gray-800">
+        <span class="text-sm font-medium text-muted-foreground">Call Number</span>
+        <div class="flex items-center gap-2">
+          <span class="text-sm font-mono bg-gray-100 dark:bg-gray-800 px-2 py-0.5 rounded text-gray-800 dark:text-gray-200">{{ book.callNumber || book.ddc || '-' }}</span>
+          <button v-if="book.callNumber || book.ddc" @click="copyToClipboard(book.callNumber || book.ddc, 'callNumber')" class="p-1 rounded opacity-0 hover:opacity-100 transition-opacity">
+            <Check v-if="copiedField === 'callNumber'" class="w-3.5 h-3.5 text-green-500" />
+            <Copy v-else class="w-3.5 h-3.5 text-muted-foreground" />
+          </button>
+        </div>
+      </div>
+
+      <!-- Publisher (ISBD format) -->
+      <div class="grid grid-cols-[140px_1fr] py-2 border-b border-gray-100 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-800/30">
+        <span class="text-sm font-medium text-muted-foreground">Publisher</span>
+        <span class="text-sm text-gray-900 dark:text-gray-100">{{ publisherString }}</span>
+      </div>
+
+      <!-- Collation -->
+      <div class="grid grid-cols-[140px_1fr] py-2 border-b border-gray-100 dark:border-gray-800">
+        <span class="text-sm font-medium text-muted-foreground">Collation</span>
+        <span class="text-sm text-gray-900 dark:text-gray-100">{{ book.collation || (book.pageCount ? `${book.pageCount} p.` : '-') }}</span>
+      </div>
+
+      <!-- Language -->
+      <div class="grid grid-cols-[140px_1fr] py-2 border-b border-gray-100 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-800/30">
+        <span class="text-sm font-medium text-muted-foreground">Language</span>
+        <span class="text-sm uppercase text-gray-900 dark:text-gray-100">{{ book.language || '-' }}</span>
+      </div>
+
+      <!-- ISBN -->
+      <div class="grid grid-cols-[140px_1fr] py-2 border-b border-gray-100 dark:border-gray-800">
+        <span class="text-sm font-medium text-muted-foreground">ISBN/ISSN</span>
+        <div class="flex items-center gap-2">
+          <span class="text-sm font-mono text-gray-900 dark:text-gray-100">{{ book.isbn || '-' }}</span>
+          <button v-if="book.isbn" @click="copyToClipboard(book.isbn, 'isbn')" class="p-1 rounded opacity-0 hover:opacity-100 transition-opacity">
+            <Check v-if="copiedField === 'isbn'" class="w-3.5 h-3.5 text-green-500" />
+            <Copy v-else class="w-3.5 h-3.5 text-muted-foreground" />
+          </button>
+        </div>
+      </div>
+
+      <!-- Classification -->
+      <div class="grid grid-cols-[140px_1fr] py-2 border-b border-gray-100 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-800/30">
+        <span class="text-sm font-medium text-muted-foreground">Classification</span>
+        <div class="flex items-center gap-2">
+          <span class="text-sm text-gray-900 dark:text-gray-100">{{ book.ddc ? `${book.ddc} (DDC)` : '-' }}</span>
+          <span v-if="trustBadge" :class="['inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium', trustBadge.class]">
+            <component :is="trustBadge.icon" class="w-3 h-3" />
+            {{ trustBadge.label }}
+          </span>
+        </div>
+      </div>
+
+      <!-- Edition -->
+      <div v-if="book.edition" class="grid grid-cols-[140px_1fr] py-2 border-b border-gray-100 dark:border-gray-800">
+        <span class="text-sm font-medium text-muted-foreground">Edition</span>
+        <span class="text-sm text-gray-900 dark:text-gray-100">{{ book.edition }}</span>
+      </div>
+
+      <!-- Subjects -->
+      <div v-if="book.subjects" class="grid grid-cols-[140px_1fr] py-2 border-b border-gray-100 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-800/30">
+        <span class="text-sm font-medium text-muted-foreground">Subject(s)</span>
+        <span class="text-sm text-gray-900 dark:text-gray-100">{{ book.subjects }}</span>
+      </div>
+
+      <!-- Authors -->
+      <div class="grid grid-cols-[140px_1fr] py-2 border-b border-gray-100 dark:border-gray-800">
+        <span class="text-sm font-medium text-muted-foreground">Author(s)</span>
+        <span class="text-sm text-gray-900 dark:text-gray-100">{{ book.authors?.join('; ') || '-' }}</span>
+      </div>
+
+      <!-- Description -->
+      <div v-if="book.description" class="mt-4 p-4 bg-gray-50 dark:bg-gray-800/50 rounded-lg border border-gray-100 dark:border-gray-700">
+        <p class="text-xs font-medium text-muted-foreground mb-2">Description</p>
+        <p class="text-sm text-gray-700 dark:text-gray-300 line-clamp-4">{{ book.description }}</p>
+      </div>
+    </div>
+
+    <!-- Right Column: Cover & Quick View -->
+    <div class="space-y-6">
+      <!-- Cover Image -->
+      <div class="aspect-[2/3] bg-gray-100 dark:bg-gray-800 rounded-lg overflow-hidden shadow-lg border border-gray-200 dark:border-gray-700">
+        <img 
+          :src="coverUrl" 
+          :alt="book.title || 'Book cover'"
+          class="w-full h-full object-cover"
+          loading="lazy"
+        />
+      </div>
+
+      <!-- Classification Quick View -->
+      <div class="p-4 bg-indigo-50 dark:bg-indigo-950/30 rounded-lg space-y-3 border border-indigo-100 dark:border-indigo-900/50">
+        <div>
+          <p class="text-xs font-medium text-indigo-600 dark:text-indigo-400 mb-1">DDC</p>
+          <div class="bg-white dark:bg-gray-900 rounded px-3 py-2 font-mono text-sm shadow-sm flex justify-between items-center">
+            <template v-if="book.ddc">
+              <a 
+                :href="`https://openlibrary.org/subjects/dewey_decimal_classification:${book.ddc}`" 
+                target="_blank" 
+                class="hover:underline decoration-indigo-400 underline-offset-2"
+              >
+                {{ book.ddc }}
+              </a>
+              <ExternalLink class="w-3 h-3 text-indigo-400" />
+            </template>
+            <span v-else>—</span>
+          </div>
+        </div>
+        <div>
+          <p class="text-xs font-medium text-indigo-600 dark:text-indigo-400 mb-1">LCC</p>
+          <div class="bg-white dark:bg-gray-900 rounded px-3 py-2 font-mono text-sm shadow-sm">
+             {{ book.lcc || '—' }}
+          </div>
+        </div>
+        
+        <!-- AI Clean Status -->
+        <div v-if="book.isAiEnhanced" class="pt-2 border-t border-indigo-200 dark:border-indigo-800">
+           <div class="flex items-center gap-2 text-xs font-medium text-amber-600 dark:text-amber-500 bg-amber-50 dark:bg-amber-950/30 px-2 py-1.5 rounded">
+             <Sparkles class="w-3.5 h-3.5" />
+             AI Cleaned
+           </div>
+        </div>
+      </div>
+
+      <!-- AI History (if enhanced) -->
+      <div v-if="book.isAiEnhanced && book.aiLog?.length" class="p-4 bg-purple-50 dark:bg-purple-950/30 rounded-lg border border-purple-100 dark:border-purple-900/50">
+        <p class="text-xs font-medium text-purple-600 dark:text-purple-400 mb-2 flex items-center gap-1">
+          <Sparkles class="w-3 h-3" />
+          AI Enhancement Log
+        </p>
+        <ul class="text-xs text-gray-600 dark:text-gray-400 space-y-1">
+          <li v-for="(change, i) in book.aiLog[book.aiLog.length - 1]?.changes.slice(0, 3)" :key="i" class="flex items-start gap-1">
+            <span class="text-purple-500">•</span>
+            <span>{{ change }}</span>
+          </li>
+        </ul>
+      </div>
+      
+      <!-- Slot for extra actions -->
+      <slot name="actions" />
+    </div>
+  </div>
+</template>

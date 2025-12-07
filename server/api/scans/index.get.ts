@@ -18,10 +18,26 @@ export default defineEventHandler(async (event) => {
     .where(eq(scans.userId, user.id))
     .orderBy(desc(scans.createdAt))
 
+  const mappedScans = userScans.map(scan => {
+    let thumbnail: string | null = null
+    try {
+      if (typeof scan.jsonData === 'string') {
+        const data = JSON.parse(scan.jsonData)
+        thumbnail = data.thumbnail || null
+      }
+    } catch {
+      // Ignore JSON parse errors
+    }
+    return {
+      ...scan,
+      thumbnail
+    }
+  })
+
   console.info(`[api:scans] Found ${userScans.length} scans for user ${user.id}`)
 
   return {
-    scans: userScans,
-    count: userScans.length
+    scans: mappedScans,
+    count: mappedScans.length
   }
 })

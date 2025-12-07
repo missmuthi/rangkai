@@ -39,6 +39,7 @@ export interface Scan {
   title: string | null
   authors: string | null
   publisher: string | null
+  thumbnail?: string | null
   description?: string | null
   status: 'pending' | 'complete' | 'error' | 'exported'
   created_at: string

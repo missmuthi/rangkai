@@ -5,6 +5,7 @@ import { cn } from '~/utils/cn'
 const props = defineProps<{
   book: BookMetadata
   showActions?: boolean
+  isSaved?: boolean
   class?: string
 }>()
 
@@ -56,17 +57,18 @@ const coverUrl = computed(() => {
         <!-- Actions -->
         <div v-if="showActions" class="flex gap-2 mt-3">
           <button
-            class="px-3 py-1 text-sm bg-indigo-600 text-white rounded hover:bg-indigo-700"
+            class="px-3 py-1 text-sm rounded bg-indigo-600 text-white hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-green-600"
+            :disabled="isSaved"
             @click="emit('save', book)"
           >
-            Save
+            {{ isSaved ? 'Saved ✓' : 'Save' }}
           </button>
-          <button
-            class="px-3 py-1 text-sm border border-gray-300 rounded hover:bg-gray-50"
-            @click="emit('edit', book)"
+          <NuxtLink
+            :to="`/book/${book.isbn}`"
+            class="px-3 py-1 text-sm border border-gray-300 rounded hover:bg-gray-50 dark:border-gray-600 dark:hover:bg-gray-700 text-center"
           >
-            Edit
-          </button>
+            Details
+          </NuxtLink>
         </div>
       </div>
     </div>

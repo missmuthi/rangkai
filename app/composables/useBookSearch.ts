@@ -34,16 +34,12 @@ export function useBookSearch() {
   }
 
   async function cleanMetadata(metadata: Partial<BookMetadata>) {
-    try {
-      // Using AI endpoint if available, otherwise just return metadata
-      const cleaned = await $fetch<BookMetadata>('/api/ai/clean', {
-        method: 'POST',
-        body: metadata
-      })
-      return cleaned
-    } catch {
-      return metadata as BookMetadata
-    }
+    // Throw errors to caller so they can handle them properly
+    const cleaned = await $fetch<BookMetadata>('/api/ai/clean', {
+      method: 'POST',
+      body: { metadata }
+    })
+    return cleaned
   }
 
   return { book, scanId, loading, error, searchByISBN, cleanMetadata }

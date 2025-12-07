@@ -1,13 +1,30 @@
 <script setup lang="ts">
-import BiblioModal from '~/components/BiblioModal.vue'
-import { BookOpen } from 'lucide-vue-next'
+import BibliographicRecord from '~/components/BibliographicRecord.vue'
+import { ArrowLeft, Sparkles, Edit, RotateCcw } from 'lucide-vue-next'
+import Button from '@/components/ui/Button.vue'
+import Skeleton from '@/components/ui/Skeleton.vue'
 
 const route = useRoute()
 const isbn = computed(() => route.params.isbn as string)
 
 const { book, scanId, loading, error, searchByISBN, cleanMetadata } = useBookSearch()
-const showBiblioModal = ref(false)
 const isCleaning = ref(false)
+const loadingStep = ref('')
+const cooldown = ref(0)
+const cleanError = ref<string | null>(null)
+let cooldownTimer: NodeJS.Timeout
+
+// Steps for AI loader
+const STEPS = [
+  'Searching OpenLibrary sources...',
+  'Extracting bibliographic metadata...',
+  'Standardizing titles and authors...',
+  'Generating LCC/DDC classifications...',
+  'Finalizing record...'
+]
+
+// Determine if saved based on scanId existence
+const isSaved = computed(() => !!scanId.value)
 
 onMounted(async () => {
   if (isbn.value) {
@@ -15,75 +32,191 @@ onMounted(async () => {
   }
 })
 
+// Cleanup timer
+onUnmounted(() => {
+  if (cooldownTimer) clearInterval(cooldownTimer)
+})
+
+function startCooldown() {
+  cooldown.value = 10
+  cooldownTimer = setInterval(() => {
+    cooldown.value--
+    if (cooldown.value <= 0) clearInterval(cooldownTimer)
+  }, 1000)
+}
+
 async function handleAiClean() {
-  if (!book.value || !scanId.value) return
+  if (!book.value || cooldown.value > 0) return
   
   isCleaning.value = true
+  cleanError.value = null
+  let stepIdx = 0
+  loadingStep.value = STEPS[0]
+  
+  // Cycle steps
+  const stepInterval = setInterval(() => {
+    stepIdx = (stepIdx + 1) % STEPS.length
+    loadingStep.value = STEPS[stepIdx]
+  }, 1500)
+  
   try {
+    console.log('[Book Details] Calling AI clean with:', book.value.isbn)
     const cleaned = await cleanMetadata(book.value)
+    console.log('[Book Details] AI clean successful:', cleaned)
     
     // Save to server
-    await $fetch(`/api/scans/${scanId.value}`, {
-      method: 'PATCH',
-      body: cleaned
-    })
+    if (scanId.value) {
+      await $fetch(`/api/scans/${scanId.value}`, {
+        method: 'PATCH',
+        body: cleaned
+      })
+    } else {
+       const saved = await $fetch('/api/scans', {
+         method: 'POST',
+         body: cleaned
+       })
+       scanId.value = saved.id
+    }
     
     // Update local state
     book.value = cleaned
-  } catch (err) {
-    console.error('Failed to clean metadata', err)
-    // Ideally show toast here
+    startCooldown()
+  } catch (err: any) {
+    console.error('[Book Details] AI clean failed:', err)
+    
+    // Extract the most informative error message
+    let errorMsg = 'AI enhancement failed. Please try again.'
+    
+    if (err.data?.message) {
+      errorMsg = err.data.message
+    } else if (err.message) {
+      errorMsg = err.message
+    } else if (err.statusMessage) {
+      errorMsg = err.statusMessage
+    }
+    
+    // Add helpful context based on error type
+    if (errorMsg.includes('GROQ_API_KEY')) {
+      errorMsg += ' (Configuration issue - please contact administrator)'
+    } else if (errorMsg.includes('rate limit')) {
+      errorMsg += ' (Too many requests - please wait a moment)'
+    } else if (errorMsg.includes('502') || errorMsg.includes('Service')) {
+      errorMsg += ' (External service issue - please try again later)'
+    }
+    
+    cleanError.value = errorMsg
   } finally {
+    clearInterval(stepInterval)
     isCleaning.value = false
   }
+}
+
+function handleEdit() {
+  alert('Manual editing is coming soon to Rangkai!')
 }
 </script>
 
 <template>
-  <div class="container mx-auto p-4 max-w-2xl min-h-screen py-8">
-    <div class="flex items-center justify-between mb-6">
+  <div class="container mx-auto p-4 max-w-5xl min-h-screen py-8">
+    <!-- Header -->
+    <div class="flex items-center justify-between mb-8">
       <div class="flex items-center gap-4">
         <Button variant="ghost" size="icon" @click="$router.back()">
-          <component :is="resolveComponent('LucideArrowLeft')" class="h-5 w-5" />
+          <ArrowLeft class="h-5 w-5" />
         </Button>
-        <h1 class="text-xl font-bold">Book Details</h1>
+        <h1 class="text-2xl font-bold tracking-tight text-gray-900 dark:text-white">Book Details</h1>
+        
+        <!-- Saved Badge (Left Aligned) -->
+        <span v-if="isSaved" class="hidden sm:inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-50 text-green-700 dark:bg-green-900/30 dark:text-green-400 border border-green-200 dark:border-green-800">
+          ✓ Saved to Library
+        </span>
       </div>
       
-      <Button 
-        v-if="book" 
-        variant="outline" 
-        size="sm"
-        class="gap-2"
-        @click="showBiblioModal = true"
-      >
-        <BookOpen class="w-4 h-4" />
-        <span class="hidden sm:inline">Bibliographic Record</span>
-      </Button>
-    </div>
-
-    <div v-if="loading" class="space-y-4">
-      <div class="h-64 bg-muted animate-pulse rounded-lg" />
-      <div class="h-8 w-3/4 bg-muted animate-pulse rounded" />
-      <div class="h-4 w-1/2 bg-muted animate-pulse rounded" />
-    </div>
-
-    <div v-else-if="error" class="p-4 bg-red-900/20 text-red-400 rounded-lg">
-      {{ error }}
-    </div>
-
-    <div v-else-if="book" class="animate-in fade-in slide-in-from-bottom-4 duration-500">
-      <div v-if="scanId" class="mb-4 text-green-400 text-center text-sm font-medium p-2 bg-green-900/10 rounded border border-green-900/20">
-        ✓ Saved to history
+      <div class="flex items-center gap-2">
+         <Button 
+          variant="outline" 
+          size="sm"
+          class="gap-2"
+          @click="handleEdit"
+        >
+          <Edit class="w-4 h-4" />
+          Edit
+        </Button>
+        <Button 
+          v-if="book" 
+          :variant="book.isAiEnhanced ? 'secondary' : 'default'"
+          size="sm"
+          class="gap-2 min-w-[140px]"
+          :disabled="isCleaning || cooldown > 0"
+          @click="handleAiClean"
+        >
+          <Sparkles class="w-4 h-4" :class="{ 'animate-pulse': isCleaning }" />
+          <span v-if="isCleaning">Cleaning...</span>
+          <span v-else-if="cooldown > 0">Wait {{ cooldown }}s</span>
+          <span v-else-if="book.isAiEnhanced">Re-Clean</span>
+          <span v-else>AI Clean</span>
+        </Button>
       </div>
-      
-      <BookCard :book="book" :show-actions="true" />
-      
-      <BiblioModal 
-        :book="book" 
-        :open="showBiblioModal" 
-        @close="showBiblioModal = false"
-        @clean="handleAiClean"
-      />
+    </div>
+
+    <div v-if="loading" class="flex items-center justify-center p-12">
+      <div class="animate-spin w-8 h-8 border-4 border-indigo-600 border-t-transparent rounded-full" />
+    </div>
+
+    <!-- Generative UI Loader -->
+    <div v-else-if="isCleaning" class="p-8 bg-white dark:bg-gray-900 rounded-xl border border-indigo-100 dark:border-indigo-900/50 shadow-lg space-y-6 max-w-2xl mx-auto my-12">
+       <div class="flex items-center gap-3 text-indigo-600 dark:text-indigo-400 animate-pulse">
+         <Sparkles class="w-5 h-5" />
+         <span class="font-medium text-lg">{{ loadingStep }}</span>
+       </div>
+       <div class="space-y-3">
+         <Skeleton class="h-4 w-3/4 bg-indigo-50 dark:bg-indigo-900/20" />
+         <Skeleton class="h-4 w-1/2 bg-indigo-50 dark:bg-indigo-900/20" />
+         <Skeleton class="h-32 w-full bg-indigo-50 dark:bg-indigo-900/20 rounded-lg" />
+       </div>
+    </div>
+
+    <!-- AI Error Display -->
+    <div v-else-if="cleanError" class="p-6 bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-400 rounded-lg border border-amber-200 dark:border-amber-900/30 max-w-2xl mx-auto my-12">
+      <div class="flex items-start gap-3">
+        <svg class="w-5 h-5 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+        </svg>
+        <div class="flex-1">
+          <p class="font-medium">AI Enhancement Failed</p>
+          <p class="text-sm mt-2 leading-relaxed">{{ cleanError }}</p>
+          <div class="mt-4 pt-3 border-t border-amber-200 dark:border-amber-800">
+            <p class="text-xs font-medium mb-2">Troubleshooting:</p>
+            <ul class="text-xs space-y-1 list-disc list-inside">
+              <li>Check your internet connection</li>
+              <li>Wait a moment and try again</li>
+              <li>If issue persists, contact support with error details above</li>
+            </ul>
+          </div>
+          <button 
+            class="mt-3 text-sm underline hover:no-underline"
+            @click="cleanError = null"
+          >
+            Dismiss
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div v-else-if="error" class="p-6 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 rounded-lg border border-red-100 dark:border-red-900/30">
+      <p class="font-medium">Error loading book</p>
+      <p class="text-sm mt-1">{{ error }}</p>
+    </div>
+
+    <div v-else-if="book" class="animate-in fade-in slide-in-from-bottom-4 duration-500 bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 p-6 md:p-8">
+      <!-- Mobile Saved Badge -->
+       <div v-if="isSaved" class="sm:hidden mb-6 flex items-center justify-center">
+        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-sm font-medium bg-green-50 text-green-700 dark:bg-green-900/30 dark:text-green-400 border border-green-100 dark:border-green-900/50">
+          ✓ Saved to Library
+        </span>
+      </div>
+
+      <BibliographicRecord :book="book" />
     </div>
 
     <div v-else class="text-center text-muted-foreground py-12">
