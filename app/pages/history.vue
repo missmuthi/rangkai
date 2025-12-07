@@ -121,7 +121,7 @@ onMounted(() => {
           v-if="hasData"
           as-child
         >
-          <NuxtLink to="/scan/mobile">
+          <NuxtLink to="/dashboard">
             <ScanBarcode class="mr-2 h-4 w-4" />
             Start Scanning
           </NuxtLink>

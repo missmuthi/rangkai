@@ -10,10 +10,11 @@ useSeoMeta({
 })
 
 const { isAuthenticated } = useAuth()
+const { handleSearch } = useSearchRouting()
 const scanMode = ref<'camera' | 'manual'>('camera')
 
 function handleScan(isbn: string) {
-  navigateTo(`/scan/mobile?isbn=${isbn}`)
+  handleSearch(isbn)
 }
 </script>
 

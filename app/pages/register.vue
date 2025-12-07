@@ -137,7 +137,7 @@ const loading = ref(false)
 // Redirect if already authenticated
 watch(isAuthenticated, (value) => {
   if (value) {
-    const redirect = route.query.redirect as string || '/scan/mobile'
+    const redirect = route.query.redirect as string || '/dashboard'
     router.push(redirect)
   }
 }, { immediate: true })

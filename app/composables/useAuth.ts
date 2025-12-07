@@ -86,7 +86,7 @@ export const useAuth = () => {
     // We strictly use window.location.href for the redirect to the provider
     const params = new URLSearchParams({
       provider,
-      callbackURL: baseURL + '/scan/mobile',
+      callbackURL: baseURL + '/dashboard',
     })
 
     window.location.href = `/api/auth/sign-in/social?${params.toString()}`
