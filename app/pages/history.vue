@@ -4,9 +4,27 @@
  * Optimized for UX: flat hierarchy, proper action priority, distinct empty states
  */
 import type { Scan } from '~/types'
+import { 
+  Download, 
+  ScanBarcode, 
+  BookOpen, 
+  CheckCircle2, 
+  Clock, 
+  AlertCircle,
+  Search,
+  Filter
+} from 'lucide-vue-next'
+import { Button } from '@/components/ui/button'
 
 definePageMeta({
   middleware: 'auth'
+})
+
+useHead({
+  title: 'Scan History - Rangkai Dashboard',
+  meta: [
+    { name: 'description', content: 'Manage your scanned book metadata and export status.' }
+  ]
 })
 
 const { history, loading, fetchHistory } = useHistory()
@@ -77,112 +95,94 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="flex-1 space-y-8 p-4 md:p-8 pt-6">
+  <main class="flex-1 space-y-8 p-4 md:p-8 pt-6">
     <!-- Header -->
-    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+    <header class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
       <div>
+        <!-- H2 per Design System Rule 4 (Page Title) -->
         <h2 class="text-3xl font-bold tracking-tight text-gray-900 dark:text-white">Dashboard</h2>
         <p class="text-gray-500 dark:text-gray-400">
           Manage your scanned book metadata and export status.
         </p>
       </div>
       <div class="flex items-center gap-2">
-        <button 
+        <!-- Replaced native button with shadcn Button per Rule 3 -->
+        <Button 
           v-if="hasData" 
-          class="inline-flex items-center px-4 py-2 text-sm font-medium border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+          variant="outline"
           @click="handleExportAll"
         >
-          <!-- Download Icon -->
-          <svg class="mr-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-          </svg>
+          <Download class="mr-2 h-4 w-4" />
           Export All
-        </button>
+        </Button>
         
-        <!-- Only show header button when we have data (avoid duplicate CTAs) -->
-        <NuxtLink 
+        <!-- Updated to use shadcn Button (as-child) with NuxtLink -->
+        <Button 
           v-if="hasData"
-          to="/scan/mobile"
-          class="inline-flex items-center px-4 py-2 text-sm font-medium bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
+          as-child
         >
-          <!-- ScanBarcode Icon -->
-          <svg class="mr-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" />
-          </svg>
-          Start Scanning
-        </NuxtLink>
+          <NuxtLink to="/scan/mobile">
+            <ScanBarcode class="mr-2 h-4 w-4" />
+            Start Scanning
+          </NuxtLink>
+        </Button>
       </div>
-    </div>
+    </header>
 
     <!-- Stats Cards -->
-    <div v-if="hasData || loading" class="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+    <section v-if="hasData || loading" class="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
       <UiCard>
         <UiCardHeader>
           <UiCardTitle>Total Scans</UiCardTitle>
-          <!-- BookOpen Icon -->
-          <svg class="h-4 w-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-          </svg>
+          <BookOpen class="h-4 w-4 text-muted-foreground" />
         </UiCardHeader>
         <UiCardContent>
           <div class="text-2xl font-bold text-gray-900 dark:text-white">{{ stats.total }}</div>
-          <p class="text-xs text-gray-500 dark:text-gray-400">Lifetime volume</p>
+          <p class="text-xs text-muted-foreground">Lifetime volume</p>
         </UiCardContent>
       </UiCard>
 
       <UiCard>
         <UiCardHeader>
           <UiCardTitle>Completed</UiCardTitle>
-          <!-- CheckCircle Icon -->
-          <svg class="h-4 w-4 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-          </svg>
+          <CheckCircle2 class="h-4 w-4 text-green-500" />
         </UiCardHeader>
         <UiCardContent>
           <div class="text-2xl font-bold text-gray-900 dark:text-white">{{ stats.completed }}</div>
-          <p class="text-xs text-gray-500 dark:text-gray-400">Ready for export</p>
+          <p class="text-xs text-muted-foreground">Ready for export</p>
         </UiCardContent>
       </UiCard>
 
       <UiCard>
         <UiCardHeader>
           <UiCardTitle>Pending</UiCardTitle>
-          <!-- Clock Icon -->
-          <svg class="h-4 w-4 text-yellow-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-          </svg>
+          <Clock class="h-4 w-4 text-yellow-500" />
         </UiCardHeader>
         <UiCardContent>
           <div class="text-2xl font-bold text-gray-900 dark:text-white">{{ stats.pending }}</div>
-          <p class="text-xs text-gray-500 dark:text-gray-400">Awaiting metadata</p>
+          <p class="text-xs text-muted-foreground">Awaiting metadata</p>
         </UiCardContent>
       </UiCard>
 
       <UiCard>
         <UiCardHeader>
           <UiCardTitle>Errors</UiCardTitle>
-          <!-- AlertCircle Icon -->
-          <svg class="h-4 w-4 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-          </svg>
+          <AlertCircle class="h-4 w-4 text-red-500" />
         </UiCardHeader>
         <UiCardContent>
           <div class="text-2xl font-bold text-gray-900 dark:text-white">{{ stats.errors }}</div>
-          <p class="text-xs text-gray-500 dark:text-gray-400">Requires attention</p>
+          <p class="text-xs text-muted-foreground">Requires attention</p>
         </UiCardContent>
       </UiCard>
-    </div>
+    </section>
 
     <!-- Content Area -->
-    <div class="space-y-4">
+    <section class="space-y-4">
       <!-- Search Bar (only shown when has data) -->
       <div v-if="hasData" class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div class="flex items-center gap-2 w-full sm:w-auto">
           <div class="relative w-full sm:w-[300px]">
-            <!-- Search Icon -->
-            <svg class="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-            </svg>
+            <Search class="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <UiInput 
               v-model="filters.search" 
               placeholder="Search by title or ISBN..." 
@@ -196,7 +196,7 @@ onMounted(() => {
       <div v-if="loading" class="flex items-center justify-center h-64 border rounded-lg border-dashed bg-gray-50/50 dark:bg-gray-800/50">
         <div class="flex flex-col items-center gap-2">
           <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600" />
-          <p class="text-sm text-gray-500 dark:text-gray-400">Syncing history...</p>
+          <p class="text-sm text-muted-foreground">Syncing history...</p>
         </div>
       </div>
 
@@ -205,47 +205,41 @@ onMounted(() => {
         <div class="mx-auto flex max-w-[420px] flex-col items-center justify-center text-center">
           <!-- Softer icon background -->
           <div class="flex h-20 w-20 items-center justify-center rounded-full bg-gray-100 dark:bg-gray-800">
-            <!-- ScanBarcode Icon - using muted color for softer look -->
-            <svg class="h-10 w-10 text-gray-500 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" />
-            </svg>
+            <ScanBarcode class="h-10 w-10 text-muted-foreground" />
           </div>
           <h3 class="mt-4 text-lg font-semibold text-gray-900 dark:text-white">No books scanned</h3>
           <!-- Constrained text width for better readability -->
-          <p class="mb-4 mt-2 text-sm text-gray-500 dark:text-gray-400 max-w-sm">
+          <p class="mb-4 mt-2 text-sm text-muted-foreground max-w-sm">
             You haven't scanned any books yet. Start scanning to populate your library metadata.
           </p>
-          <NuxtLink 
-            to="/scan/mobile"
-            class="inline-flex items-center px-6 py-3 text-sm font-medium bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
-          >
-            Start Scanning
-          </NuxtLink>
+          <Button as-child>
+            <NuxtLink to="/scan/mobile">
+              Starts Scanning
+            </NuxtLink>
+          </Button>
         </div>
       </div>
 
       <!-- Empty State B: Search/Filter Found Nothing -->
       <div v-else-if="isFilteredEmpty" class="flex flex-col items-center justify-center h-64 border rounded-lg bg-gray-50/50 dark:bg-gray-800/50">
-        <!-- Search Icon -->
-        <svg class="h-10 w-10 text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-        </svg>
+        <Search class="h-10 w-10 text-muted-foreground mb-4" />
         <h3 class="text-lg font-medium text-gray-900 dark:text-white">No results found</h3>
-        <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
+        <p class="text-sm text-muted-foreground mt-1">
           No books match "<strong>{{ filters.search }}</strong>". Try adjusting your filters.
         </p>
-        <button 
-          class="mt-3 text-sm text-indigo-600 dark:text-indigo-400 hover:underline"
+        <Button 
+          variant="link" 
+          class="mt-2 text-indigo-600 dark:text-indigo-400"
           @click="clearFilters"
         >
           Clear Filters
-        </button>
+        </Button>
       </div>
 
       <!-- Data Table -->
       <div v-else class="rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
         <HistoryTable />
       </div>
-    </div>
-  </div>
+    </section>
+  </main>
 </template>
