@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { BookMetadata } from '~/types/book'
+import type { BookMetadata } from '~/types'
 import { cn } from '~/utils/cn'
 
 const props = defineProps<{

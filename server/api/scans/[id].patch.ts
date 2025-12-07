@@ -7,10 +7,38 @@ import { scans } from '../../db/schema'
 import { requireAuth } from '../../utils/auth'
 
 interface UpdateScanBody {
+  // Core
   isbn?: string
   title?: string
   authors?: string
   description?: string
+  publisher?: string
+  pageCount?: number
+  categories?: string
+  language?: string
+  thumbnail?: string
+  
+  // SLiMS
+  ddc?: string
+  lcc?: string
+  callNumber?: string
+  subjects?: string
+  series?: string
+  edition?: string
+  collation?: string
+  gmd?: string
+  publishPlace?: string
+  classificationTrust?: string
+  
+  // AI
+  isAiEnhanced?: boolean
+  enhancedAt?: string
+  aiLog?: string
+  jsonData?: string
+  
+  // Meta
+  status?: string
+  notes?: string
 }
 
 export default defineEventHandler(async (event) => {
@@ -19,22 +47,16 @@ export default defineEventHandler(async (event) => {
   const body = await readBody<UpdateScanBody>(event)
   const db = useDb()
 
-  if (!id) {
-    throw createError({
-      statusCode: 400,
-      message: 'Scan ID is required'
-    })
-  }
+  if (!id) throw createError({ statusCode: 400, message: 'Scan ID required' })
 
   console.info(`[api:scans] Updating scan ${id} for user ${user.id}`)
 
-  // Build update object with only provided fields
-  const updateData: Record<string, unknown> = {}
-
-  if (body.isbn !== undefined) updateData.isbn = body.isbn
-  if (body.title !== undefined) updateData.title = body.title
-  if (body.authors !== undefined) updateData.authors = body.authors
-  if (body.description !== undefined) updateData.description = body.description
+  // Allow all fields from body that match schema
+  // (In a real app we might want stricter validation/sanitization here)
+  const updateData = { ...body } as Record<string, unknown>
+  delete updateData.id // Protect immutable fields
+  delete updateData.userId
+  delete updateData.createdAt
 
   const [updated] = await db
     .update(scans)

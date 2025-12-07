@@ -169,7 +169,60 @@ export const scans = sqliteTable('scans', {
   index('idx_scans_status').on(table.status),
   index('idx_scans_createdAt').on(table.createdAt),
   index('idx_scans_ddc').on(table.ddc),
+// ... scans table definition ending ...
   index('idx_scans_lcc').on(table.lcc),
+])
+
+/**
+ * Scans History table - Version control for book metadata
+ */
+export const scansHistory = sqliteTable('scans_history', {
+  historyId: integer('history_id').primaryKey({ autoIncrement: true }),
+  scanId: text('scan_id').notNull().references(() => scans.id, { onDelete: 'cascade' }),
+  version: integer('version').notNull(),
+  snapshotAt: integer('snapshot_at', { mode: 'timestamp' }).notNull(),
+  
+  // Snapshot data
+  userId: text('user_id').notNull(),
+  isbn: text('isbn').notNull(),
+  title: text('title'),
+  
+  // Full metadata snapshot
+  authors: text('authors'),
+  publisher: text('publisher'),
+  description: text('description'),
+  pageCount: integer('page_count'),
+  categories: text('categories'),
+  language: text('language'),
+  thumbnail: text('thumbnail'),
+  previewLink: text('preview_link'),
+  infoLink: text('info_link'),
+  
+  // Bibliographic fields
+  ddc: text('ddc'),
+  lcc: text('lcc'),
+  callNumber: text('call_number'),
+  subjects: text('subjects'),
+  series: text('series'),
+  edition: text('edition'),
+  collation: text('collation'),
+  gmd: text('gmd'),
+  publishPlace: text('publish_place'),
+  classificationTrust: text('classification_trust'),
+  
+  // AI Meta
+  isAiEnhanced: integer('is_ai_enhanced', { mode: 'boolean' }),
+  enhancedAt: integer('enhanced_at', { mode: 'timestamp' }),
+  aiLog: text('ai_log'),
+  jsonData: text('json_data'), // Full MergedBookData as JSON
+  
+  status: text('status'),
+  notes: text('notes'),
+  createdAt: integer('created_at', { mode: 'timestamp' }),
+  updatedAt: integer('updated_at', { mode: 'timestamp' })
+}, (table) => [
+  index('idx_scans_history_scan_id').on(table.scanId),
+  index('idx_scans_history_version').on(table.scanId, table.version),
 ])
 
 // =============================================================================
@@ -200,14 +253,23 @@ export const booksRelations = relations(books, ({ many }) => ({
   scans: many(scans),
 }))
 
-export const scansRelations = relations(scans, ({ one }) => ({
+export const scansRelations = relations(scans, ({ one, many }) => ({
   user: one(user, {
     fields: [scans.userId],
     references: [user.id],
   }),
+// ... scans relations ...
   book: one(books, {
     fields: [scans.bookId],
     references: [books.id],
+  }),
+  history: many(scansHistory)
+}))
+
+export const scansHistoryRelations = relations(scansHistory, ({ one }) => ({
+  scan: one(scans, {
+    fields: [scansHistory.scanId],
+    references: [scans.id],
   }),
 }))
 

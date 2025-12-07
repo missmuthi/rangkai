@@ -1,205 +1,86 @@
 /**
- * POST /api/ai/clean - AI-powered metadata cleanup
- *
- * Cleans and normalizes book metadata using AI or rule-based processing.
- * Currently uses rule-based cleaning; can be extended with AI providers.
+ * POST /api/ai/clean
+ * Uses Groq LLM to enhance book metadata (SLiMS fields, cleaning title/authors)
  */
 
 import { requireAuth } from '../../utils/auth'
+import type { BookMetadata } from '../../utils/metadata/types'
 
-interface CleanRequest {
-  title?: string
-  authors?: string | string[]
-  description?: string
-  publisher?: string
+// Groq API Configuration
+const GROQ_API_URL = 'https://api.groq.com/openai/v1/chat/completions'
+const MODEL_ID = 'llama-3.1-8b-instant' // Fast, efficient, good at JSON
+
+interface AiCleanRequest {
+  metadata: BookMetadata
 }
 
-interface CleanResponse {
-  cleaned: {
-    title: string | null
-    authors: string[]
-    description: string | null
-    publisher: string | null
-  }
-  changes: string[]
-}
-
-/**
- * Clean and normalize a title string
- */
-function cleanTitle(title: string | undefined): { value: string | null; changes: string[] } {
-  if (!title) return { value: null, changes: [] }
-
-  const changes: string[] = []
-  let cleaned = title.trim()
-
-  // Remove leading/trailing punctuation
-  const beforePunctuation = cleaned
-  cleaned = cleaned.replace(/^[:\-–—.,;]+\s*/, '').replace(/\s*[:\-–—.,;]+$/, '')
-  if (cleaned !== beforePunctuation) {
-    changes.push('Removed leading/trailing punctuation from title')
-  }
-
-  // Normalize multiple spaces
-  if (/\s{2,}/.test(cleaned)) {
-    cleaned = cleaned.replace(/\s+/g, ' ')
-    changes.push('Normalized whitespace in title')
-  }
-
-  // Title case if all uppercase or all lowercase
-  if (cleaned === cleaned.toUpperCase() || cleaned === cleaned.toLowerCase()) {
-    cleaned = cleaned
-      .split(' ')
-      .map(word => {
-        // Keep short words lowercase unless first word
-        const lowerWords = ['a', 'an', 'the', 'and', 'but', 'or', 'for', 'nor', 'on', 'at', 'to', 'by', 'of', 'in']
-        const lower = word.toLowerCase()
-        if (lowerWords.includes(lower) && cleaned.indexOf(word) !== 0) {
-          return lower
-        }
-        return lower.charAt(0).toUpperCase() + lower.slice(1)
-      })
-      .join(' ')
-    changes.push('Applied title case')
-  }
-
-  return { value: cleaned || null, changes }
-}
-
-/**
- * Clean and normalize authors
- */
-function cleanAuthors(authors: string | string[] | undefined): { value: string[]; changes: string[] } {
-  if (!authors) return { value: [], changes: [] }
-
-  const changes: string[] = []
-  let authorList: string[]
-
-  if (typeof authors === 'string') {
-    // Split by common delimiters
-    authorList = authors.split(/[,;&]|\band\b/i).map(a => a.trim()).filter(Boolean)
-    if (authorList.length > 1) {
-      changes.push('Split authors string into list')
-    }
-  } else {
-    authorList = [...authors]
-  }
-
-  // Clean each author name
-  const cleanedAuthors = authorList.map(author => {
-    let cleaned = author.trim()
-
-    // Remove titles/suffixes
-    const beforeTitles = cleaned
-    cleaned = cleaned.replace(/\b(Dr\.?|Prof\.?|Mr\.?|Mrs\.?|Ms\.?|Jr\.?|Sr\.?|PhD|Ph\.D\.?|MD|M\.D\.?)\b/gi, '').trim()
-    if (cleaned !== beforeTitles && !changes.includes('Removed author titles/suffixes')) {
-      changes.push('Removed author titles/suffixes')
-    }
-
-    // Normalize spacing
-    cleaned = cleaned.replace(/\s+/g, ' ')
-
-    return cleaned
-  }).filter(Boolean)
-
-  // Remove duplicates (case-insensitive)
-  const seen = new Set<string>()
-  const dedupedAuthors = cleanedAuthors.filter(author => {
-    const lower = author.toLowerCase()
-    if (seen.has(lower)) {
-      if (!changes.includes('Removed duplicate authors')) {
-        changes.push('Removed duplicate authors')
-      }
-      return false
-    }
-    seen.add(lower)
-    return true
-  })
-
-  return { value: dedupedAuthors, changes }
-}
-
-/**
- * Clean and normalize description
- */
-function cleanDescription(description: string | undefined): { value: string | null; changes: string[] } {
-  if (!description) return { value: null, changes: [] }
-
-  const changes: string[] = []
-  let cleaned = description.trim()
-
-  // Remove HTML tags
-  if (/<[^>]+>/.test(cleaned)) {
-    cleaned = cleaned.replace(/<[^>]+>/g, '')
-    changes.push('Removed HTML tags from description')
-  }
-
-  // Normalize whitespace
-  if (/\s{2,}/.test(cleaned)) {
-    cleaned = cleaned.replace(/\s+/g, ' ')
-    changes.push('Normalized whitespace in description')
-  }
-
-  // Truncate if too long (max 2000 chars)
-  if (cleaned.length > 2000) {
-    cleaned = cleaned.substring(0, 1997) + '...'
-    changes.push('Truncated long description')
-  }
-
-  return { value: cleaned || null, changes }
-}
-
-/**
- * Clean and normalize publisher
- */
-function cleanPublisher(publisher: string | undefined): { value: string | null; changes: string[] } {
-  if (!publisher) return { value: null, changes: [] }
-
-  const changes: string[] = []
-  let cleaned = publisher.trim()
-
-  // Remove common suffixes
-  const beforeSuffix = cleaned
-  cleaned = cleaned.replace(/\s*(Inc\.?|LLC|Ltd\.?|Co\.?|Corporation|Publishing|Publishers?|Books?|Press)\s*$/gi, '').trim()
-  if (cleaned !== beforeSuffix) {
-    changes.push('Removed publisher suffix')
-  }
-
-  // Normalize spacing
-  cleaned = cleaned.replace(/\s+/g, ' ')
-
-  return { value: cleaned || null, changes }
-}
-
-export default defineEventHandler(async (event): Promise<CleanResponse> => {
+export default defineEventHandler(async (event) => {
   await requireAuth(event)
-  const body = await readBody<CleanRequest>(event)
-
-  console.info('[api:ai/clean] Cleaning metadata')
-
-  const allChanges: string[] = []
-
-  const titleResult = cleanTitle(body.title)
-  allChanges.push(...titleResult.changes)
-
-  const authorsResult = cleanAuthors(body.authors)
-  allChanges.push(...authorsResult.changes)
-
-  const descriptionResult = cleanDescription(body.description)
-  allChanges.push(...descriptionResult.changes)
-
-  const publisherResult = cleanPublisher(body.publisher)
-  allChanges.push(...publisherResult.changes)
-
-  console.info(`[api:ai/clean] Made ${allChanges.length} changes`)
-
-  return {
-    cleaned: {
-      title: titleResult.value,
-      authors: authorsResult.value,
-      description: descriptionResult.value,
-      publisher: publisherResult.value
-    },
-    changes: allChanges
+  const { metadata } = await readBody<AiCleanRequest>(event)
+  const config = useRuntimeConfig()
+  const apiKey = config.groqApiKey || process.env.GROQ_API_KEY
+  
+  if (!apiKey) {
+    throw createError({
+      statusCode: 500,
+      message: 'GROQ_API_KEY is not configured on server'
+    })
+  }
+  
+  // System Prompt for Library Cataloger Persona
+  const systemPrompt = `You are an expert Library Cataloger and SLiMS (Senayan Library Management System) specialist.
+  Your task is to enhance, correct, and complete the bibliographic metadata for a book based on the provided JSON input.
+  
+  Strictly follow these rules:
+  1. OUTPUT FORMAT: Return ONLY a valid JSON object matching the exact structure of the input. Do not include markdown formatting (like \`\`\`json) or extra text.
+  2. DATA IMPROVEMENT:
+     - DDC/LCC: Estimate accurate Dewey Decimal and LC Classification call numbers if missing.
+     - Subjects: Generate 3-5 relevant Library of Congress Subject Headings (semicolon separated).
+     - Title: Fix capitalization (Title Case) and remove subtitles if they are erroneously in the title field.
+     - Authors: Standardize format (e.g., "Lastname, Firstname" is preferred for SLiMS but maintain input consistency if unsure).
+     - Physical: Estimate "collation" (e.g., "x, 300 p. ; 23 cm") if description contains page/size info.
+     - SLiMS Fields: Populate 'publishPlace', 'gmd' (default 'Text'), 'classificationTrust' (set to 'Estimated' if generated by you).
+  3. AI LOG: Populate the 'aiLog' array with brief notes on what you changed (e.g., "Estimated DDC", "Standardized Title").
+  4. CONSISTENCY: Keep original valid data if it looks correct. Only fix obvious errors or fill gaps.`
+  
+  const userPrompt = JSON.stringify(metadata)
+  
+  try {
+    console.info(`[AI] enhancing metadata for ${metadata.isbn}`)
+    
+    const response = await $fetch<any>(GROQ_API_URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${apiKey}`
+      },
+      body: {
+        model: MODEL_ID,
+        messages: [
+          { role: 'system', content: systemPrompt },
+          { role: 'user', content: userPrompt }
+        ],
+        temperature: 0.1, // Low temperature for deterministic/strict output
+        response_format: { type: 'json_object' }
+      }
+    })
+    
+    const content = response.choices[0]?.message?.content
+    if (!content) throw new Error('Empty response from Groq')
+      
+    const enhancedData = JSON.parse(content)
+    
+    // Add metadata for tracking
+    enhancedData.isAiEnhanced = true
+    enhancedData.enhancedAt = new Date().toISOString()
+    
+    return enhancedData as BookMetadata
+    
+  } catch (error: any) {
+    console.error('[AI] Enhancement failed:', error)
+    throw createError({
+      statusCode: 502,
+      message: 'AI Service unavailble: ' + error.message
+    })
   }
 })

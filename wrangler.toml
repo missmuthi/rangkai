@@ -2,7 +2,7 @@
 # This file is the SOURCE OF TRUTH for Pages Functions configuration
 # https://developers.cloudflare.com/pages/functions/wrangler-configuration/
 
-name = "rangkai"
+name = "rangkai-d3k"
 compatibility_date = "2025-04-25"
 compatibility_flags = ["nodejs_compat"]
 
