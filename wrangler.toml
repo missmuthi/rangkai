@@ -47,6 +47,19 @@ NUXT_PUBLIC_SITE_URL = "https://rangkai-d3k.pages.dev"
 ENVIRONMENT = "production"
 NUXT_PUBLIC_SITE_URL = "https://rangkai-d3k.pages.dev"
 
+[[env.production.d1_databases]]
+binding = "DB"
+database_name = "rangkai-db"
+database_id = "ff59aaac-cf7a-44f2-8f94-1d71482389c9"
+
+[[env.production.kv_namespaces]]
+binding = "KV"
+id = "457dc32275364e8db48ed7f2fcd59f5c"
+
+[[env.production.kv_namespaces]]
+binding = "CACHE"
+id = "2cd4dceb60f34809a627314e444c497d"
+
 # Preview-specific overrides (if needed)
 # [env.preview]
 # [env.preview.vars]

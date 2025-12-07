@@ -32,15 +32,12 @@ export const useAuth = () => {
   async function fetchSession() {
     state.value.isLoading = true
     try {
-      const response = await $fetch<{ session: Session; user: User } | null>(
-        '/api/auth/get-session',
-        {
-          credentials: 'include',
-        }
-      )
+      const response = await $fetch<{ user: User } | null>('/api/auth-session', {
+        credentials: 'include',
+      })
 
-      if (response?.session && response?.user) {
-        state.value.session = response.session
+      if (response?.user) {
+        state.value.session = null
         state.value.user = response.user
         state.value.isAuthenticated = true
       } else {

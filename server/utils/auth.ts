@@ -94,6 +94,17 @@ export async function getServerSession(event: H3Event) {
 
 export async function getUserFromEvent(event: H3Event): Promise<AuthUser | null> {
   try {
+    // Prefer user injected by middleware (custom session cookie path)
+    if (event.context?.user) {
+      const user = event.context.user as { id: string; email: string; name?: string | null }
+      return {
+        id: user.id,
+        email: user.email,
+        name: user.name ?? null,
+      }
+    }
+
+    // Fallback to Better Auth session
     const session = await getServerSession(event)
 
     if (!session?.user) {
