@@ -4,11 +4,11 @@ definePageMeta({
   layout: 'scanner'
 })
 
-const { book, loading, error, fetchBook, cleanMetadata } = useBookFetch()
-const { createScan } = useScans()
+const { book, loading, error, searchByISBN, cleanMetadata } = useBookSearch()
+const { addScan } = useHistory()
+const { startScanner, stopScanner } = useScanner()
 
 const scannerRef = ref<HTMLElement | null>(null)
-const scanner = ref<InstanceType<typeof import('html5-qrcode').Html5Qrcode> | null>(null)
 const lastScan = ref('')
 const lastScanAt = ref(0)
 const autoClean = ref(true)
@@ -30,11 +30,8 @@ async function onScanSuccess(decodedText: string) {
     return
   }
 
-  // Play success sound
-  playBeep()
-
   // Fetch metadata
-  await fetchBook(isbn)
+  await searchByISBN(isbn)
 
   // Auto-clean if enabled
   if (autoClean.value && book.value) {
@@ -42,22 +39,19 @@ async function onScanSuccess(decodedText: string) {
   }
 }
 
-function playBeep() {
-  const audio = new Audio('/sounds/beep.mp3')
-  audio.play().catch(() => {})
-}
-
 async function saveCurrentBook() {
   if (!book.value) return
 
   saveStatus.value = 'saving'
   try {
-    await createScan({
+    await addScan({
       isbn: book.value.isbn || '',
       title: book.value.title || '',
       authors: book.value.authors?.join('; ') || '',
       publisher: book.value.publisher || '',
-      status: 'complete'
+      status: 'complete',
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString()
     })
     saveStatus.value = 'saved'
     setTimeout(() => {
@@ -69,24 +63,13 @@ async function saveCurrentBook() {
   }
 }
 
-onMounted(async () => {
-  const { Html5Qrcode } = await import('html5-qrcode')
-
-  const scannerInstance = new Html5Qrcode('scanner-reader', { verbose: false })
-  scanner.value = scannerInstance
-
-  await scannerInstance.start(
-    { facingMode: 'environment' },
-    { fps: 10, qrbox: { width: 250, height: 150 } },
-    onScanSuccess,
-    () => {} // Ignore errors
-  )
+onMounted(() => {
+  if (scannerRef.value) {
+    // Start scanner when mounted
+    startScanner('scanner-reader', onScanSuccess, (err) => console.warn(err))
+  }
 })
-
-onUnmounted(() => {
-  scanner.value?.stop().catch(() => {})
-  scanner.value?.clear()
-})
+// onUnmounted is handled by useScanner composable
 </script>
 
 <template>

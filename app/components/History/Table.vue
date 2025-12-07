@@ -1,7 +1,9 @@
 <script setup lang="ts">
-const { scans, loading, error, fetchScans, deleteScan } = useScans()
+const { history: scans, loading, error, fetchHistory, removeScan } = useHistory()
 
 const searchQuery = ref('')
+// We might want to pass search query as prop or handle it internally
+// For now keeping self-contained
 
 const filteredScans = computed(() => {
   if (!searchQuery.value) return scans.value
@@ -15,11 +17,11 @@ const filteredScans = computed(() => {
 
 async function handleDelete(id: string) {
   if (confirm('Delete this scan?')) {
-    await deleteScan(id)
+    await removeScan(id)
   }
 }
 
-onMounted(() => fetchScans())
+onMounted(() => fetchHistory())
 </script>
 
 <template>

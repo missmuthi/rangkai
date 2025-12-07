@@ -1,9 +1,11 @@
 <script setup lang="ts">
 import type { BookMetadata } from '~/types/book'
+import { cn } from '~/utils/cn'
 
 const props = defineProps<{
   book: BookMetadata
   showActions?: boolean
+  class?: string
 }>()
 
 const emit = defineEmits<{
@@ -20,7 +22,7 @@ const coverUrl = computed(() => {
 </script>
 
 <template>
-  <article class="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden">
+  <article :class="cn('bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden', props.class)">
     <div class="flex">
       <!-- Cover Image -->
       <div class="w-24 h-36 flex-shrink-0 bg-gray-100 dark:bg-gray-700">

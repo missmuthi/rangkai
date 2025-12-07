@@ -3,29 +3,11 @@ definePageMeta({
   middleware: 'auth'
 })
 
-const { scans, fetchScans } = useScans()
+const { history: scans } = useHistory() // keeping 'scans' alias for now to minimize template changes if any, but actually template uses <HistoryTable> which handles fetching
+const { exportToCSV } = useSlimsExport()
 
-onMounted(() => fetchScans())
-
-function exportCSV() {
-  const headers = ['ISBN', 'Title', 'Authors', 'Publisher', 'Date']
-  const rows = scans.value.map(s => [
-    s.isbn,
-    s.title,
-    s.authors,
-    s.publisher,
-    new Date(s.created_at).toISOString()
-  ])
-
-  const csv = [headers, ...rows].map(r => r.map(c => `"${c || ''}"`).join(',')).join('\n')
-  const blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8;' })
-  const url = URL.createObjectURL(blob)
-
-  const a = document.createElement('a')
-  a.href = url
-  a.download = `rangkai-scans-${new Date().toISOString().slice(0, 10)}.csv`
-  a.click()
-  URL.revokeObjectURL(url)
+function handleExport() {
+  exportToCSV(scans.value)
 }
 </script>
 
@@ -35,12 +17,12 @@ function exportCSV() {
       <h1 class="text-2xl font-bold">Scan History</h1>
       <button
         class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
-        @click="exportCSV"
+        @click="handleExport"
       >
         Export CSV
       </button>
     </header>
 
-    <ScanHistory />
+    <HistoryTable />
   </div>
 </template>

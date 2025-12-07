@@ -1,11 +1,11 @@
-import type { BookMetadata } from '~/types/book'
+import type { BookMetadata } from '~/types'
 
-export function useBookFetch() {
+export function useBookSearch() {
   const book = ref<BookMetadata | null>(null)
   const loading = ref(false)
   const error = ref<string | null>(null)
 
-  async function fetchBook(isbn: string) {
+  async function searchByISBN(isbn: string) {
     loading.value = true
     error.value = null
     book.value = null
@@ -13,9 +13,8 @@ export function useBookFetch() {
     try {
       const data = await $fetch<BookMetadata>(`/api/book/${isbn}`)
       book.value = data
-    } catch (e: unknown) {
-      const err = e as { data?: { message?: string } }
-      error.value = err.data?.message || 'Failed to fetch book metadata'
+    } catch (e: any) {
+      error.value = e.data?.message || e.message || 'Failed to fetch book metadata'
     } finally {
       loading.value = false
     }
@@ -23,6 +22,7 @@ export function useBookFetch() {
 
   async function cleanMetadata(metadata: Partial<BookMetadata>) {
     try {
+      // Using AI endpoint if available, otherwise just return metadata
       const cleaned = await $fetch<BookMetadata>('/api/ai/clean', {
         method: 'POST',
         body: metadata
@@ -33,5 +33,6 @@ export function useBookFetch() {
     }
   }
 
-  return { book, loading, error, fetchBook, cleanMetadata }
+  return { book, loading, error, searchByISBN, cleanMetadata }
 }
+

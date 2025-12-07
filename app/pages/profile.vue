@@ -3,38 +3,10 @@ definePageMeta({
   middleware: 'auth',
 })
 
-interface ProfileData {
-  id: string
-  email: string
-  name: string | null
-}
+const { profile, isLoading, error: errorMessage, loadProfile, updateProfile } = useProfile()
 
-const profile = ref<ProfileData | null>(null)
-const isLoading = ref(true)
-const errorMessage = ref('')
-
-async function loadProfile() {
-  isLoading.value = true
-  errorMessage.value = ''
-
-  try {
-    const data = await $fetch<ProfileData>('/api/profile', {
-      credentials: 'include',
-    })
-    profile.value = data
-  } catch (error: unknown) {
-    const err = error as { data?: { message?: string } }
-    errorMessage.value = err?.data?.message || 'Failed to load profile'
-  } finally {
-    isLoading.value = false
-  }
-}
-
-function handleProfileSave(updatedProfile: ProfileData) {
-  profile.value = updatedProfile
-  // Re-fetch session to update the global auth state
-  const { fetchSession } = useAuth()
-  fetchSession()
+function handleProfileSave(updatedProfile: any) {
+  updateProfile(updatedProfile)
 }
 
 onMounted(() => {
