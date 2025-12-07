@@ -18,6 +18,7 @@ pages_build_output_dir = "dist"
 binding = "DB"
 database_name = "rangkai-db"
 database_id = "ff59aaac-cf7a-44f2-8f94-1d71482389c9"
+migrations_dir = "server/db/migrations"
 
 # KV Namespaces
 [[kv_namespaces]]

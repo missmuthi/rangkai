@@ -36,7 +36,8 @@ export async function fetchOpenLibrary(isbn: string): Promise<BookMetadata | nul
     const editionResponse = await fetch(editionUrl, {
       signal: controller.signal,
       headers: {
-        'Accept': 'application/json'
+        'Accept': 'application/json',
+        'User-Agent': 'RangkaiBot/1.0 (https://rangkai.app)'
       }
     })
 

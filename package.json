@@ -21,6 +21,11 @@
     "test:all": "pnpm test && pnpm test:e2e",
     "migrate:prod": "npx wrangler d1 execute rangkai-db --remote --file=./server/db/migrations/0001_init.sql"
   },
+  "nuxthub": {
+    "hooks": {
+      "deploy": "npm run migrate:prod"
+    }
+  },
   "dependencies": {
     "@nuxt/eslint": "^1.4.1",
     "@nuxthub/core": "^0.9.0",

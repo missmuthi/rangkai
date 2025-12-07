@@ -32,7 +32,8 @@ export async function fetchLoc(isbn: string): Promise<BookMetadata | null> {
     const response = await fetch(url, {
       signal: controller.signal,
       headers: {
-        'Accept': 'application/json'
+        'Accept': 'application/json',
+        'User-Agent': 'RangkaiBot/1.0 (https://rangkai.app)'
       }
     })
 
