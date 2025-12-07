@@ -61,12 +61,18 @@ export default defineEventHandler(async (event): Promise<BookResponse> => {
         isbn: bookRecord.isbn,
         title: bookRecord.title,
         subtitle: null, 
-        authors: bookRecord.authors || [],
+        authors: Array.isArray(bookRecord.authors) ? bookRecord.authors : 
+                 (typeof bookRecord.authors === 'string' ? 
+                  (()=> { try { const p = JSON.parse(bookRecord.authors as string); return Array.isArray(p) ? p : [] } catch { return [] } })() 
+                  : []),
         publisher: bookRecord.publisher,
         publishedDate: bookRecord.publishedDate,
         description: bookRecord.description,
         pageCount: bookRecord.pageCount,
-        categories: bookRecord.categories || [],
+        categories: Array.isArray(bookRecord.categories) ? bookRecord.categories : 
+                    (typeof bookRecord.categories === 'string' ? 
+                     (()=> { try { const p = JSON.parse(bookRecord.categories as string); return Array.isArray(p) ? p : [] } catch { return [] } })() 
+                     : []),
         language: bookRecord.language,
         thumbnail: bookRecord.thumbnail,
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
