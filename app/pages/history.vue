@@ -99,7 +99,9 @@ onMounted(() => {
           Export All
         </button>
         
+        <!-- Only show header button when we have data (avoid duplicate CTAs) -->
         <NuxtLink 
+          v-if="hasData"
           to="/scan/mobile"
           class="inline-flex items-center px-4 py-2 text-sm font-medium bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
         >
@@ -201,14 +203,16 @@ onMounted(() => {
       <!-- Empty State A: No Data At All -->
       <div v-else-if="!hasData" class="flex h-[450px] shrink-0 items-center justify-center rounded-lg border border-dashed border-gray-300 dark:border-gray-700">
         <div class="mx-auto flex max-w-[420px] flex-col items-center justify-center text-center">
+          <!-- Softer icon background -->
           <div class="flex h-20 w-20 items-center justify-center rounded-full bg-gray-100 dark:bg-gray-800">
-            <!-- ScanBarcode Icon -->
-            <svg class="h-10 w-10 text-indigo-600 dark:text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <!-- ScanBarcode Icon - using muted color for softer look -->
+            <svg class="h-10 w-10 text-gray-500 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" />
             </svg>
           </div>
           <h3 class="mt-4 text-lg font-semibold text-gray-900 dark:text-white">No books scanned</h3>
-          <p class="mb-4 mt-2 text-sm text-gray-500 dark:text-gray-400">
+          <!-- Constrained text width for better readability -->
+          <p class="mb-4 mt-2 text-sm text-gray-500 dark:text-gray-400 max-w-sm">
             You haven't scanned any books yet. Start scanning to populate your library metadata.
           </p>
           <NuxtLink 
