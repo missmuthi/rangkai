@@ -89,12 +89,12 @@ export const books = sqliteTable('books', {
   isbn10: text('isbn10'), // Original ISBN-10 if available
   isbn13: text('isbn13'), // Original ISBN-13 if available
   title: text('title').notNull(),
-  authors: text('authors'), // JSON array as string: '["Author 1", "Author 2"]'
+  authors: text('authors', { mode: 'json' }).$type<string[]>(), // JSON array
   publisher: text('publisher'),
   publishedDate: text('publishedDate'), // ISO date string or year
   description: text('description'),
   pageCount: integer('pageCount'),
-  categories: text('categories'), // JSON array as string
+  categories: text('categories', { mode: 'json' }).$type<string[]>(), // JSON array
   thumbnail: text('thumbnail'), // Cover image URL
   language: text('language'), // ISO language code
   previewLink: text('previewLink'), // Google Books preview URL
@@ -113,7 +113,7 @@ export const books = sqliteTable('books', {
   // AI Enhancement
   isAiEnhanced: integer('is_ai_enhanced', { mode: 'boolean' }).default(false),
   enhancedAt: integer('enhanced_at', { mode: 'timestamp' }),
-  aiLog: text('ai_log'), // JSON array of AI changes
+  aiLog: text('ai_log', { mode: 'json' }).$type<any[]>(), // JSON array of AI changes
   // Metadata source tracking
   source: text('source').default('google_books'), // 'google_books', 'open_library', 'manual'
   rawMetadata: text('rawMetadata'), // Original API response as JSON string
@@ -137,7 +137,7 @@ export const scans = sqliteTable('scans', {
   // Fallback fields if book lookup failed
   isbn: text('isbn').notNull(), // Original scanned ISBN
   title: text('title'), // Manual entry or from failed lookup
-  authors: text('authors'), // Manual entry
+  authors: text('authors', { mode: 'json' }).$type<string[]>(), // Manual entry
   publisher: text('publisher'),
   description: text('description'),
   // SLiMS Bibliographic Fields
@@ -154,12 +154,12 @@ export const scans = sqliteTable('scans', {
   // AI Enhancement
   isAiEnhanced: integer('is_ai_enhanced', { mode: 'boolean' }).default(false),
   enhancedAt: integer('enhanced_at', { mode: 'timestamp' }),
-  aiLog: text('ai_log'),
+  aiLog: text('ai_log', { mode: 'json' }).$type<any[]>(),
   jsonData: text('json_data'), // Full MergedBookData as JSON
   // Scan-specific data
   status: text('status').notNull().default('pending'), // 'pending', 'complete', 'error', 'exported'
   notes: text('notes'), // User notes
-  exportedAt: integer('exportedAt', { mode: 'timestamp' }), // When exported to SLIMS
+  exportedAt: integer('exported_at', { mode: 'timestamp' }), // When exported to SLIMS
   createdAt: integer('created_at', { mode: 'timestamp' }).notNull(),
   updatedAt: integer('updated_at', { mode: 'timestamp' }).notNull(),
 }, (table) => [
@@ -188,11 +188,11 @@ export const scansHistory = sqliteTable('scans_history', {
   title: text('title'),
   
   // Full metadata snapshot
-  authors: text('authors'),
+  authors: text('authors', { mode: 'json' }).$type<string[]>(),
   publisher: text('publisher'),
   description: text('description'),
   pageCount: integer('page_count'),
-  categories: text('categories'),
+  categories: text('categories', { mode: 'json' }).$type<string[]>(),
   language: text('language'),
   thumbnail: text('thumbnail'),
   previewLink: text('preview_link'),
@@ -213,7 +213,7 @@ export const scansHistory = sqliteTable('scans_history', {
   // AI Meta
   isAiEnhanced: integer('is_ai_enhanced', { mode: 'boolean' }),
   enhancedAt: integer('enhanced_at', { mode: 'timestamp' }),
-  aiLog: text('ai_log'),
+  aiLog: text('ai_log', { mode: 'json' }).$type<any[]>(),
   jsonData: text('json_data'), // Full MergedBookData as JSON
   
   status: text('status'),

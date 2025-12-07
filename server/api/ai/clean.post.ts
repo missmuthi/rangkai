@@ -29,7 +29,7 @@ export default defineEventHandler(async (event) => {
     })
   }
 
-  const db = hubDatabase()
+  const db = useDb()
   const { classificationCache } = await import('../../db/schema')
   const isbn = metadata.isbn
 
@@ -132,15 +132,18 @@ export default defineEventHandler(async (event) => {
 Your task is to enhance book metadata with accurate classifications.
 
 Strictly follow these rules:
-1. OUTPUT FORMAT: Return ONLY a valid JSON object. No markdown, no extra text.
-2. DDC/LCC: Assign Dewey Decimal (DDC) and Library of Congress (LCC) classifications.
-   - If you cannot determine with 80%+ confidence, set to null.
-   - Use the REFERENCE EXAMPLES to match the style of similar books if provided.
-3. CALL NUMBER: Generate a call number following this pattern: DDC + first 3 letters of author's last name (e.g., "650.1 NEW").
-4. SUBJECTS: Generate 3-5 relevant Library of Congress Subject Headings (semicolon separated).
-5. CLASSIFICATION TRUST: Set to 'low' if estimated, 'medium' if from known patterns.
-6. AI LOG: Create an array of strings describing what you added (e.g., ["Estimated DDC: 650.1", "Created call number"]).
-7. IMPORTANT: Set 'isAiEnhanced' to true in the response.
+1. OUTPUT FORMAT: Return the COMPLETE book metadata as a valid JSON object, INCLUDING all original fields (isbn, title, authors, publisher, etc.) PLUS your classifications. No markdown, no extra text.
+2. PRESERVE ORIGINAL: Keep ALL original fields (authors, title, publisher, publishedDate, description, pageCount, categories, language, thumbnail, source, etc.) in your response.
+3. ADD CLASSIFICATIONS: Add these fields:
+   - DDC: Dewey Decimal Classification (string or null if uncertain)
+   - LCC: Library of Congress Classification (string or null if uncertain)
+   - callNumber: Format as "DDC + first 3 letters of author's last name" (e.g., "650.1 NEW")
+   - subjects: 3-5 relevant Library of Congress Subject Headings (semicolon separated string)
+   - classificationTrust: 'low' if estimated, 'medium' if from known patterns, 'high' if certain
+   - AI_LOG: Array of strings describing what you added (e.g., ["Estimated DDC: 650.1", "Created call number"])
+   - isAiEnhanced: Set to true
+4. CONFIDENCE: If you cannot determine DDC/LCC with 80%+ confidence, set to null.
+5. RAG GUIDANCE: Use the REFERENCE EXAMPLES to match the style of similar books if provided.
 ${ragContext}`
   
   const userPrompt = JSON.stringify(metadata)
@@ -173,10 +176,46 @@ ${ragContext}`
     
     const enhancedData = JSON.parse(content)
     
+    // Debug: Log what AI actually returned
+    console.info('[AI Clean] Raw AI response:', JSON.stringify(enhancedData, null, 2))
+    
+    // Normalize keys (AI sometimes returns uppercase) and handle "null" strings
+    const normalizeValue = (val: any) => {
+      if (val === 'null' || val === 'undefined') return null
+      return val
+    }
+
+    const ddc = normalizeValue(enhancedData.ddc || enhancedData.DDC)
+    const lcc = normalizeValue(enhancedData.lcc || enhancedData.LCC)
+    const callNumber = normalizeValue(enhancedData.callNumber || enhancedData.CALL_NUMBER)
+    const subjects = normalizeValue(enhancedData.subjects || enhancedData.SUBJECTS)
+    const classificationTrust = normalizeValue(enhancedData.classificationTrust || enhancedData.CLASSIFICATION_TRUST)
+
+    // Normalize authors (ensure array)
+    let authors = enhancedData.authors || enhancedData.AUTHORS || []
+    if (typeof authors === 'string') {
+       try {
+         authors = JSON.parse(authors)
+       } catch (e) {
+         authors = [authors] // Treat as single author name
+       }
+    }
+    if (!Array.isArray(authors)) {
+      authors = [String(authors)]
+    }
+
     // Add AI metadata
     enhancedData.isAiEnhanced = true
     enhancedData.enhancedAt = new Date().toISOString()
     
+    // Update enhancedData with normalized values for subsequent usage
+    enhancedData.ddc = ddc
+    enhancedData.lcc = lcc
+    enhancedData.callNumber = callNumber
+    enhancedData.subjects = subjects
+    enhancedData.classificationTrust = classificationTrust
+    enhancedData.authors = authors
+
     if (!enhancedData.aiLog || !Array.isArray(enhancedData.aiLog)) {
       enhancedData.aiLog = ['AI classification applied']
     }
@@ -200,7 +239,22 @@ ${ragContext}`
       }).onConflictDoNothing()
     }
     
-    return enhancedData as BookMetadata
+    // Sanitize data: convert undefined to null for SQLite compatibility
+    const sanitized = {
+      ...metadata,
+      ...enhancedData,
+      // Ensure critical fields are never undefined
+      ddc: enhancedData.ddc || metadata.ddc || null,
+      lcc: enhancedData.lcc || metadata.lcc || null,
+      callNumber: enhancedData.callNumber || metadata.callNumber || null,
+      subjects: enhancedData.subjects || metadata.subjects || null,
+      classificationTrust: enhancedData.classificationTrust || metadata.classificationTrust || null,
+      aiLog: JSON.stringify(enhancedData.aiLog || ['AI classification applied']),
+      isAiEnhanced: true,
+      enhancedAt: enhancedData.enhancedAt
+    }
+    
+    return sanitized as BookMetadata
     
   } catch (error: any) {
     console.error('[AI Clean] Groq failed:', {

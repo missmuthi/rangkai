@@ -41,10 +41,14 @@ const publisherString = computed(() => {
   const parts = []
   if (props.book.publishPlace) parts.push(props.book.publishPlace)
   if (props.book.publisher) parts.push(props.book.publisher)
+  
   if (props.book.publishedDate) {
-    const year = props.book.publishedDate.match(/\d{4}/)?.[0]
+    // Safety check: ensure publishedDate is a string before calling match
+    const dateStr = String(props.book.publishedDate)
+    const year = dateStr.match(/\d{4}/)?.[0]
     if (year) parts.push(year)
   }
+  
   return parts.length > 0 ? parts.join(' : ') : props.book.publisher || '-'
 })
 

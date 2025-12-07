@@ -12,6 +12,7 @@ const isCleaning = ref(false)
 const loadingStep = ref('')
 const cooldown = ref(0)
 const cleanError = ref<string | null>(null)
+const showDebug = ref(false)
 let cooldownTimer: NodeJS.Timeout
 
 // Steps for AI loader
@@ -114,6 +115,13 @@ async function handleAiClean() {
 function handleEdit() {
   alert('Manual editing is coming soon to Rangkai!')
 }
+
+function copyDebug() {
+  if (book.value) {
+    navigator.clipboard.writeText(JSON.stringify(book.value, null, 2))
+    alert('Debug info copied to clipboard!')
+  }
+}
 </script>
 
 <template>
@@ -162,6 +170,22 @@ function handleEdit() {
       </div>
     </div>
 
+    <!-- STATUS OVERLAY (DEBUG) -->
+    <div class="fixed bottom-4 right-4 z-50 p-4 bg-black/80 text-white text-xs font-mono rounded shadow-lg pointer-events-auto">
+      <p>Loaded: {{ !!book }}</p>
+      <p>Loading: {{ loading }}</p>
+      <p>Clean: {{ isCleaning }}</p>
+      <p>Err: {{ !!error }}</p>
+      <p>ISBN: {{ isbn }}</p>
+      <button @click="showDebug = !showDebug" class="mt-2 underline text-yellow-400">Toggle JSON</button>
+    </div>
+
+    <!-- Debug Section (Unconditional) -->
+    <div v-if="showDebug" class="fixed inset-0 z-50 bg-black/90 text-green-400 p-8 overflow-auto font-mono text-xs">
+      <button @click="showDebug = false" class="absolute top-4 right-4 text-white text-lg">✕</button>
+      <pre>{{ JSON.stringify({ book, loading, error, cleanError }, null, 2) }}</pre>
+    </div>
+
     <div v-if="loading" class="flex items-center justify-center p-12">
       <div class="animate-spin w-8 h-8 border-4 border-indigo-600 border-t-transparent rounded-full" />
     </div>
@@ -181,29 +205,9 @@ function handleEdit() {
 
     <!-- AI Error Display -->
     <div v-else-if="cleanError" class="p-6 bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-400 rounded-lg border border-amber-200 dark:border-amber-900/30 max-w-2xl mx-auto my-12">
-      <div class="flex items-start gap-3">
-        <svg class="w-5 h-5 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-        </svg>
-        <div class="flex-1">
-          <p class="font-medium">AI Enhancement Failed</p>
-          <p class="text-sm mt-2 leading-relaxed">{{ cleanError }}</p>
-          <div class="mt-4 pt-3 border-t border-amber-200 dark:border-amber-800">
-            <p class="text-xs font-medium mb-2">Troubleshooting:</p>
-            <ul class="text-xs space-y-1 list-disc list-inside">
-              <li>Check your internet connection</li>
-              <li>Wait a moment and try again</li>
-              <li>If issue persists, contact support with error details above</li>
-            </ul>
-          </div>
-          <button 
-            class="mt-3 text-sm underline hover:no-underline"
-            @click="cleanError = null"
-          >
-            Dismiss
-          </button>
-        </div>
-      </div>
+      <!-- ... error content ... -->
+       <p>{{ cleanError }}</p>
+       <button class="mt-2 underline" @click="cleanError = null">Dismiss</button>
     </div>
 
     <div v-else-if="error" class="p-6 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 rounded-lg border border-red-100 dark:border-red-900/30">
@@ -211,7 +215,7 @@ function handleEdit() {
       <p class="text-sm mt-1">{{ error }}</p>
     </div>
 
-    <div v-else-if="book" class="animate-in fade-in slide-in-from-bottom-4 duration-500 bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 p-6 md:p-8">
+    <div v-else-if="book" class="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 p-6 md:p-8">
       <!-- Mobile Saved Badge -->
        <div v-if="isSaved" class="sm:hidden mb-6 flex items-center justify-center">
         <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-sm font-medium bg-green-50 text-green-700 dark:bg-green-900/30 dark:text-green-400 border border-green-100 dark:border-green-900/50">
@@ -224,6 +228,24 @@ function handleEdit() {
 
     <div v-else class="text-center text-muted-foreground py-12">
       No book found specifically for ISBN {{ isbn }}
+    </div>
+
+    <!-- Debug Section -->
+    <div class="mt-12 pt-8 border-t border-gray-200 dark:border-gray-800">
+      <button 
+        @click="showDebug = !showDebug" 
+        class="text-xs text-gray-500 hover:text-gray-900 dark:hover:text-gray-300 underline"
+      >
+        {{ showDebug ? 'Hide Debug Info' : 'Show Debug Info' }}
+      </button>
+      
+      <div v-if="showDebug" class="mt-4 p-4 bg-gray-100 dark:bg-gray-800 rounded-lg overflow-auto max-h-96 font-mono text-xs text-gray-700 dark:text-gray-300">
+        <div class="flex justify-between items-center mb-2">
+          <span class="font-bold">Raw Book Data:</span>
+          <button @click="copyDebug" class="text-indigo-600 hover:underline">Copy JSON</button>
+        </div>
+        <pre>{{ JSON.stringify(book, null, 2) }}</pre>
+      </div>
     </div>
   </div>
 </template>

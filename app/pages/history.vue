@@ -27,7 +27,7 @@ useHead({
   ]
 })
 
-const { history, loading, fetchHistory } = useHistory()
+const { history, loading, error, fetchHistory } = useHistory()
 const { exportToCSV } = useSlimsExport()
 
 // Filter state
@@ -178,6 +178,29 @@ onMounted(() => {
 
     <!-- Content Area -->
     <section class="space-y-4">
+      <!-- Error State -->
+      <div v-if="error" class="p-4 rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800">
+        <div class="flex items-start gap-3">
+          <AlertCircle class="h-5 w-5 text-red-600 dark:text-red-400 mt-0.5" />
+          <div class="flex-1">
+            <h3 class="text-sm font-medium text-red-800 dark:text-red-300">
+              Failed to load history
+            </h3>
+            <p class="mt-1 text-sm text-red-700 dark:text-red-400">
+              {{ error }}
+            </p>
+            <Button 
+              variant="outline" 
+              class="mt-3 border-red-200 text-red-800 hover:bg-red-100 dark:border-red-800 dark:text-red-300 dark:hover:bg-red-900/40"
+              size="sm"
+              @click="fetchHistory"
+            >
+              Try Again
+            </Button>
+          </div>
+        </div>
+      </div>
+
       <!-- Search Bar (only shown when has data) -->
       <div v-if="hasData" class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div class="flex items-center gap-2 w-full sm:w-auto">
