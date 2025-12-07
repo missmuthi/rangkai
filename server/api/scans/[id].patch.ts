@@ -16,6 +16,7 @@ interface UpdateScanBody {
   categories?: string[] // JSON array
   language?: string
   thumbnail?: string
+  source?: string // 'google' | 'openlibrary' | 'manual' | ...
   
   // SLiMS
   ddc?: string
@@ -49,6 +50,11 @@ export default defineEventHandler(async (event) => {
   if (!id) throw createError({ statusCode: 400, message: 'Scan ID required' })
 
   console.info(`[api:scans] Updating scan ${id} for user ${user.id}`)
+  
+  // DEBUG: Check what fields are being received vs processed
+  console.log('[api:scans] PATCH Body keys:', Object.keys(body))
+  if ('ddc' in body) console.log('[api:scans] Body has DDC:', body.ddc)
+  if ('source' in body) console.log('[api:scans] Body has Source:', body.source)
 
   // Allow all fields from body that match schema
   // (In a real app we might want stricter validation/sanitization here)

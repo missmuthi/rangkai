@@ -157,6 +157,7 @@ export const scans = sqliteTable('scans', {
   aiLog: text('ai_log', { mode: 'json' }).$type<any[]>(),
   jsonData: text('json_data'), // Full MergedBookData as JSON
   // Scan-specific data
+  source: text('source'), // 'google', 'openlibrary', 'ai', 'manual'
   status: text('status').notNull().default('pending'), // 'pending', 'complete', 'error', 'exported'
   notes: text('notes'), // User notes
   exportedAt: integer('exported_at', { mode: 'timestamp' }), // When exported to SLIMS
