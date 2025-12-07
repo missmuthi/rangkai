@@ -4,15 +4,13 @@ definePageMeta({
   layout: 'scanner'
 })
 
-const { book, loading, error, searchByISBN, cleanMetadata } = useBookSearch()
-const { addScan } = useHistory()
+const { book, scanId, loading, error, searchByISBN, cleanMetadata } = useBookSearch()
 const { startScanner } = useScanner()
 
 const scannerRef = ref<HTMLElement | null>(null)
 const lastScan = ref('')
 const lastScanAt = ref(0)
 const autoClean = ref(true)
-const saveStatus = ref<'idle' | 'saving' | 'saved' | 'error'>('idle')
 
 async function onScanSuccess(decodedText: string) {
   // Debounce duplicates (3 second window)
@@ -30,36 +28,12 @@ async function onScanSuccess(decodedText: string) {
     return
   }
 
-  // Fetch metadata
+  // Fetch metadata & Auto-save (handled by server)
   await searchByISBN(isbn)
 
   // Auto-clean if enabled
   if (autoClean.value && book.value) {
     book.value = await cleanMetadata(book.value)
-  }
-}
-
-async function saveCurrentBook() {
-  if (!book.value) return
-
-  saveStatus.value = 'saving'
-  try {
-    await addScan({
-      isbn: book.value.isbn || '',
-      title: book.value.title || '',
-      authors: book.value.authors?.join('; ') || '',
-      publisher: book.value.publisher || '',
-      status: 'complete',
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString()
-    })
-    saveStatus.value = 'saved'
-    setTimeout(() => {
-      book.value = null
-      saveStatus.value = 'idle'
-    }, 1500)
-  } catch {
-    saveStatus.value = 'error'
   }
 }
 
@@ -104,11 +78,12 @@ onMounted(() => {
     </div>
 
     <div v-else-if="book" class="p-4">
-      <BookCard :book="book" :show-actions="true" @save="saveCurrentBook" />
-
-      <div v-if="saveStatus === 'saved'" class="mt-4 text-green-400 text-center">
+      <!-- Show saved state indicator -->
+      <div v-if="scanId" class="mb-2 text-green-400 text-center text-sm font-medium animate-in fade-in slide-in-from-top-2">
         ✓ Saved to history
       </div>
+      
+      <BookCard :book="book" :show-actions="false" />
     </div>
 
     <!-- Navigation Footer -->

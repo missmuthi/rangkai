@@ -45,6 +45,8 @@ export async function mockBookApi(page: Page): Promise<void> {
           contentType: 'application/json',
           body: JSON.stringify({
             metadata: bookFixture,
+            scan_id: 'mock-scan-id-123',
+            source: 'mock',
             cached: false
           }),
           headers: {

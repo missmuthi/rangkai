@@ -31,7 +31,7 @@ const onSearch = () => {
       </p>
 
       <!-- Smart Search Input -->
-      <div class="relative w-full max-w-xl mx-auto group">
+      <form class="relative w-full max-w-xl mx-auto group" @submit.prevent="onSearch">
         <div class="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground">
           <Search class="h-5 w-5" />
         </div>
@@ -40,11 +40,12 @@ const onSearch = () => {
           v-model="searchQuery"
           class="pl-12 pr-14 h-14 text-lg rounded-full shadow-sm border-muted-foreground/20 focus-visible:ring-primary/20 transition-all group-hover:shadow-md"
           placeholder="Search by Title, Author, or ISBN..."
-          @keydown.enter="onSearch"
         />
         
         <div class="absolute right-2 top-1/2 -translate-y-1/2">
           <Button 
+            v-if="!searchQuery"
+            type="button"
             variant="ghost" 
             size="icon" 
             class="h-10 w-10 rounded-full hover:bg-primary/10 hover:text-primary transition-colors"
@@ -53,8 +54,18 @@ const onSearch = () => {
           >
             <Camera class="h-5 w-5" />
           </Button>
+          <Button
+            v-else
+            type="submit"
+            variant="ghost"
+            size="icon"
+            class="h-10 w-10 rounded-full hover:bg-primary/10 hover:text-primary transition-colors"
+            title="Search"
+          >
+            <ArrowRight class="h-5 w-5" />
+          </Button>
         </div>
-      </div>
+      </form>
     </section>
 
     <!-- Recent Scans / History -->

@@ -1,105 +1,172 @@
 /**
- * GET /api/book/[isbn] - Fetch book metadata from Google Books API
+ * GET /api/book/[isbn] - Fetch book metadata, merge sources, and save to history
  *
- * Features:
- * - KV caching with 24h TTL
- * - X-Cache header (HIT/MISS)
- * - Retry logic (3 attempts with exponential backoff)
- * - Background audit logging via waitUntil
+ * Flow:
+ * 1. Auth Guard (Strict)
+ * 2. Validate ISBN
+ * 3. Check DB Cache (books table)
+ * 4. Cache Miss -> Fetch & Merge (Google + OL + LoC)
+ * 5. Upsert Master Record (books table)
+ * 6. Upsert User History (scans table)
+ * 7. Return Result
  */
 
-import { fetchGoogleBooks } from '../../utils/metadata/google'
+import { eq, and } from 'drizzle-orm'
+import { fetchBookByIsbn } from '../../utils/metadata'
+import { books, scans } from '../../db/schema'
+import { useDb } from '../../utils/db'
+import { requireUserSession } from '../../utils/session'
 import type { BookMetadata } from '../../utils/metadata/types'
-
-const CACHE_TTL_SECONDS = 60 * 60 * 24 // 24 hours
 
 interface BookResponse {
   metadata: BookMetadata | null
+  scan_id: string | null
+  source: string
   cached: boolean
+  meta?: any
 }
 
 export default defineEventHandler(async (event): Promise<BookResponse> => {
-  const isbn = getRouterParam(event, 'isbn')
+  // 1. Strict Auth Guard
+  const session = await requireUserSession(event)
+  const userId = session.user.id
 
+  const isbn = getRouterParam(event, 'isbn')
   if (!isbn) {
-    throw createError({
-      statusCode: 400,
-      message: 'ISBN is required'
-    })
+    throw createError({ statusCode: 400, message: 'ISBN is required' })
   }
 
-  // Validate ISBN format (10 or 13 digits, with optional hyphens)
+  // 2. Validate ISBN
   const cleanIsbn = isbn.replace(/[-\s]/g, '')
   if (!/^(\d{10}|\d{13})$/.test(cleanIsbn)) {
-    throw createError({
-      statusCode: 400,
-      message: 'Invalid ISBN format. Must be 10 or 13 digits.'
-    })
+    throw createError({ statusCode: 400, message: 'Invalid ISBN format' })
   }
 
-  const cacheKey = `book:${cleanIsbn}`
-  const kv = hubKV()
-
-  // 1. Check KV cache first
-  try {
-    const cached = await kv.get<BookResponse>(cacheKey)
-    if (cached) {
-      console.info(`[api:book] Cache HIT for ISBN ${cleanIsbn}`)
-      setHeader(event, 'X-Cache', 'HIT')
-      return { ...cached, cached: true }
-    }
-  } catch (error) {
-    console.warn(`[api:book] Cache read error for ISBN ${cleanIsbn}:`, error)
-  }
-
-  // Cache MISS - fetch from Google Books API
-  setHeader(event, 'X-Cache', 'MISS')
-  console.info(`[api:book] Cache MISS - Fetching metadata for ISBN ${cleanIsbn}`)
-
-  const startTime = Date.now()
-  const metadata = await fetchGoogleBooks(cleanIsbn)
-  const duration = Date.now() - startTime
-
-  console.info(`[api:book] Fetched ISBN ${cleanIsbn} in ${duration}ms`, {
-    found: !!metadata
+  const db = useDb()
+  
+  // 3. Check DB Cache (Books Table)
+  let bookRecord = await db.query.books.findFirst({
+    where: eq(books.isbn, cleanIsbn)
   })
 
-  const response: BookResponse = {
-    metadata,
-    cached: false
-  }
+  let metadata: BookMetadata | null = null
+  let isCached = false
+  let meta = {}
 
-  // 2. Cache the result if we have data
-  if (metadata) {
+  if (bookRecord) {
+    // Cache Hit in DB
+    isCached = true
     try {
-      await kv.set(cacheKey, response, { ttl: CACHE_TTL_SECONDS })
-      console.info(`[api:book] Cached ISBN ${cleanIsbn} for ${CACHE_TTL_SECONDS}s`)
-    } catch (error) {
-      console.warn(`[api:book] Cache write error for ISBN ${cleanIsbn}:`, error)
+      metadata = {
+        isbn: bookRecord.isbn,
+        title: bookRecord.title,
+        subtitle: null, 
+        authors: bookRecord.authors ? JSON.parse(bookRecord.authors) : [],
+        publisher: bookRecord.publisher,
+        publishedDate: bookRecord.publishedDate,
+        description: bookRecord.description,
+        pageCount: bookRecord.pageCount,
+        categories: bookRecord.categories ? JSON.parse(bookRecord.categories) : [],
+        language: bookRecord.language,
+        thumbnail: bookRecord.thumbnail,
+        source: (bookRecord.source as any) || 'database'
+      }
+    } catch (e) {
+      console.warn('Error parsing cached book metadata:', e)
+      bookRecord = undefined 
     }
   }
 
-  // 3. Background audit log (non-blocking)
-  // Note: waitUntil requires Cloudflare runtime context
-  // In local dev, this runs synchronously
-  const cloudflareContext = event.context.cloudflare
-  if (cloudflareContext?.context?.waitUntil) {
-    cloudflareContext.context.waitUntil(
-      logBookFetch(cleanIsbn, !!metadata, duration).catch(err =>
-        console.warn('[api:book] Audit log error:', err)
-      )
-    )
+  // 4. Cache Miss -> Fetch & Merge
+  if (!bookRecord) {
+    const fetchResult = await fetchBookByIsbn(cleanIsbn)
+    metadata = fetchResult.data
+    meta = fetchResult.meta
+
+    if (metadata) {
+      // 5. Upsert Master Record (Books Table)
+      const now = new Date()
+      const newBook = {
+        id: crypto.randomUUID(),
+        isbn: cleanIsbn,
+        title: metadata.title || 'Unknown Title',
+        authors: JSON.stringify(metadata.authors),
+        publisher: metadata.publisher,
+        publishedDate: metadata.publishedDate,
+        description: metadata.description,
+        pageCount: metadata.pageCount,
+        categories: JSON.stringify(metadata.categories),
+        language: metadata.language,
+        thumbnail: metadata.thumbnail,
+        source: metadata.source,
+        rawMetadata: JSON.stringify(fetchResult.meta),
+        createdAt: now,
+        updatedAt: now
+      }
+
+      try {
+        await db.insert(books).values(newBook).onConflictDoUpdate({
+           target: books.isbn,
+           set: { updatedAt: now } 
+        })
+        
+        const savedBook = await db.query.books.findFirst({
+          where: eq(books.isbn, cleanIsbn)
+        })
+        if (savedBook) bookRecord = savedBook
+
+      } catch (e) {
+        console.error('Error saving book to DB:', e)
+      }
+    }
   }
 
-  return response
-})
+  if (!metadata) {
+    throw createError({ statusCode: 404, message: 'Book found in no sources' })
+  }
 
-/**
- * Background audit logging (runs via waitUntil)
- */
-async function logBookFetch(isbn: string, found: boolean, durationMs: number): Promise<void> {
-  console.info(`[audit] Book fetch: isbn=${isbn} found=${found} duration=${durationMs}ms`)
-  // Future: Save to D1 audit table
-  // const db = useDrizzle()
-  // await db.insert(auditLog).values({ isbn, found, durationMs, timestamp: new Date() })
-}
+  // 6. Upsert User History (Scans Table)
+  let scanId: string | null = null
+  
+  try {
+    const now = new Date()
+    
+    // Check if scan already exists for this user/isbn
+    const existingScan = await db.query.scans.findFirst({
+      where: and(eq(scans.userId, userId), eq(scans.isbn, cleanIsbn))
+    })
+
+    if (existingScan) {
+      scanId = existingScan.id
+      await db.update(scans)
+        .set({ updatedAt: now })
+        .where(eq(scans.id, scanId))
+    } else {
+      // Create new scan
+      scanId = crypto.randomUUID()
+      await db.insert(scans).values({
+        id: scanId,
+        userId: userId,
+        bookId: bookRecord?.id,
+        isbn: cleanIsbn,
+        title: metadata.title,
+        authors: JSON.stringify(metadata.authors),
+        publisher: metadata.publisher,
+        description: metadata.description,
+        status: 'complete',
+        createdAt: now,
+        updatedAt: now
+      })
+    }
+  } catch (e) {
+    console.error('Error saving scan to history:', e)
+  }
+
+  return {
+    metadata,
+    scan_id: scanId,
+    source: metadata.source,
+    cached: isCached,
+    meta
+  }
+})

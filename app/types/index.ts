@@ -1,6 +1,7 @@
 export interface BookMetadata {
   isbn: string
   title: string
+  subtitle?: string
   authors: string[]
   publisher?: string
   publishedDate?: string
@@ -10,6 +11,7 @@ export interface BookMetadata {
   thumbnail?: string
   language?: string
   previewLink?: string
+  source?: string
 }
 
 export interface Scan {

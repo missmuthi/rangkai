@@ -84,8 +84,9 @@ test.describe('Real ISBN Scan Workflow', () => {
         { timeout: 30000 }
       ).catch(() => null) // Don't fail if no API call (mock may have already responded)
       
-      // Submit search (press Enter)
-      await input.press('Enter')
+      // Submit search (click button)
+      const searchButton = page.locator('button[title="Search"]')
+      await searchButton.click()
       
       // Wait for navigation to book details page
       await page.waitForURL(/\/book\//, { timeout: 15000 })

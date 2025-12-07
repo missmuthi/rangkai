@@ -40,31 +40,23 @@ function handleScan(isbn: string) {
       </div>
 
       <div class="flex flex-col sm:flex-row gap-4 justify-center items-center">
-        <!-- Primary Action -->
-        <Button class="h-12 px-8 text-lg" @click="navigateTo('/scan/mobile')">
-          <ScanBarcode class="mr-2 h-5 w-5" />
-          Start Scanning
-        </Button>
-        
-        <!-- Secondary Action -->
         <Button 
-          v-if="isAuthenticated" 
-          variant="outline" 
-          class="h-12 px-8 text-lg"
-          @click="navigateTo('/history')"
-        >
-          <History class="mr-2 h-5 w-5" />
-          View History
-        </Button>
-        
-        <Button 
-          v-else 
-          variant="outline" 
+          v-if="!isAuthenticated" 
+          variant="default" 
           class="h-12 px-8 text-lg"
           @click="navigateTo('/auth/login')"
         >
           <LogIn class="mr-2 h-5 w-5" />
           Sign In
+        </Button>
+        <Button 
+          v-else 
+          variant="default" 
+          class="h-12 px-8 text-lg"
+          @click="navigateTo('/dashboard')"
+        >
+          <ArrowRight class="mr-2 h-5 w-5" />
+          Go to Dashboard
         </Button>
       </div>
     </section>
