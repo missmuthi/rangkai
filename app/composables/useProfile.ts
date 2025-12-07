@@ -14,8 +14,9 @@ export function useProfile() {
         // credentials: 'include' // usually implied or handled by auth middleware/headers
       })
       profile.value = data
-    } catch (e: any) {
-      error.value = e.data?.message || 'Failed to load profile'
+    } catch (e: unknown) {
+      const err = e as { data?: { message?: string } }
+      error.value = err.data?.message || 'Failed to load profile'
     } finally {
       isLoading.value = false
     }

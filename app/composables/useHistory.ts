@@ -10,8 +10,9 @@ export function useHistory() {
     error.value = null
     try {
       history.value = await $fetch<Scan[]>('/api/scans')
-    } catch (e: any) {
-      error.value = e.data?.message || 'Failed to fetch history'
+    } catch (e: unknown) {
+      const err = e as { data?: { message?: string } }
+      error.value = err.data?.message || 'Failed to fetch history'
     } finally {
       loading.value = false
     }

@@ -13,8 +13,9 @@ export function useBookSearch() {
     try {
       const data = await $fetch<BookMetadata>(`/api/book/${isbn}`)
       book.value = data
-    } catch (e: any) {
-      error.value = e.data?.message || e.message || 'Failed to fetch book metadata'
+    } catch (e: unknown) {
+      const err = e as { data?: { message?: string }, message?: string }
+      error.value = err.data?.message || err.message || 'Failed to fetch book metadata'
     } finally {
       loading.value = false
     }

@@ -127,7 +127,7 @@ export default defineEventHandler(async (event) => {
 
         return sendRedirect(event, '/?loginSuccess=1')
 
-    } catch (e: any) {
+    } catch (e: unknown) {
         console.error('OAuth Callback Critical Error:', e)
         return sendRedirect(event, '/login?error=oauth_callback_error')
     }

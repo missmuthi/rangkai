@@ -29,7 +29,7 @@ export function useSlimsExport() {
   }
 
   // Placeholder for future API integration
-  async function exportToSlimsApi(scans: Scan[], slimsConfig: any) {
+  async function exportToSlimsApi(scans: Scan[], slimsConfig: Record<string, unknown>) {
     // TODO: Implement SLIMS API push
     console.log('Exporting to SLIMS API...', scans.length)
   }

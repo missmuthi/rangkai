@@ -1,3 +1,4 @@
+import { type InferSelectModel } from 'drizzle-orm'
 import { drizzle } from 'drizzle-orm/d1'
 import { hubDatabase } from '#imports'
 import * as schema from '../db/schema'
@@ -30,8 +31,8 @@ export default defineEventHandler(async (event) => {
 
     if (sessionResult) {
       // Valid session
-      event.context.session = sessionResult.session as any
-      event.context.user = sessionResult.user as any
+      event.context.session = sessionResult.session
+      event.context.user = sessionResult.user
     } else {
       // Invalid or expired token - clear it to avoid confusion
       deleteCookie(event, 'session', {
@@ -57,8 +58,8 @@ export default defineEventHandler(async (event) => {
 // Type augmentation for event.context
 declare module 'h3' {
   interface H3EventContext {
-    user?: any
-    session?: any
+    user?: InferSelectModel<typeof schema.user>
+    session?: InferSelectModel<typeof schema.session>
     isProduction?: boolean // populated by platform logic usually, or we can assume via env
   }
 }
