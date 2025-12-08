@@ -32,4 +32,7 @@ await fetchUser()
   <NuxtLayout>
     <NuxtPage />
   </NuxtLayout>
+
+  <UNotifications />
+  <CommandPalette />
 </template>

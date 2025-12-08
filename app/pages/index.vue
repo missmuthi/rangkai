@@ -1,8 +1,4 @@
 <script setup lang="ts">
-import { ArrowRight, Download, LogIn } from 'lucide-vue-next'
-import Button from '@/components/ui/Button.vue'
-import Card from '@/components/ui/Card.vue'
-import CardContent from '@/components/ui/CardContent.vue'
 
 useSeoMeta({
   title: 'Rangkai - Book Scanner',
@@ -21,43 +17,59 @@ function handleScan(isbn: string) {
 <template>
   <main class="min-h-screen bg-background">
     <!-- Hero Section -->
-    <section class="container mx-auto px-4 py-24 text-center space-y-8">
-      <div class="inline-flex items-center gap-2 rounded-full border px-4 py-1.5 text-sm font-medium text-foreground transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2">
+    <section class="relative container mx-auto px-4 py-32 sm:py-40 text-center space-y-8 overflow-hidden">
+      <!-- Animated Background -->
+      <LandingHeroBackground />
+      
+      <!-- Badge -->
+      <div 
+        class="inline-flex items-center gap-2 rounded-full bg-primary/10 border border-primary/20 px-4 py-1.5 text-sm font-medium text-primary backdrop-blur-sm animate-fade-in"
+      >
         <span class="relative flex h-2 w-2">
           <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75" />
           <span class="relative inline-flex rounded-full h-2 w-2 bg-primary" />
         </span>
-        <span class="text-muted-foreground">Version 2.0 - New Architecture</span>
+        <span>Version 2.0 - New Architecture</span>
       </div>
       
-      <div class="space-y-4">
-        <h1 class="text-4xl font-extrabold tracking-tight lg:text-5xl text-foreground">
-          📚 Rangkai
+      <!-- Main Heading -->
+      <div class="space-y-6 animate-fade-in" style="animation-delay: 150ms">
+        <h1 class="text-5xl sm:text-6xl lg:text-7xl font-extrabold tracking-tight text-foreground">
+          📚 <span class="bg-gradient-to-r from-primary via-primary/80 to-primary/60 bg-clip-text text-transparent">Rangkai</span>
         </h1>
-        <p class="text-xl text-muted-foreground max-w-2xl mx-auto">
-          Book metadata harvester for Indonesian librarians. Scan barcodes, fetch metadata from multiple APIs, and export to SLiMS format.
+        <p class="text-xl sm:text-2xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
+          Book metadata harvester for <span class="text-foreground font-semibold">Indonesian librarians</span>. 
+          Scan barcodes, fetch metadata from multiple APIs, and export to SLiMS format.
         </p>
       </div>
 
-      <div class="flex flex-col sm:flex-row gap-4 justify-center items-center">
-        <Button 
-          v-if="!isAuthenticated" 
-          variant="default" 
-          class="h-12 px-8 text-lg"
+      <!-- CTA Buttons -->
+      <div class="flex flex-col sm:flex-row gap-4 justify-center items-center animate-fade-in" style="animation-delay: 300ms">
+        <UButton
+          v-if="!isAuthenticated"
+          size="xl"
+          icon="i-lucide-log-in"
           @click="navigateTo('/login')"
         >
-          <LogIn class="mr-2 h-5 w-5" />
           Sign In
-        </Button>
-        <Button 
-          v-else 
-          variant="default" 
-          class="h-12 px-8 text-lg"
+        </UButton>
+        <UButton
+          v-else
+          size="xl"
+          icon="i-lucide-arrow-right"
           @click="navigateTo('/dashboard')"
         >
-          <ArrowRight class="mr-2 h-5 w-5" />
           Go to Dashboard
-        </Button>
+        </UButton>
+        <UButton
+          size="xl"
+          color="gray"
+          variant="ghost"
+          icon="i-lucide-play-circle"
+          @click="navigateTo('/features')"
+        >
+          Learn More
+        </UButton>
       </div>
     </section>
 
@@ -86,9 +98,12 @@ function handleScan(isbn: string) {
               <ScanBarcode class="w-16 h-16 mx-auto text-muted-foreground/50" />
               <div>
                 <p class="text-sm font-medium">Camera scanner available on mobile</p>
-                <Button variant="link" class="mt-2" @click="navigateTo('/scan/mobile')">
-                  Open Mobile Scanner <ArrowRight class="ml-2 h-4 w-4" />
-                </Button>
+                <UButton variant="link" class="mt-2" @click="navigateTo('/scan/mobile')">
+                  Open Mobile Scanner
+                  <template #trailing>
+                    <UIcon name="i-lucide-arrow-right" class="w-4 h-4" />
+                  </template>
+                </UButton>
               </div>
             </div>
           </div>
@@ -97,52 +112,74 @@ function handleScan(isbn: string) {
     </section>
 
     <!-- Features Section -->
-    <section class="container mx-auto px-4 py-32 text-center space-y-8">
-      <div class="max-w-4xl mx-auto space-y-6">
-        <h1 class="text-5xl sm:text-6xl font-bold tracking-tight">
+    <section class="container mx-auto px-4 py-24 space-y-16">
+      <div class="max-w-4xl mx-auto text-center space-y-6">
+        <div class="inline-flex items-center gap-2 rounded-full bg-primary/10 border border-primary/20 px-4 py-1.5 text-sm font-medium text-primary">
+          <span>✨</span>
+          <span>Powerful Features</span>
+        </div>
+        <h2 class="text-4xl sm:text-5xl font-bold tracking-tight">
           Book metadata harvester for Indonesian librarians
-        </h1>
-        <p class="text-xl text-gray-600 dark:text-gray-300">
-          Scan, fetch, <strong class="text-indigo-600 dark:text-indigo-400">and clean</strong> bibliographic metadata with AI for seamless SLiMS cataloging.
+        </h2>
+        <p class="text-xl text-muted-foreground">
+          Scan, fetch, <span class="text-primary font-semibold">and clean</span> bibliographic metadata with AI for seamless SLiMS cataloging.
         </p>
       </div>
       
       <div class="grid md:grid-cols-3 gap-8">
-        <Card>
-          <CardContent class="pt-6 space-y-4">
-            <div class="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center">
-              <ScanBarcode class="w-6 h-6 text-primary" />
+        <UCard 
+          class="group hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
+          :ui="{ 
+            body: { padding: 'p-6 sm:p-8' },
+            ring: 'ring-1 ring-border group-hover:ring-primary/50'
+          }"
+        >
+          <div class="space-y-4">
+            <div class="w-14 h-14 rounded-xl bg-gradient-to-br from-primary/20 to-primary/10 flex items-center justify-center group-hover:scale-110 transition-transform">
+              <UIcon name="i-lucide-scan-line" class="w-7 h-7 text-primary" />
             </div>
-            <h3 class="text-xl font-bold">Barcode Scanner</h3>
-            <p class="text-muted-foreground">
+            <h3 class="text-xl font-bold text-foreground">Barcode Scanner</h3>
+            <p class="text-muted-foreground leading-relaxed">
               Scan ISBN barcodes with your phone camera for instant book lookup. Supports both ISBN-10 and ISBN-13 formats.
             </p>
-          </CardContent>
-        </Card>
+          </div>
+        </UCard>
 
-        <Card>
-          <CardContent class="pt-6 space-y-4">
-            <div class="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center">
-              <BookOpen class="w-6 h-6 text-primary" />
+        <UCard 
+          class="group hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
+          :ui="{ 
+            body: { padding: 'p-6 sm:p-8' },
+            ring: 'ring-1 ring-border group-hover:ring-primary/50'
+          }"
+        >
+          <div class="space-y-4">
+            <div class="w-14 h-14 rounded-xl bg-gradient-to-br from-primary/20 to-primary/10 flex items-center justify-center group-hover:scale-110 transition-transform">
+              <UIcon name="i-lucide-book-open" class="w-7 h-7 text-primary" />
             </div>
-            <h3 class="text-xl font-bold">Multi-Source API</h3>
-            <p class="text-muted-foreground">
+            <h3 class="text-xl font-bold text-foreground">Multi-Source API</h3>
+            <p class="text-muted-foreground leading-relaxed">
               Fetches metadata from Google Books, OpenLibrary, and Library of Congress for comprehensive coverage.
             </p>
-          </CardContent>
-        </Card>
+          </div>
+        </UCard>
 
-        <Card>
-          <CardContent class="pt-6 space-y-4">
-            <div class="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center">
-              <Download class="w-6 h-6 text-primary" />
+        <UCard 
+          class="group hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
+          :ui="{ 
+            body: { padding: 'p-6 sm:p-8' },
+            ring: 'ring-1 ring-border group-hover:ring-primary/50'
+          }"
+        >
+          <div class="space-y-4">
+            <div class="w-14 h-14 rounded-xl bg-gradient-to-br from-primary/20 to-primary/10 flex items-center justify-center group-hover:scale-110 transition-transform">
+              <UIcon name="i-lucide-download" class="w-7 h-7 text-primary" />
             </div>
-            <h3 class="text-xl font-bold">SLiMS Export</h3>
-            <p class="text-muted-foreground">
+            <h3 class="text-xl font-bold text-foreground">SLiMS Export</h3>
+            <p class="text-muted-foreground leading-relaxed">
               Export your scan history to SLiMS-compatible CSV format for seamless library system integration.
             </p>
-          </CardContent>
-        </Card>
+          </div>
+        </UCard>
       </div>
     </section>
 

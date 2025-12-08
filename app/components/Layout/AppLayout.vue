@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { BookOpen, Menu, X } from 'lucide-vue-next'
+import { BookOpen, Menu, X, Search } from 'lucide-vue-next'
 import { cn } from '~/utils/cn'
 
 interface Props {
@@ -12,6 +12,9 @@ const props = withDefaults(defineProps<Props>(), {
 
 // Use the navigation composable
 const { navItems, isActive } = useNavigation()
+
+// Command palette state
+const { isOpen: commandPaletteOpen } = useCommandPalette()
 
 // Mobile sidebar state
 const isMobileMenuOpen = ref(false)
@@ -146,6 +149,17 @@ watch(() => route.path, () => {
         <h1 class="text-xl font-semibold text-foreground">
           {{ props.pageTitle }}
         </h1>
+
+        <!-- Search Button (Command Palette Trigger) -->
+        <button
+          type="button"
+          class="ml-auto hidden sm:flex items-center gap-2 px-3 py-1.5 text-sm text-muted-foreground bg-muted/50 border border-border rounded-lg hover:bg-muted transition-colors"
+          @click="commandPaletteOpen = true"
+        >
+          <Search class="h-4 w-4" />
+          <span>Search...</span>
+          <UKbd size="xs">⌘K</UKbd>
+        </button>
       </header>
 
       <!-- Page Content -->
