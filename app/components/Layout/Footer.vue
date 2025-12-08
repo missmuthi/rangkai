@@ -6,7 +6,7 @@
 const currentYear = new Date().getFullYear()
 
 const productLinks = [
-  { label: 'Features', to: '/features' },
+  { label: 'Home', to: '/' },
   { label: 'FAQ', to: '/faq' },
   { label: 'Dashboard', to: '/dashboard' },
   { label: 'Scan History', to: '/history' }
