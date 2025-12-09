@@ -23,9 +23,11 @@ useHead({
 })
 
 // Initialize session on first load so auth middleware has a current session
-// This works both server-side and client-side
+// Skip during prerender (build time) as DB bindings aren't available
 const { fetchUser } = useAuth()
-await fetchUser()
+if (!import.meta.prerender) {
+  await fetchUser()
+}
 </script>
 
 <template>
