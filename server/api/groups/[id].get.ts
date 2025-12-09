@@ -1,5 +1,5 @@
 
-import { eq } from 'drizzle-orm'
+import { eq, sql, and, or, isNull } from 'drizzle-orm'
 import { groups, groupMembers, scans, user } from '../../db/schema'
 import { useDb } from '../../utils/db'
 import { requireUserSession } from '../../utils/session'
@@ -91,6 +91,30 @@ export default defineEventHandler(async (event) => {
   // Sort by timestamp descending
   activities.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
 
+  // 6. Get personal scan count for the current user (eligible for migration)
+  // We use Drizzle's sql operator for efficient counting
+  const result = await db.select({
+    count: sql<number>`count(*)`
+  })
+  .from(scans)
+  .where(
+    and(
+      eq(scans.userId, session.user.id),
+      or(isNull(scans.groupId), eq(scans.groupId, ''), eq(scans.groupId, 'null'))
+    )
+  )
+  
+  const personalScanCount = Number(result[0]?.count || 0)
+
+  // 7. Get total scans for context
+  const totalResult = await db.select({
+    count: sql<number>`count(*)`
+  })
+  .from(scans)
+  .where(eq(scans.userId, session.user.id))
+
+  const totalScanCount = Number(totalResult[0]?.count || 0)
+
   return {
     group: {
       id: group.id,
@@ -124,6 +148,8 @@ export default defineEventHandler(async (event) => {
     }),
     activities: activities.slice(0, 20), // Last 20 activities
     currentUserRole: membership.role,
-    isOwner: membership.role === 'owner'
+    isOwner: membership.role === 'owner',
+    personalScanCount,
+    totalScanCount
   }
 })

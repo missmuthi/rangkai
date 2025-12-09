@@ -327,21 +327,46 @@ useHead({
         </div>
 
 
-        <!-- Settings Tab -->
+          <!-- Settings Tab -->
         <div v-else-if="activeTab === 'settings'" class="space-y-4">
           <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
             <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">Migrate Personal Books</h3>
             <p class="text-gray-500 dark:text-gray-400 mb-6">
-              Move all your existing personal scan history to this group. The books will be visible to all group members and you will remain the "Added By" user.
+              Move your personal scan history to this group. This action updates your books to be owned by this group.
             </p>
+
+            <!-- Stats Card -->
+            <div class="grid grid-cols-3 gap-4 mb-6">
+              <div class="bg-gray-50 dark:bg-gray-700/50 p-3 rounded-lg text-center">
+                <div class="text-2xl font-bold text-indigo-600 dark:text-indigo-400">{{ data.personalScanCount }}</div>
+                <div class="text-xs text-gray-500 uppercase font-medium mt-1">Available to Migrate</div>
+              </div>
+              <div class="bg-gray-50 dark:bg-gray-700/50 p-3 rounded-lg text-center">
+                <div class="text-2xl font-bold text-gray-900 dark:text-white">{{ data.totalScanCount }}</div>
+                <div class="text-xs text-gray-500 uppercase font-medium mt-1">Total History</div>
+              </div>
+              <div class="bg-gray-50 dark:bg-gray-700/50 p-3 rounded-lg text-center">
+                <div class="text-2xl font-bold text-green-600 dark:text-green-400">{{ data.totalScanCount - data.personalScanCount }}</div>
+                <div class="text-xs text-gray-500 uppercase font-medium mt-1">Already in Groups</div>
+              </div>
+            </div>
             
+            <div v-if="data.personalScanCount === 0" class="p-4 bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 rounded-lg mb-4 text-sm flex items-start gap-2">
+              <BookOpen class="w-5 h-5 flex-shrink-0" />
+              <p>
+                <strong>No books to migrate.</strong><br>
+                All your books are already assigned to a group (either this one or another). 
+                If you see books in your history, they are already shared!
+              </p>
+            </div>
+
             <button
-              class="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-              :disabled="isMigrating"
+              class="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed w-full justify-center sm:w-auto"
+              :disabled="isMigrating || data.personalScanCount === 0"
               @click="migrateBooks"
             >
               <BookOpen class="w-4 h-4" />
-              {{ isMigrating ? 'Migrating...' : 'Move My Books to This Group' }}
+              {{ isMigrating ? 'Migrating...' : `Move ${data.personalScanCount} Books to This Group` }}
             </button>
           </div>
         </div>
