@@ -6,8 +6,6 @@
  *   - limit: Max results (default 50)
  */
 
-import { like, or, desc } from 'drizzle-orm'
-import { scans } from '../db/schema'
 import { requireAuth } from '../utils/auth'
 
 export default defineEventHandler(async (event) => {
@@ -44,7 +42,9 @@ export default defineEventHandler(async (event) => {
   // Filter in JS since D1 doesn't support complex LIKE with OR well
   const filtered = results.filter(scan => {
     const titleMatch = scan.title?.toLowerCase().includes(searchTerm.toLowerCase())
-    const authorsMatch = scan.authors?.toLowerCase().includes(searchTerm.toLowerCase())
+    const authorsMatch = Array.isArray(scan.authors)
+      ? scan.authors.join(' ').toLowerCase().includes(searchTerm.toLowerCase())
+      : (typeof scan.authors === 'string' ? (scan.authors as string).toLowerCase().includes(searchTerm.toLowerCase()) : false)
     const isbnMatch = scan.isbn?.includes(searchTerm)
     return titleMatch || authorsMatch || isbnMatch
   })
