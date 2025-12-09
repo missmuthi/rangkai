@@ -56,9 +56,9 @@ const handleInstall = async () => {
           </p>
           
           <button
-            @click="handleInstall"
             :disabled="isInstalling"
             class="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-500 disabled:bg-blue-600/50 text-white text-sm font-medium rounded-md transition-colors"
+            @click="handleInstall"
           >
             <Download v-if="!isInstalling" class="w-4 h-4" />
             <span v-if="isInstalling">Installing...</span>

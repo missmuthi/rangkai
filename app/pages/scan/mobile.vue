@@ -110,7 +110,8 @@ onMounted(() => {
   <div class="min-h-screen bg-gray-900 text-white pb-20">
     <!-- Floating Badge Counter -->
     <Transition name="bounce">
-      <div v-if="isRapidMode && sessionQueue.length > 0" 
+      <div
+v-if="isRapidMode && sessionQueue.length > 0" 
            class="fixed top-4 right-4 z-50 bg-green-500 text-white px-4 py-2 rounded-full font-bold text-lg shadow-lg">
         {{ sessionQueue.length }} scanned
       </div>
@@ -122,7 +123,8 @@ onMounted(() => {
     </div>
 
     <!-- Offline Queue Badge -->
-    <div v-if="offlineQueue.length > 0" 
+    <div
+v-if="offlineQueue.length > 0" 
          class="fixed top-4 left-1/2 -translate-x-1/2 z-50 bg-yellow-500 text-black px-3 py-1 rounded-full text-xs font-bold cursor-pointer"
          @click="syncQueue">
       {{ isSyncing ? 'Syncing...' : `${offlineQueue.length} queued` }}
@@ -138,7 +140,8 @@ onMounted(() => {
       </div>
       
       <!-- Mode Badge -->
-      <div class="absolute top-2 left-2 px-2 py-1 rounded text-xs font-bold" 
+      <div
+class="absolute top-2 left-2 px-2 py-1 rounded text-xs font-bold" 
            :class="isRapidMode ? 'bg-amber-500' : 'bg-blue-500'">
         {{ isRapidMode ? '⚡ RAPID FIRE' : '📖 NORMAL' }}
       </div>
@@ -177,7 +180,8 @@ onMounted(() => {
         
         <!-- Queue List -->
         <div class="max-h-40 overflow-y-auto space-y-2">
-          <div v-for="isbn in sessionQueue" :key="isbn" 
+          <div
+v-for="isbn in sessionQueue" :key="isbn" 
                class="flex justify-between items-center bg-gray-800 p-2 rounded text-sm font-mono">
             <span>{{ isbn }}</span>
             <button class="text-gray-500 hover:text-red-400 px-2" @click="removeFromQueue(isbn)">×</button>

@@ -209,12 +209,12 @@ function copyDebug() {
       <p>Clean: {{ isCleaning }}</p>
       <p>Err: {{ !!error }}</p>
       <p>ISBN: {{ isbn }}</p>
-      <button @click="showDebug = !showDebug" class="mt-2 underline text-yellow-400">Toggle JSON</button>
+      <button class="mt-2 underline text-yellow-400" @click="showDebug = !showDebug">Toggle JSON</button>
     </div>
 
     <!-- Debug Section (Unconditional) -->
     <div v-if="showDebug" class="fixed inset-0 z-50 bg-black/90 text-green-400 p-8 overflow-auto font-mono text-xs">
-      <button @click="showDebug = false" class="absolute top-4 right-4 text-white text-lg">✕</button>
+      <button class="absolute top-4 right-4 text-white text-lg" @click="showDebug = false">✕</button>
       <pre>{{ JSON.stringify({ book, loading, error, cleanError }, null, 2) }}</pre>
     </div>
 
@@ -272,8 +272,8 @@ function copyDebug() {
     <!-- Debug Section -->
     <div class="mt-12 pt-8 border-t border-gray-200 dark:border-gray-800">
       <button 
-        @click="showDebug = !showDebug" 
-        class="text-xs text-gray-500 hover:text-gray-900 dark:hover:text-gray-300 underline"
+        class="text-xs text-gray-500 hover:text-gray-900 dark:hover:text-gray-300 underline" 
+        @click="showDebug = !showDebug"
       >
         {{ showDebug ? 'Hide Debug Info' : 'Show Debug Info' }}
       </button>
@@ -281,7 +281,7 @@ function copyDebug() {
       <div v-if="showDebug" class="mt-4 p-4 bg-gray-100 dark:bg-gray-800 rounded-lg overflow-auto max-h-96 font-mono text-xs text-gray-700 dark:text-gray-300">
         <div class="flex justify-between items-center mb-2">
           <span class="font-bold">Raw Book Data:</span>
-          <button @click="copyDebug" class="text-indigo-600 hover:underline">Copy JSON</button>
+          <button class="text-indigo-600 hover:underline" @click="copyDebug">Copy JSON</button>
         </div>
         <pre>{{ JSON.stringify(book, null, 2) }}</pre>
       </div>

@@ -49,7 +49,8 @@ function handleSelect(action: CommandPaletteAction) {
 
 <template>
   <UModal v-model="isOpen" :ui="{ width: 'sm:max-w-2xl' }">
-    <UCard :ui="{ 
+    <UCard
+:ui="{ 
       ring: '', 
       divide: 'divide-y divide-gray-200 dark:divide-gray-800',
       body: { padding: 'p-0' }

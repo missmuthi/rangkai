@@ -182,8 +182,8 @@ async function handleUpload() {
           <p class="font-medium text-gray-900 dark:text-white">{{ file.name }}</p>
           <p class="text-sm text-gray-500 mb-4">{{ (file.size / 1024).toFixed(1) }} KB</p>
           <button 
-            @click.stop="file = null"
             class="text-sm text-red-500 hover:text-red-600"
+            @click.stop="file = null"
           >
             Remove file
           </button>

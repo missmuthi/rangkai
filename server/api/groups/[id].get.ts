@@ -115,6 +115,15 @@ export default defineEventHandler(async (event) => {
 
   const totalScanCount = Number(totalResult[0]?.count || 0)
 
+  // 8. Get total group book count (for accurate UI display)
+  const groupBookResult = await db.select({
+    count: sql<number>`count(*)`
+  })
+  .from(scans)
+  .where(eq(scans.groupId, groupId))
+  
+  const groupBookCount = Number(groupBookResult[0]?.count || 0)
+
   // 8. Get Leaderboard (Top 5 Contributors)
   // Only fetching if enabled or if owner (privacy logic can be handled in UI too, but safer here)
   let leaderboard: Array<{ userId: string; count: number; userName: string | null }> = []
@@ -176,6 +185,7 @@ export default defineEventHandler(async (event) => {
     isOwner: membership.role === 'owner',
     personalScanCount,
     totalScanCount,
+    groupBookCount,
     leaderboard
   }
 })

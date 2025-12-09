@@ -157,7 +157,7 @@ useHead({
               <p class="text-indigo-100 text-sm">Move them to this group so everyone can access them.</p>
             </div>
          </div>
-         <button @click="activeTab = 'settings'" class="bg-white text-indigo-600 px-4 py-2 rounded-lg text-sm font-bold hover:bg-indigo-50 shadow-sm transition-colors">
+         <button class="bg-white text-indigo-600 px-4 py-2 rounded-lg text-sm font-bold hover:bg-indigo-50 shadow-sm transition-colors" @click="activeTab = 'settings'">
             Review & Move
          </button>
       </div>
@@ -221,7 +221,7 @@ useHead({
           <button
             v-for="tab in [
               { id: 'members', label: 'Members', icon: Users, count: data.members.length },
-              { id: 'books', label: 'Books', icon: BookOpen, count: data.scans.length },
+              { id: 'books', label: 'Books', icon: BookOpen, count: data.groupBookCount },
               { id: 'activity', label: 'Activity', icon: Activity },
               { id: 'settings', label: 'Settings', icon: Settings }
             ]"
@@ -252,7 +252,8 @@ useHead({
               </h3>
               <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
                  <div v-for="(u, idx) in data.leaderboard" :key="u.userId" class="flex items-center gap-3 bg-white/60 dark:bg-black/20 p-3 rounded-lg backdrop-blur-sm border border-white/20">
-                    <div class="font-black text-lg w-8 text-center flex items-center justify-center shrink-0" 
+                    <div
+class="font-black text-lg w-8 text-center flex items-center justify-center shrink-0" 
                          :class="{ 'text-amber-500 text-2xl': idx===0, 'text-gray-400': idx>0 }">
                          <span v-if="idx===0">👑</span>
                          <span v-else>#{{ idx+1 }}</span>
@@ -442,9 +443,9 @@ useHead({
                 <div class="text-sm text-gray-500">Display top contributors widget in the members tab</div>
               </div>
               <button 
-                @click="toggleLeaderboard" 
-                class="relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+                class="relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2" 
                 :class="showLeaderboard ? 'bg-indigo-600' : 'bg-gray-200 dark:bg-gray-700'"
+                @click="toggleLeaderboard"
               >
                 <span 
                   class="inline-block h-4 w-4 transform rounded-full bg-white transition-transform duration-200 ease-in-out shadow-sm" 

@@ -76,15 +76,15 @@ const dismiss = () => {
         <!-- Actions -->
         <div class="flex items-center gap-2">
           <button
-            @click="updateApp"
             class="px-3 py-1.5 bg-blue-600 hover:bg-blue-500 text-white text-sm font-medium rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-slate-900"
+            @click="updateApp"
           >
             Refresh
           </button>
           <button
-            @click="dismiss"
             class="p-1.5 hover:bg-slate-800 rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-slate-600 focus:ring-offset-2 focus:ring-offset-slate-900"
             aria-label="Dismiss update notification"
+            @click="dismiss"
           >
             <X class="w-4 h-4 text-slate-400" />
           </button>

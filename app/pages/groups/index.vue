@@ -80,15 +80,15 @@ function copyCode(code: string) {
       </div>
       <div class="flex gap-2 w-full sm:w-auto">
         <button
-          @click="isJoinModalOpen = true"
           class="flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+          @click="isJoinModalOpen = true"
         >
           <LogIn class="w-4 h-4" />
           Join Group
         </button>
         <button
-          @click="isCreateModalOpen = true"
           class="flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
+          @click="isCreateModalOpen = true"
         >
           <Plus class="w-4 h-4" />
           Create Group
@@ -109,9 +109,9 @@ function copyCode(code: string) {
         Create a new group for your library or ask a colleague for an invite code to join theirs.
       </p>
       <div class="mt-6 flex justify-center gap-3">
-        <button @click="isCreateModalOpen = true" class="text-indigo-600 hover:underline text-sm font-medium">Create Group</button>
+        <button class="text-indigo-600 hover:underline text-sm font-medium" @click="isCreateModalOpen = true">Create Group</button>
         <span class="text-gray-300">|</span>
-        <button @click="isJoinModalOpen = true" class="text-indigo-600 hover:underline text-sm font-medium">Join Group</button>
+        <button class="text-indigo-600 hover:underline text-sm font-medium" @click="isJoinModalOpen = true">Join Group</button>
       </div>
     </div>
 
@@ -161,17 +161,17 @@ function copyCode(code: string) {
     <UModal v-model="isCreateModalOpen">
       <div class="p-6">
         <h3 class="text-lg font-semibold mb-4">Create New Library Group</h3>
-        <form @submit.prevent="handleCreate" class="space-y-4">
+        <form class="space-y-4" @submit.prevent="handleCreate">
           <div>
             <label class="block text-sm font-medium mb-1">Group Name</label>
             <input v-model="newGroupName" type="text" class="w-full px-3 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600" placeholder="e.g. City Public Library" required>
           </div>
           <div>
             <label class="block text-sm font-medium mb-1">Description (Optional)</label>
-            <textarea v-model="newGroupDesc" rows="3" class="w-full px-3 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600 resize-none" placeholder="Brief description of this library..."></textarea>
+            <textarea v-model="newGroupDesc" rows="3" class="w-full px-3 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600 resize-none" placeholder="Brief description of this library..."/>
           </div>
           <div class="flex justify-end gap-3 pt-2">
-            <button type="button" @click="isCreateModalOpen = false" class="px-4 py-2 text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700 rounded-lg">Cancel</button>
+            <button type="button" class="px-4 py-2 text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700 rounded-lg" @click="isCreateModalOpen = false">Cancel</button>
             <button type="submit" :disabled="isSubmitting" class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:opacity-50">
               {{ isSubmitting ? 'Creating...' : 'Create Group' }}
             </button>
@@ -184,14 +184,14 @@ function copyCode(code: string) {
     <UModal v-model="isJoinModalOpen">
       <div class="p-6">
         <h3 class="text-lg font-semibold mb-4">Join Existing Group</h3>
-        <form @submit.prevent="handleJoin" class="space-y-4">
+        <form class="space-y-4" @submit.prevent="handleJoin">
           <div>
             <label class="block text-sm font-medium mb-1">Invite Code</label>
             <input v-model="inviteCode" type="text" class="w-full px-3 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600 font-mono uppercase" placeholder="XXXXXX" maxlength="6" required>
             <p class="text-xs text-gray-500 mt-1">Ask the group owner for the 6-character invite code.</p>
           </div>
           <div class="flex justify-end gap-3 pt-2">
-            <button type="button" @click="isJoinModalOpen = false" class="px-4 py-2 text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700 rounded-lg">Cancel</button>
+            <button type="button" class="px-4 py-2 text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700 rounded-lg" @click="isJoinModalOpen = false">Cancel</button>
             <button type="submit" :disabled="isSubmitting" class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:opacity-50">
               {{ isSubmitting ? 'Joining...' : 'Join Group' }}
             </button>

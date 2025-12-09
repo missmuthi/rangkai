@@ -89,14 +89,14 @@ function parseMarcXML(marcRecord: any): PerpusnasRawRecord | null {
     let title = ''
     let subtitle = ''
     let author = ''
-    let additionalAuthors: string[] = []
+    const additionalAuthors: string[] = []
     let publisher = ''
     let year = ''
     let isbn = ''
     let language = 'id'
     let publishPlace = ''
     let collation = ''
-    let subjects: string[] = []
+    const subjects: string[] = []
 
     // Helper to get subfield value
     const getSubfield = (field: any, code: string): string => {

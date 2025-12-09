@@ -132,7 +132,7 @@ const sampleIsbns = [
         <h2 class="font-semibold">Search by ISBN</h2>
       </template>
 
-      <form @submit.prevent="searchByIsbn" class="space-y-4">
+      <form class="space-y-4" @submit.prevent="searchByIsbn">
         <UFormGroup label="ISBN" hint="Enter Indonesian ISBN (978-602-xxx or 978-623-xxx)">
           <UInput
             v-model="isbn"

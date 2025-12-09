@@ -70,7 +70,7 @@ const coverUrl = computed(() => {
         <span class="text-sm font-medium text-gray-500 dark:text-gray-400">Title</span>
         <div class="flex items-center gap-2">
           <span class="text-sm font-semibold text-gray-900 dark:text-gray-100">{{ book.title || '-' }}</span>
-          <button v-if="book.title" @click="copyToClipboard(book.title, 'title')" class="p-1 rounded opacity-0 hover:opacity-100 transition-opacity group-hover:opacity-60">
+          <button v-if="book.title" class="p-1 rounded opacity-0 hover:opacity-100 transition-opacity group-hover:opacity-60" @click="copyToClipboard(book.title, 'title')">
             <Check v-if="copiedField === 'title'" class="w-3.5 h-3.5 text-green-500" />
             <Copy v-else class="w-3.5 h-3.5 text-muted-foreground" />
           </button>
@@ -89,12 +89,12 @@ const coverUrl = computed(() => {
         <div class="flex items-center gap-2">
           <template v-if="book.callNumber || book.ddc">
             <span class="text-sm font-mono bg-gray-100 dark:bg-gray-800 px-2 py-0.5 rounded text-gray-800 dark:text-gray-200">{{ book.callNumber || book.ddc }}</span>
-            <button @click="copyToClipboard(book.callNumber || book.ddc, 'callNumber')" class="p-1 rounded opacity-0 hover:opacity-100 transition-opacity">
+            <button class="p-1 rounded opacity-0 hover:opacity-100 transition-opacity" @click="copyToClipboard(book.callNumber || book.ddc, 'callNumber')">
               <Check v-if="copiedField === 'callNumber'" class="w-3.5 h-3.5 text-green-500" />
               <Copy v-else class="w-3.5 h-3.5 text-muted-foreground" />
             </button>
           </template>
-          <button v-else @click="emit('aiClean')" class="text-xs text-amber-600 dark:text-amber-500 hover:text-amber-700 dark:hover:text-amber-400 font-medium flex items-center gap-1">
+          <button v-else class="text-xs text-amber-600 dark:text-amber-500 hover:text-amber-700 dark:hover:text-amber-400 font-medium flex items-center gap-1" @click="emit('aiClean')">
             <Sparkles class="w-3 h-3" />
             Generate with AI
           </button>
@@ -124,7 +124,7 @@ const coverUrl = computed(() => {
         <span class="text-sm font-medium text-muted-foreground">ISBN/ISSN</span>
         <div class="flex items-center gap-2">
           <span class="text-sm font-mono text-gray-900 dark:text-gray-100">{{ book.isbn || '-' }}</span>
-          <button v-if="book.isbn" @click="copyToClipboard(book.isbn, 'isbn')" class="p-1 rounded opacity-0 hover:opacity-100 transition-opacity">
+          <button v-if="book.isbn" class="p-1 rounded opacity-0 hover:opacity-100 transition-opacity" @click="copyToClipboard(book.isbn, 'isbn')">
             <Check v-if="copiedField === 'isbn'" class="w-3.5 h-3.5 text-green-500" />
             <Copy v-else class="w-3.5 h-3.5 text-muted-foreground" />
           </button>
@@ -142,7 +142,7 @@ const coverUrl = computed(() => {
               {{ trustBadge.label }}
             </span>
           </template>
-          <button v-else @click="emit('aiClean')" class="text-xs text-amber-600 dark:text-amber-500 hover:text-amber-700 dark:hover:text-amber-400 font-medium flex items-center gap-1">
+          <button v-else class="text-xs text-amber-600 dark:text-amber-500 hover:text-amber-700 dark:hover:text-amber-400 font-medium flex items-center gap-1" @click="emit('aiClean')">
             <AlertTriangle class="w-3 h-3" />
             Missing - Fix with AI
           </button>
@@ -161,7 +161,7 @@ const coverUrl = computed(() => {
         <template v-if="book.subjects">
           <span class="text-sm text-gray-900 dark:text-gray-100">{{ book.subjects }}</span>
         </template>
-        <button v-else @click="emit('aiClean')" class="text-xs text-red-600 dark:text-red-500 hover:text-red-700 dark:hover:text-red-400 font-medium flex items-center gap-1">
+        <button v-else class="text-xs text-red-600 dark:text-red-500 hover:text-red-700 dark:hover:text-red-400 font-medium flex items-center gap-1" @click="emit('aiClean')">
           <Sparkles class="w-3 h-3" />
           Add subjects with AI
         </button>
@@ -189,7 +189,7 @@ const coverUrl = computed(() => {
           :alt="book.title || 'Book cover'"
           class="w-full h-full object-cover"
           loading="lazy"
-        />
+        >
       </div>
 
       <!-- Classification Quick View -->

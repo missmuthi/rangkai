@@ -51,14 +51,14 @@ onUnmounted(() => {
               </span>
               <button 
                 v-else 
-                @click="$emit('clean')"
                 class="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium bg-white text-indigo-600 hover:bg-indigo-50 transition-colors shadow-sm ml-2"
+                @click="$emit('clean')"
               >
                 <Sparkles class="w-3 h-3" />
                 AI Clean
               </button>
             </div>
-            <button @click="$emit('close')" class="p-1 rounded-full hover:bg-white/20 transition-colors">
+            <button class="p-1 rounded-full hover:bg-white/20 transition-colors" @click="$emit('close')">
               <X class="w-5 h-5 text-white" />
             </button>
           </div>
