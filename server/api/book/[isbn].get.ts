@@ -38,7 +38,8 @@ export default defineEventHandler(async (event): Promise<BookResponse> => {
 
   // 2. Validate ISBN
   const cleanIsbn = isbn.replace(/[-\s]/g, '')
-  if (!/^(\d{10}|\d{13})$/.test(cleanIsbn)) {
+  // Allow 10 digits (last can be X) or 13 digits
+  if (!/^(\d{9}[\dXx]|\d{13})$/.test(cleanIsbn)) {
     throw createError({ statusCode: 400, message: 'Invalid ISBN format' })
   }
 
