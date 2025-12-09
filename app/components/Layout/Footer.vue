@@ -20,7 +20,7 @@ const resourceLinks = [
 </script>
 
 <template>
-  <footer class="relative border-t border-border bg-card/50 backdrop-blur-sm">
+  <footer class="relative border-t border-border bg-card/50 backdrop-blur-sm border-4 border-red-500">
     <div class="container mx-auto px-4 py-16">
       <!-- Main Footer Content -->
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-12">

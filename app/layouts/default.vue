@@ -7,7 +7,9 @@
       <slot />
     </main>
 
-    <LayoutFooter />
+    <div class="border-4 border-blue-500">
+      <LayoutFooter />
+    </div>
     <ReloadPrompt />
   </div>
 </template>

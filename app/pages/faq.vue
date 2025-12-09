@@ -289,8 +289,8 @@ function isOpen(question: string) {
             size="lg"
             class="text-base"
           >
-            <NuxtLink to="/features">
-              View Features
+            <NuxtLink to="/">
+              Back to Home
             </NuxtLink>
           </UiButton>
           <UiButton 
