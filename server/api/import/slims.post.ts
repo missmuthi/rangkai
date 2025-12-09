@@ -24,7 +24,9 @@ export default defineEventHandler(async (event) => {
     throw createError({ statusCode: 400, message: 'CSV file is required' })
   }
 
-  const groupId = groupIdPart ? groupIdPart.data.toString() : null
+  // Parse groupId - treat empty string as null (personal library)
+  const rawGroupId = groupIdPart ? groupIdPart.data.toString().trim() : ''
+  const groupId = rawGroupId.length > 0 ? rawGroupId : null
   const csvContent = filePart.data.toString()
   
   // Basic CSV Parser (assuming simple SLiMS export)
@@ -132,7 +134,7 @@ export default defineEventHandler(async (event) => {
       await db.insert(scans).values({
         id: uuidv4(),
         userId: session.user.id,
-        groupId: groupId || null,
+        groupId,
         bookId: book?.id || bookId,
         isbn,
         title,
