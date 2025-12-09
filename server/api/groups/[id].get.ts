@@ -1,5 +1,5 @@
 
-import { eq, sql, and, or, isNull } from 'drizzle-orm'
+import { eq, sql, and, or, isNull, desc } from 'drizzle-orm'
 import { groups, groupMembers, scans, user } from '../../db/schema'
 import { useDb } from '../../utils/db'
 import { requireUserSession } from '../../utils/session'
@@ -115,6 +115,30 @@ export default defineEventHandler(async (event) => {
 
   const totalScanCount = Number(totalResult[0]?.count || 0)
 
+  // 8. Get Leaderboard (Top 5 Contributors)
+  // Only fetching if enabled or if owner (privacy logic can be handled in UI too, but safer here)
+  let leaderboard: Array<{ userId: string; count: number; userName: string | null }> = []
+  
+  if (group.settings?.showLeaderboard !== false) { // Default to true if undefined
+     const lbResult = await db.select({
+        userId: scans.userId,
+        count: sql<number>`count(*)`,
+        userName: user.name
+      })
+      .from(scans)
+      .leftJoin(user, eq(scans.userId, user.id))
+      .where(eq(scans.groupId, groupId))
+      .groupBy(scans.userId)
+      .orderBy(desc(sql`count(*)`))
+      .limit(5)
+      
+      leaderboard = lbResult.map(r => ({
+        userId: r.userId,
+        count: Number(r.count),
+        userName: r.userName
+      }))
+  }
+
   return {
     group: {
       id: group.id,
@@ -123,7 +147,8 @@ export default defineEventHandler(async (event) => {
       inviteCode: group.inviteCode,
       ownerId: group.ownerId,
       createdAt: group.createdAt,
-      updatedAt: group.updatedAt
+      updatedAt: group.updatedAt,
+      settings: group.settings
     },
     members: members.map(m => ({
       id: m.id,
@@ -150,6 +175,7 @@ export default defineEventHandler(async (event) => {
     currentUserRole: membership.role,
     isOwner: membership.role === 'owner',
     personalScanCount,
-    totalScanCount
+    totalScanCount,
+    leaderboard
   }
 })

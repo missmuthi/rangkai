@@ -8,6 +8,13 @@
       "when": 1765247481955,
       "tag": "0000_sudden_kate_bishop",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "6",
+      "when": 1765273754990,
+      "tag": "0001_steady_barracuda",
+      "breakpoints": true
     }
   ]
 }

@@ -238,6 +238,9 @@ export const groups = sqliteTable('groups', {
   id: text('id').primaryKey(), // UUID
   name: text('name').notNull(),
   description: text('description'),
+  settings: text('settings', { mode: 'json' }).$type<{
+    showLeaderboard: boolean
+  }>(),
   inviteCode: text('invite_code').unique().notNull(), // 6-char code
   ownerId: text('owner_id').notNull().references(() => user.id),
   createdAt: integer('created_at', { mode: 'timestamp' }).notNull(),

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Users, BookOpen, Activity, ArrowLeft, Copy, Download, Trash2, Clock, Settings } from 'lucide-vue-next'
+import { Users, BookOpen, Activity, ArrowLeft, Copy, Download, Trash2, Clock, Settings, Trophy } from 'lucide-vue-next'
 import { useClipboard } from '@vueuse/core'
 
 definePageMeta({
@@ -99,7 +99,27 @@ function formatRelativeTime(date: string | Date) {
   if (diffMins < 60) return `${diffMins}m ago`
   if (diffHours < 24) return `${diffHours}h ago`
   if (diffDays < 7) return `${diffDays}d ago`
+
   return formatDate(date)
+}
+
+const showLeaderboard = ref(data.value?.group.settings?.showLeaderboard !== false)
+
+async function toggleLeaderboard() {
+  const newValue = !showLeaderboard.value
+  showLeaderboard.value = newValue
+  
+  try {
+    await $fetch(`/api/groups/${groupId.value}/settings`, {
+      method: 'PUT',
+      body: { showLeaderboard: newValue }
+    })
+    refresh()
+    toast.add({ title: 'Settings updated', color: 'green' })
+  } catch (e) {
+    showLeaderboard.value = !newValue // revert
+    toast.add({ title: 'Failed to update settings', color: 'red' })
+  }
 }
 
 useHead({
@@ -124,6 +144,23 @@ useHead({
 
     <!-- Content -->
     <template v-else-if="data">
+      <!-- Migration Banner (Proactive UX) -->
+      <div v-if="data.personalScanCount > 0" class="mb-6 bg-indigo-600 rounded-xl p-4 text-white flex items-center justify-between shadow-lg ring-4 ring-indigo-50 dark:ring-indigo-900/20">
+         <div class="flex items-center gap-4">
+            <div class="p-2 bg-white/20 rounded-lg">
+              <BookOpen class="w-6 h-6 text-white" />
+            </div>
+            <div>
+              <h3 class="font-bold text-lg">
+                 You have {{ data.personalScanCount }} personal books
+              </h3>
+              <p class="text-indigo-100 text-sm">Move them to this group so everyone can access them.</p>
+            </div>
+         </div>
+         <button @click="activeTab = 'settings'" class="bg-white text-indigo-600 px-4 py-2 rounded-lg text-sm font-bold hover:bg-indigo-50 shadow-sm transition-colors">
+            Review & Move
+         </button>
+      </div>
       <!-- Header -->
       <div class="flex items-start justify-between">
         <div class="flex items-center gap-4">
@@ -207,7 +244,30 @@ useHead({
       <!-- Tab Content -->
       <div class="min-h-[400px]">
         <!-- Members Tab -->
-        <div v-if="activeTab === 'members'" class="space-y-3">
+        <div v-if="activeTab === 'members'" class="space-y-6">
+           <!-- Leaderboard Widget -->
+           <div v-if="data.leaderboard && data.leaderboard.length > 0 && showLeaderboard" class="bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20 p-6 rounded-xl border border-amber-100 dark:border-amber-900/50">
+              <h3 class="font-bold text-amber-800 dark:text-amber-200 mb-4 flex items-center gap-2">
+                 <Trophy class="w-5 h-5" /> Top Contributors
+              </h3>
+              <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                 <div v-for="(u, idx) in data.leaderboard" :key="u.userId" class="flex items-center gap-3 bg-white/60 dark:bg-black/20 p-3 rounded-lg backdrop-blur-sm border border-white/20">
+                    <div class="font-black text-lg w-8 text-center flex items-center justify-center shrink-0" 
+                         :class="{ 'text-amber-500 text-2xl': idx===0, 'text-gray-400': idx>0 }">
+                         <span v-if="idx===0">👑</span>
+                         <span v-else>#{{ idx+1 }}</span>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                      <div class="truncate font-bold text-gray-900 dark:text-gray-100">{{ u.userName || 'Unknown' }}</div>
+                      <div class="text-xs text-gray-500 dark:text-gray-400">Contributor</div>
+                    </div>
+                    <div class="text-sm font-bold bg-amber-100 dark:bg-amber-900/50 text-amber-700 dark:text-amber-300 px-2.5 py-1 rounded-full whitespace-nowrap">{{ u.count }} books</div>
+                 </div>
+              </div>
+           </div>
+
+           <!-- Members List -->
+           <div class="space-y-3">
           <div
             v-for="member in data.members"
             :key="member.id"
@@ -251,7 +311,9 @@ useHead({
               </button>
             </div>
           </div>
-        </div>
+            </div>
+          </div>
+
 
         <!-- Books Tab -->
         <div v-else-if="activeTab === 'books'" class="space-y-3">
@@ -327,8 +389,9 @@ useHead({
         </div>
 
 
-          <!-- Settings Tab -->
+        <!-- Settings Tab -->
         <div v-else-if="activeTab === 'settings'" class="space-y-4">
+          <!-- Migration Card -->
           <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
             <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">Migrate Personal Books</h3>
             <p class="text-gray-500 dark:text-gray-400 mb-6">
@@ -368,6 +431,27 @@ useHead({
               <BookOpen class="w-4 h-4" />
               {{ isMigrating ? 'Migrating...' : `Move ${data.personalScanCount} Books to This Group` }}
             </button>
+          </div>
+
+          <!-- Display Settings (Owner Only) -->
+          <div v-if="data.isOwner" class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
+            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Display Settings</h3>
+            <div class="flex items-center justify-between">
+              <div>
+                <div class="font-medium text-gray-900 dark:text-white">Show Leaderboard</div>
+                <div class="text-sm text-gray-500">Display top contributors widget in the members tab</div>
+              </div>
+              <button 
+                @click="toggleLeaderboard" 
+                class="relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+                :class="showLeaderboard ? 'bg-indigo-600' : 'bg-gray-200 dark:bg-gray-700'"
+              >
+                <span 
+                  class="inline-block h-4 w-4 transform rounded-full bg-white transition-transform duration-200 ease-in-out shadow-sm" 
+                  :class="showLeaderboard ? 'translate-x-6' : 'translate-x-1'"
+                />
+              </button>
+            </div>
           </div>
         </div>
       </div>
