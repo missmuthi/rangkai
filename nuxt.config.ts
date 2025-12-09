@@ -13,7 +13,8 @@ export default defineNuxtConfig({
     '@nuxt/eslint',
     '@nuxt/ui',
     '@vite-pwa/nuxt',
-    '@nuxt/image'
+    '@nuxt/image',
+    '@nuxtjs/security'
   ],
   image: {
     // Use Cloudflare's built-in image resizing (no IPX Worker CPU overhead)
@@ -31,6 +32,31 @@ export default defineNuxtConfig({
       'tile.loc.gov',
       'opac.perpusnas.go.id'
     ]
+  },
+  // Security Configuration
+  security: {
+    headers: {
+      contentSecurityPolicy: {
+        'img-src': ["'self'", 'data:', 'https:', 'https://books.google.com', 'https://covers.openlibrary.org', 'https://opac.perpusnas.go.id'],
+        'script-src': ["'self'", "'unsafe-inline'", "'wasm-unsafe-eval'"],
+        'style-src': ["'self'", "'unsafe-inline'"],
+        'connect-src': ["'self'"],
+        'font-src': ["'self'", 'data:'],
+        'object-src': ["'none'"],
+        'base-uri': ["'self'"],
+        'form-action': ["'self'"]
+      },
+      crossOriginEmbedderPolicy: false,
+      strictTransportSecurity: {
+        maxAge: 31536000,
+        includeSubdomains: true,
+        preload: true
+      },
+      xContentTypeOptions: 'nosniff',
+      xFrameOptions: 'SAMEORIGIN',
+      xXSSProtection: '1; mode=block'
+    },
+    rateLimiter: false
   },
   routeRules: {
     // Landing page & static content

@@ -3,6 +3,7 @@ import * as schema from '../../../db/schema'
 import { eq } from 'drizzle-orm'
 
 import { createSession, generateState } from '../../../utils/session'
+import { getSecureCookieOptions } from '../../../utils/secure-cookie'
 
 // Type for Google User Info
 type GoogleUser = {
@@ -111,15 +112,8 @@ export default defineEventHandler(async (event) => {
         const ip = getRequestHeader(event, 'x-forwarded-for')
         const session = await createSession(db, user.id, userAgent, ip)
 
-        // 7. Set Session Cookie
-        const isSecure = process.env.NODE_ENV === 'production' || process.env.ENVIRONMENT === 'production'
-        setCookie(event, 'session', session.token, {
-            httpOnly: true,
-            secure: isSecure,
-            sameSite: 'lax',
-            maxAge: 60 * 60 * 24 * 7, // 7 days
-            path: '/'
-        })
+        // 7. Set Session Cookie with secure defaults
+        setCookie(event, 'session', session.token, getSecureCookieOptions())
 
         // 8. Cleanup Temp Cookies
         deleteCookie(event, 'google_oauth_state')

@@ -45,12 +45,18 @@ export default defineEventHandler(async (event) => {
 
   // 4. Rate Limit (Optional) - Apply only to auth endpoints for now
   if (path.startsWith('/api/auth/')) {
-    const ip = getRequestHeader(event, 'x-forwarded-for') || '127.0.0.1'
-    if (!event.context.session && isRateLimited(ip)) {
-      throw createError({
-        statusCode: 429,
-        message: 'Too many requests'
-      })
+    const ip = getRequestHeader(event, 'cf-connecting-ip') || getRequestHeader(event, 'x-forwarded-for') || '127.0.0.1'
+    if (!event.context.session) {
+      const limited = await isRateLimited(ip)
+      if (limited) {
+        throw createError({
+          statusCode: 429,
+          message: 'Too many requests. Please try again later.',
+          data: {
+            retryAfter: 60 // seconds
+          }
+        })
+      }
     }
   }
 })
