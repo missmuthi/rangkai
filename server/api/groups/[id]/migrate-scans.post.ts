@@ -6,9 +6,9 @@
  */
 
 import { eq, and } from 'drizzle-orm'
-import { groupMembers } from '../../db/schema'
-import { useDb } from '../../utils/db'
-import { requireUserSession } from '../../utils/session'
+import { groupMembers } from '../../../db/schema'
+import { useDb } from '../../../utils/db'
+import { requireUserSession } from '../../../utils/session'
 
 export default defineEventHandler(async (event) => {
   const session = await requireUserSession(event)
