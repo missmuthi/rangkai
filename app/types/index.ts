@@ -70,3 +70,14 @@ export interface UserProfile {
   totalScans: number
   joinDate: string
 }
+
+export interface Group {
+  id: string
+  name: string
+  description?: string | null
+  inviteCode: string
+  ownerId: string
+  role?: 'owner' | 'member' // augmented for frontend
+  createdAt: string
+  updatedAt: string
+}

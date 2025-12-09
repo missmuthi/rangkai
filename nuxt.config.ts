@@ -16,6 +16,15 @@ export default defineNuxtConfig({
     '@nuxt/image'
   ],
   image: {
+    // Use Cloudflare's built-in image resizing (no IPX Worker CPU overhead)
+    provider: 'cloudflare',
+    cloudflare: {
+      baseURL: '/' // Relative to site
+    },
+    // Limit quality to prevent CPU spikes on Free tier
+    quality: 80,
+    format: ['webp', 'avif'],
+    // External domains that we'll proxy
     domains: [
       'books.google.com',
       'covers.openlibrary.org',

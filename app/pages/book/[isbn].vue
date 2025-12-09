@@ -134,40 +134,54 @@ function copyDebug() {
         </Button>
         <h1 class="text-2xl font-bold tracking-tight text-gray-900 dark:text-white">Book Details</h1>
         
-        <!-- Saved Badge (Left Aligned) -->
-        <span v-if="isSaved" class="hidden sm:inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-50 text-green-700 dark:bg-green-900/30 dark:text-green-400 border border-green-200 dark:border-green-800">
-          ✓ Saved to Library
-        </span>
+        <!-- Saved Badge (Personalized - ClientOnly to avoid SWR caching) -->
+        <ClientOnly>
+          <span v-if="isSaved" class="hidden sm:inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-50 text-green-700 dark:bg-green-900/30 dark:text-green-400 border border-green-200 dark:border-green-800">
+            ✓ Saved to Library
+          </span>
+          <template #fallback>
+            <div class="hidden sm:block h-6 w-28 bg-muted/40 animate-pulse rounded-full" />
+          </template>
+        </ClientOnly>
       </div>
       
-      <div class="flex items-center gap-2">
-         <Button 
-          variant="outline" 
-          size="sm"
-          class="gap-2"
-          @click="handleEdit"
-        >
-          <Edit class="w-4 h-4" />
-          Edit
-        </Button>
-        <Button 
-          v-if="book" 
-          :variant="book.isAiEnhanced ? 'secondary' : 'default'"
-          size="sm"
-          :class="[
-            'gap-2 min-w-[140px] transition-all duration-300',
-            !book.isAiEnhanced && !isCleaning && cooldown === 0 ? 'shadow-[0_0_20px_rgba(99,102,241,0.5),0_0_40px_rgba(99,102,241,0.2)] animate-pulse' : ''
-          ]"
-          :disabled="isCleaning || cooldown > 0"
-          @click="handleAiClean"
-        >
-          <Sparkles class="w-4 h-4" :class="{ 'animate-pulse': isCleaning }" />
-          <span v-if="isCleaning">Cleaning...</span>
-          <span v-else-if="cooldown > 0">Wait {{ cooldown }}s</span>
-          <span v-else-if="book.isAiEnhanced">Re-Clean</span>
-          <span v-else>AI Clean</span>
-        </Button>
-      </div>
+      <!-- Action Buttons (Personalized - ClientOnly) -->
+      <ClientOnly>
+        <div class="flex items-center gap-2">
+           <Button 
+            variant="outline" 
+            size="sm"
+            class="gap-2"
+            @click="handleEdit"
+          >
+            <Edit class="w-4 h-4" />
+            Edit
+          </Button>
+          <Button 
+            v-if="book" 
+            :variant="book.isAiEnhanced ? 'secondary' : 'default'"
+            size="sm"
+            :class="[
+              'gap-2 min-w-[140px] transition-all duration-300',
+              !book.isAiEnhanced && !isCleaning && cooldown === 0 ? 'shadow-[0_0_20px_rgba(99,102,241,0.5),0_0_40px_rgba(99,102,241,0.2)] animate-pulse' : ''
+            ]"
+            :disabled="isCleaning || cooldown > 0"
+            @click="handleAiClean"
+          >
+            <Sparkles class="w-4 h-4" :class="{ 'animate-pulse': isCleaning }" />
+            <span v-if="isCleaning">Cleaning...</span>
+            <span v-else-if="cooldown > 0">Wait {{ cooldown }}s</span>
+            <span v-else-if="book.isAiEnhanced">Re-Clean</span>
+            <span v-else>AI Clean</span>
+          </Button>
+        </div>
+        <template #fallback>
+          <div class="flex items-center gap-2">
+            <div class="h-9 w-20 bg-muted/40 animate-pulse rounded-md" />
+            <div class="h-9 w-32 bg-muted/40 animate-pulse rounded-md" />
+          </div>
+        </template>
+      </ClientOnly>
     </div>
 
     <!-- STATUS OVERLAY (DEBUG) -->
@@ -216,12 +230,19 @@ function copyDebug() {
     </div>
 
     <div v-else-if="book" class="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 p-6 md:p-8">
-      <!-- Mobile Saved Badge -->
-       <div v-if="isSaved" class="sm:hidden mb-6 flex items-center justify-center">
-        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-sm font-medium bg-green-50 text-green-700 dark:bg-green-900/30 dark:text-green-400 border border-green-100 dark:border-green-900/50">
-          ✓ Saved to Library
-        </span>
-      </div>
+      <!-- Mobile Saved Badge (ClientOnly) -->
+      <ClientOnly>
+        <div v-if="isSaved" class="sm:hidden mb-6 flex items-center justify-center">
+          <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-sm font-medium bg-green-50 text-green-700 dark:bg-green-900/30 dark:text-green-400 border border-green-100 dark:border-green-900/50">
+            ✓ Saved to Library
+          </span>
+        </div>
+        <template #fallback>
+          <div class="sm:hidden mb-6 flex items-center justify-center">
+            <div class="h-7 w-36 bg-muted/40 animate-pulse rounded-full" />
+          </div>
+        </template>
+      </ClientOnly>
 
       <BibliographicRecord :book="book" @ai-clean="handleAiClean" />
     </div>

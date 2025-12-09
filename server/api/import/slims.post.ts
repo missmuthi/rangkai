@@ -1,0 +1,118 @@
+
+import { eq, and } from 'drizzle-orm'
+import { books, scans } from '../../db/schema'
+import { v4 as uuidv4 } from 'uuid'
+import { useDb } from '../../utils/db'
+import { requireUserSession } from '../../utils/session'
+
+// SLiMS CSV Header Mapping (approximate)
+// ISBN, Title, Author, DDC, Classification, Publisher, Publish Year, etc.
+
+export default defineEventHandler(async (event) => {
+  const session = await requireUserSession(event)
+  const body = await readMultipartFormData(event)
+  
+  if (!body || body.length === 0) {
+    throw createError({ statusCode: 400, message: 'No file uploaded' })
+  }
+
+  // Find file part and groupId part
+  const filePart = body.find(p => p.name === 'file' && p.filename)
+  const groupIdPart = body.find(p => p.name === 'groupId')
+  
+  if (!filePart) {
+    throw createError({ statusCode: 400, message: 'CSV file is required' })
+  }
+
+  const groupId = groupIdPart ? groupIdPart.data.toString() : null
+  const csvContent = filePart.data.toString()
+  
+  // Basic CSV Parser (assuming simple SLiMS export)
+  // In production, might need a robust library like 'csv-parse'
+  const lines = csvContent.split('\n').filter(l => l.trim().length > 0)
+  const headers = lines[0].split(',').map(h => h.replace(/^"|"$/g, '').trim().toLowerCase())
+  
+  // Find column indices
+  const isbnIdx = headers.findIndex(h => h.includes('isbn'))
+  const titleIdx = headers.findIndex(h => h.includes('title') || h.includes('judul'))
+  const authorIdx = headers.findIndex(h => h.includes('author') || h.includes('pengarang'))
+  const ddcIdx = headers.findIndex(h => h.includes('classification') || h.includes('ddc') || h.includes('klasifikasi'))
+  
+  if (isbnIdx === -1 || titleIdx === -1) {
+    throw createError({ statusCode: 400, message: 'Invalid CSV format: Missing ISBN or Title column' })
+  }
+
+  const db = useDb()
+  const results = {
+    total: 0,
+    success: 0,
+    errors: 0
+  }
+
+  const now = new Date()
+
+  // Process rows
+  for (let i = 1; i < lines.length; i++) {
+    try {
+      // Split by comma, handling quotes roughly
+      // TODO: Use better CSV parser
+      const row = lines[i].split(',').map(c => c.replace(/^"|"$/g, '').trim())
+      
+      if (row.length < headers.length) continue
+
+      const isbn = row[isbnIdx].replace(/[-\s]/g, '')
+      const title = row[titleIdx]
+      const author = authorIdx !== -1 ? row[authorIdx] : null
+      const ddc = ddcIdx !== -1 ? row[ddcIdx] : null
+
+      if (!isbn || !title) continue
+
+      results.total++
+
+      // 1. Upsert Book
+      const bookId = uuidv4()
+      await db.insert(books).values({
+        id: bookId,
+        isbn,
+        title,
+        authors: author ? [author] : [],
+        ddc,
+        source: 'manual_import',
+        createdAt: now,
+        updatedAt: now
+      }).onConflictDoUpdate({
+        target: books.isbn,
+        set: { updatedAt: now }
+      })
+
+      // Get actual book ID if it existed
+      const book = await db.query.books.findFirst({
+        where: eq(books.isbn, isbn),
+        columns: { id: true }
+      })
+
+      // 2. Create Scan Record
+      await db.insert(scans).values({
+        id: uuidv4(),
+        userId: session.user.id,
+        groupId: groupId || null,
+        bookId: book?.id || bookId,
+        isbn,
+        title,
+        authors: author ? [author] : [],
+        ddc,
+        source: 'slims_import',
+        status: 'complete',
+        createdAt: now,
+        updatedAt: now
+      })
+
+      results.success++
+    } catch (e) {
+      console.error('Import error row ' + i, e)
+      results.errors++
+    }
+  }
+
+  return results
+})

@@ -133,6 +133,7 @@ export const books = sqliteTable('books', {
 export const scans = sqliteTable('scans', {
   id: text('id').primaryKey(), // UUID
   userId: text('user_id').notNull().references(() => user.id, { onDelete: 'cascade' }),
+  groupId: text('group_id').references(() => groups.id, { onDelete: 'cascade' }), // Optional: if present, belongs to group
   bookId: text('book_id').references(() => books.id, { onDelete: 'set null' }), // Optional if book lookup failed
   // Fallback fields if book lookup failed
   isbn: text('isbn').notNull(), // Original scanned ISBN
@@ -227,6 +228,38 @@ export const scansHistory = sqliteTable('scans_history', {
 ])
 
 // =============================================================================
+// GROUP TABLES (Collaboration)
+// =============================================================================
+
+/**
+ * Groups table - Library organizations
+ */
+export const groups = sqliteTable('groups', {
+  id: text('id').primaryKey(), // UUID
+  name: text('name').notNull(),
+  description: text('description'),
+  inviteCode: text('invite_code').unique().notNull(), // 6-char code
+  ownerId: text('owner_id').notNull().references(() => user.id),
+  createdAt: integer('created_at', { mode: 'timestamp' }).notNull(),
+  updatedAt: integer('updated_at', { mode: 'timestamp' }).notNull(),
+})
+
+/**
+ * Group Members table - User membership in groups
+ */
+export const groupMembers = sqliteTable('group_members', {
+  id: text('id').primaryKey(),
+  groupId: text('group_id').notNull().references(() => groups.id, { onDelete: 'cascade' }),
+  userId: text('user_id').notNull().references(() => user.id, { onDelete: 'cascade' }),
+  role: text('role').notNull().default('member'), // 'owner', 'admin', 'member'
+  joinedAt: integer('joined_at', { mode: 'timestamp' }).notNull(),
+}, (table) => [
+  index('idx_group_members_group').on(table.groupId),
+  index('idx_group_members_user').on(table.userId),
+  uniqueIndex('idx_group_members_unique').on(table.groupId, table.userId),
+])
+
+// =============================================================================
 // RELATIONS (Drizzle ORM)
 // =============================================================================
 
@@ -234,6 +267,8 @@ export const userRelations = relations(user, ({ many }) => ({
   sessions: many(session),
   accounts: many(account),
   scans: many(scans),
+  memberships: many(groupMembers),
+  ownedGroups: many(groups),
 }))
 
 export const sessionRelations = relations(session, ({ one }) => ({
@@ -254,12 +289,35 @@ export const booksRelations = relations(books, ({ many }) => ({
   scans: many(scans),
 }))
 
+export const groupsRelations = relations(groups, ({ one, many }) => ({
+  owner: one(user, {
+    fields: [groups.ownerId],
+    references: [user.id],
+  }),
+  members: many(groupMembers),
+  scans: many(scans),
+}))
+
+export const groupMembersRelations = relations(groupMembers, ({ one }) => ({
+  group: one(groups, {
+    fields: [groupMembers.groupId],
+    references: [groups.id],
+  }),
+  user: one(user, {
+    fields: [groupMembers.userId],
+    references: [user.id],
+  }),
+}))
+
 export const scansRelations = relations(scans, ({ one, many }) => ({
   user: one(user, {
     fields: [scans.userId],
     references: [user.id],
   }),
-// ... scans relations ...
+  group: one(groups, {
+    fields: [scans.groupId],
+    references: [groups.id],
+  }),
   book: one(books, {
     fields: [scans.bookId],
     references: [books.id],
@@ -292,6 +350,12 @@ export type NewBook = typeof books.$inferInsert
 
 export type Scan = typeof scans.$inferSelect
 export type NewScan = typeof scans.$inferInsert
+
+export type Group = typeof groups.$inferSelect
+export type NewGroup = typeof groups.$inferInsert
+
+export type GroupMember = typeof groupMembers.$inferSelect
+export type NewGroupMember = typeof groupMembers.$inferInsert
 
 export type ScansHistory = typeof scansHistory.$inferSelect
 export type NewScansHistory = typeof scansHistory.$inferInsert

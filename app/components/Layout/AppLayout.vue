@@ -13,6 +13,9 @@ const props = withDefaults(defineProps<Props>(), {
 // Use the navigation composable
 const { navItems, isActive } = useNavigation()
 
+// Auth state for loading check (SPA Auth Flicker prevention)
+const { isLoading: isAuthLoading } = useAuth()
+
 // Command palette state
 const { isOpen: commandPaletteOpen } = useCommandPalette()
 
@@ -164,7 +167,14 @@ watch(() => route.path, () => {
 
       <!-- Page Content -->
       <main class="flex flex-1 flex-col p-4 sm:p-6">
-        <slot />
+        <!-- Auth Loading State (Prevents flash of unauthenticated content on SPA pages) -->
+        <div v-if="isAuthLoading" class="flex flex-1 items-center justify-center">
+          <div class="text-center space-y-4">
+            <div class="h-10 w-10 mx-auto border-4 border-primary border-t-transparent rounded-full animate-spin" />
+            <p class="text-sm text-muted-foreground">Loading...</p>
+          </div>
+        </div>
+        <slot v-else />
       </main>
     </div>
   </div>

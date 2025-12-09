@@ -1,16 +1,18 @@
 <script setup lang="ts">
-import { Search, ScanLine, ArrowRight, Camera } from 'lucide-vue-next'
+import { Search, ScanLine, ArrowRight, Camera, Users, Upload } from 'lucide-vue-next'
 import Input from '@/components/ui/Input.vue'
 import Button from '@/components/ui/Button.vue'
 
 const { handleSearch, openScanner } = useSearchRouting()
 const { history, fetchHistory, loading } = useHistory()
+const { groups, fetchGroups } = useGroups()
 
 const searchQuery = ref('')
 const recentScans = computed(() => history.value.slice(0, 5))
 
 onMounted(() => {
   fetchHistory()
+  fetchGroups()
 })
 
 const onSearch = () => {
@@ -68,40 +70,94 @@ const onSearch = () => {
       </form>
     </section>
 
-    <!-- Recent Scans / History -->
+    <!-- Recent Scans / History (Existing) -->
     <section v-if="loading" class="w-full max-w-2xl">
         <div class="space-y-4">
             <div v-for="i in 3" :key="i" class="h-16 w-full bg-muted/40 animate-pulse rounded-lg" />
         </div>
     </section>
 
-    <section v-else-if="recentScans.length > 0" class="w-full max-w-2xl space-y-4">
-      <div class="flex items-center justify-between px-2">
-        <h3 class="text-sm font-medium text-muted-foreground uppercase tracking-wider">Recent Scans</h3>
-        <NuxtLink to="/history" class="text-sm text-primary hover:underline flex items-center gap-1">
-          View All <ArrowRight class="h-3 w-3" />
+    <!-- Groups & Quick Actions -->
+    <section v-else class="w-full max-w-2xl space-y-8">
+      
+      <!-- Quick Actions Grid -->
+      <div class="grid grid-cols-2 gap-4">
+        <NuxtLink 
+          to="/groups" 
+          class="flex flex-col items-center justify-center p-6 bg-card border rounded-xl hover:border-primary/50 hover:bg-muted/50 transition-all group text-center space-y-3 shadow-sm hover:shadow-md"
+        >
+          <div class="h-12 w-12 rounded-full bg-indigo-500/10 text-indigo-500 flex items-center justify-center group-hover:scale-110 transition-transform">
+            <Users class="h-6 w-6" />
+          </div>
+          <div>
+            <h3 class="font-medium">Library Groups</h3>
+            <p class="text-xs text-muted-foreground mt-1">Collaborate with others</p>
+          </div>
+        </NuxtLink>
+
+        <NuxtLink 
+          to="/import" 
+          class="flex flex-col items-center justify-center p-6 bg-card border rounded-xl hover:border-primary/50 hover:bg-muted/50 transition-all group text-center space-y-3 shadow-sm hover:shadow-md"
+        >
+          <div class="h-12 w-12 rounded-full bg-emerald-500/10 text-emerald-500 flex items-center justify-center group-hover:scale-110 transition-transform">
+            <Upload class="h-6 w-6" />
+          </div>
+          <div>
+             <h3 class="font-medium">Import Books</h3>
+             <p class="text-xs text-muted-foreground mt-1">From SLiMS CSV</p>
+          </div>
         </NuxtLink>
       </div>
 
-      <div class="grid gap-3">
-        <NuxtLink 
-          v-for="scan in recentScans" 
-          :key="scan.id" 
-          :to="`/book/${scan.isbn}`"
-          class="flex items-center gap-4 p-4 rounded-xl border bg-card text-card-foreground shadow-sm hover:shadow-md transition-all hover:border-primary/50 group"
-        >
-          <div class="h-10 w-10 flex items-center justify-center rounded-full bg-primary/10 text-primary group-hover:scale-110 transition-transform">
-            <ScanLine class="h-5 w-5" />
-          </div>
-          <div class="flex-1 min-w-0">
-            <p class="font-medium truncate">{{ scan.title || 'Processing...' }}</p>
-            <p class="text-xs text-muted-foreground font-mono">{{ scan.isbn }}</p>
-          </div>
-          <div class="text-xs text-muted-foreground">
-             <UiBadge variant="outline" class="text-[10px]">{{ scan.status }}</UiBadge>
-          </div>
-        </NuxtLink>
+      <!-- User Groups Summary (If any) -->
+      <div v-if="groups.length > 0" class="space-y-4">
+        <div class="flex items-center justify-between px-2">
+            <h3 class="text-sm font-medium text-muted-foreground uppercase tracking-wider">Your Groups</h3>
+            <NuxtLink to="/groups" class="text-xs text-primary hover:underline">Manage</NuxtLink>
+        </div>
+        <div class="grid gap-3">
+             <div v-for="group in groups.slice(0, 3)" :key="group.id" class="flex items-center justify-between p-4 rounded-xl border bg-card/50">
+                <div class="flex items-center gap-3">
+                    <div class="h-8 w-8 rounded-full bg-primary/20 text-primary flex items-center justify-center text-xs font-bold">
+                        {{ group.name.substring(0, 2).toUpperCase() }}
+                    </div>
+                    <span class="font-medium">{{ group.name }}</span>
+                </div>
+                <span class="text-xs text-muted-foreground">{{ group.role }}</span>
+             </div>
+        </div>
       </div>
+
+      <!-- Recent Scans -->
+      <div v-if="recentScans.length > 0" class="space-y-4">
+        <div class="flex items-center justify-between px-2">
+          <h3 class="text-sm font-medium text-muted-foreground uppercase tracking-wider">Recent Scans</h3>
+          <NuxtLink to="/history" class="text-sm text-primary hover:underline flex items-center gap-1">
+            View All <ArrowRight class="h-3 w-3" />
+          </NuxtLink>
+        </div>
+
+        <div class="grid gap-3">
+          <NuxtLink 
+            v-for="scan in recentScans" 
+            :key="scan.id" 
+            :to="`/book/${scan.isbn}`"
+            class="flex items-center gap-4 p-4 rounded-xl border bg-card text-card-foreground shadow-sm hover:shadow-md transition-all hover:border-primary/50 group"
+          >
+            <div class="h-10 w-10 flex items-center justify-center rounded-full bg-primary/10 text-primary group-hover:scale-110 transition-transform">
+              <ScanLine class="h-5 w-5" />
+            </div>
+            <div class="flex-1 min-w-0">
+              <p class="font-medium truncate">{{ scan.title || 'Processing...' }}</p>
+              <p class="text-xs text-muted-foreground font-mono">{{ scan.isbn }}</p>
+            </div>
+            <div class="text-xs text-muted-foreground">
+               <UiBadge variant="outline" class="text-[10px]">{{ scan.status }}</UiBadge>
+            </div>
+          </NuxtLink>
+        </div>
+      </div>
+
     </section>
 
   </div>
