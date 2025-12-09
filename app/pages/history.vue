@@ -48,9 +48,11 @@ const filteredHistory = computed(() => {
   if (filters.value.search) {
     const q = filters.value.search.toLowerCase()
     result = result.filter(s =>
-      s.title?.toLowerCase().includes(q) ||
-      s.isbn?.includes(q) ||
-      s.authors?.toLowerCase().includes(q)
+      (s.title && s.title.toLowerCase().includes(q)) ||
+      (s.isbn && s.isbn.includes(q)) ||
+      (Array.isArray(s.authors) 
+        ? s.authors.join(' ').toLowerCase().includes(q)
+        : String(s.authors || '').toLowerCase().includes(q))
     )
   }
 
