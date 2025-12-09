@@ -88,6 +88,11 @@ function handleExportAll() {
   window.location.href = '/api/scans/export'
 }
 
+function handleExportMarc21() {
+  // Export as MARC21 for Koha and other library systems
+  window.location.href = '/api/scans/export/marc'
+}
+
 function clearFilters() {
   filters.value = {}
 }
@@ -109,14 +114,24 @@ onMounted(() => {
         </p>
       </div>
       <div class="flex items-center gap-2">
-        <!-- Replaced native button with shadcn Button per Rule 3 -->
+        <!-- SLiMS CSV Export -->
         <Button 
           v-if="hasData" 
           variant="outline"
           @click="handleExportAll"
         >
           <Download class="mr-2 h-4 w-4" />
-          Export All
+          CSV (SLiMS)
+        </Button>
+        
+        <!-- MARC21 Export for Koha etc -->
+        <Button 
+          v-if="hasData" 
+          variant="outline"
+          @click="handleExportMarc21"
+        >
+          <Download class="mr-2 h-4 w-4" />
+          MARC21
         </Button>
         
         <!-- Updated to use shadcn Button (as-child) with NuxtLink -->
