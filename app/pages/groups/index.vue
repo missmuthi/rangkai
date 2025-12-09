@@ -117,10 +117,11 @@ function copyCode(code: string) {
 
     <!-- Groups Grid -->
     <div v-else class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-      <div
+      <NuxtLink
         v-for="group in groups"
         :key="group.id"
-        class="bg-white dark:bg-gray-800 p-6 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md transition-shadow"
+        :to="`/groups/${group.id}`"
+        class="block bg-white dark:bg-gray-800 p-6 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md hover:border-indigo-300 dark:hover:border-indigo-600 transition-all"
       >
         <div class="flex justify-between items-start mb-4">
           <div class="p-2 bg-indigo-50 dark:bg-indigo-900/30 rounded-lg">
@@ -142,19 +143,18 @@ function copyCode(code: string) {
             <div class="flex items-center gap-1 mb-1">
               <span>Code:</span>
               <code class="bg-gray-100 dark:bg-gray-700 px-1.5 py-0.5 rounded font-mono">{{ group.inviteCode }}</code>
-              <button @click="copyCode(group.inviteCode)" class="p-1 hover:text-indigo-600" title="Copy Code">
+              <button class="p-1 hover:text-indigo-600" title="Copy Code" @click.prevent="copyCode(group.inviteCode)">
                 <Copy class="w-3 h-3" />
               </button>
             </div>
             Updated: {{ new Date(group.updatedAt).toLocaleDateString() }}
           </div>
           
-          <!-- Future: Link into Group Context View -->
-          <!-- <NuxtLink :to="`/groups/${group.id}`" class="text-sm font-medium text-indigo-600 hover:text-indigo-500 flex items-center gap-1">
-            Open <ExternalLink class="w-3 h-3" />
-          </NuxtLink> -->
+          <span class="text-sm font-medium text-indigo-600 hover:text-indigo-500">
+            Open →
+          </span>
         </div>
-      </div>
+      </NuxtLink>
     </div>
 
     <!-- Create Modal -->
