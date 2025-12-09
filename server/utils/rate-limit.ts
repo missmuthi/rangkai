@@ -7,9 +7,9 @@ type RateLimitEntry = {
 
 const limitStore = new Map<string, RateLimitEntry>()
 
-// Limits: 10 requests per minute for unauthenticated auth endpoints
+// Limits: 30 requests per minute for unauthenticated auth endpoints
 const WINDOW_MS = 60 * 1000
-const MAX_REQUESTS = 10
+const MAX_REQUESTS = 30
 
 export function isRateLimited(ip: string): boolean {
     const now = Date.now()
