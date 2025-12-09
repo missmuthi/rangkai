@@ -233,10 +233,18 @@ const coverUrl = computed(() => {
           AI Enhancement Log
         </p>
         <ul class="text-xs text-gray-600 dark:text-gray-400 space-y-1">
-          <li v-for="(change, i) in book.aiLog[book.aiLog.length - 1]?.changes.slice(0, 3)" :key="i" class="flex items-start gap-1">
-            <span class="text-purple-500">•</span>
-            <span>{{ change }}</span>
-          </li>
+          <!-- Handle aiLog as array of strings or array of objects -->
+          <template v-if="Array.isArray(book.aiLog)">
+            <li v-for="(entry, i) in book.aiLog.slice(0, 5)" :key="i" class="flex items-start gap-1">
+              <span class="text-purple-500">•</span>
+              <!-- If entry is a string, show it directly -->
+              <span v-if="typeof entry === 'string'">{{ entry }}</span>
+              <!-- If entry is an object with changes array, show each change -->
+              <span v-else-if="entry?.changes">{{ entry.changes.slice(0, 1).join(', ') }}</span>
+              <!-- Fallback for other object structures -->
+              <span v-else>{{ JSON.stringify(entry).slice(0, 50) }}</span>
+            </li>
+          </template>
         </ul>
       </div>
       
