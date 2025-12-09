@@ -14,7 +14,7 @@ export default defineNuxtConfig({
     '@nuxt/ui',
     '@vite-pwa/nuxt',
     '@nuxt/image',
-    '@nuxtjs/security'
+    'nuxt-security'
   ],
   image: {
     // Use Cloudflare's built-in image resizing (no IPX Worker CPU overhead)
