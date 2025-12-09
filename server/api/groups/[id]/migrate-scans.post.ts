@@ -41,7 +41,7 @@ export default defineEventHandler(async (event) => {
   const result = await d1.prepare(`
     UPDATE scans
     SET group_id = ?, updated_at = ?
-    WHERE user_id = ? AND group_id IS NULL
+    WHERE user_id = ? AND (group_id IS NULL OR group_id = '' OR group_id = 'null')
   `).bind(groupId, new Date().toISOString(), userId).run()
 
   const movedCount = result.meta?.changes || 0
