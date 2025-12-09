@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Users, BookOpen, Activity, ArrowLeft, Copy, Download, Trash2, Clock } from 'lucide-vue-next'
+import { Users, BookOpen, Activity, ArrowLeft, Copy, Download, Trash2, Clock, Settings } from 'lucide-vue-next'
 import { useClipboard } from '@vueuse/core'
 
 definePageMeta({
@@ -19,7 +19,35 @@ const { data, pending, error, refresh } = await useFetch(`/api/groups/${groupId.
   key: `group-${groupId.value}`
 })
 
-const activeTab = ref<'members' | 'books' | 'activity'>('members')
+const activeTab = ref<'members' | 'books' | 'activity' | 'settings'>('members')
+const isMigrating = ref(false)
+
+async function migrateBooks() {
+  if (!confirm('Move all your personal books to this group? This cannot be undone efficiently.')) return
+
+  isMigrating.value = true
+  try {
+    const res = await $fetch<{ moved: number; message: string }>(`/api/groups/${groupId.value}/migrate-scans`, {
+      method: 'POST'
+    })
+    toast.add({ 
+      title: 'Success', 
+      description: res.message,
+      color: 'green' 
+    })
+    refresh()
+    activeTab.value = 'books'
+  } catch (e: unknown) {
+    const err = e as { data?: { message?: string } }
+    toast.add({ 
+      title: 'Error', 
+      description: err.data?.message || 'Failed to migrate books', 
+      color: 'red' 
+    })
+  } finally {
+    isMigrating.value = false
+  }
+}
 
 // Remove member
 const isRemoving = ref(false)
@@ -157,7 +185,8 @@ useHead({
             v-for="tab in [
               { id: 'members', label: 'Members', icon: Users, count: data.members.length },
               { id: 'books', label: 'Books', icon: BookOpen, count: data.scans.length },
-              { id: 'activity', label: 'Activity', icon: Activity }
+              { id: 'activity', label: 'Activity', icon: Activity },
+              { id: 'settings', label: 'Settings', icon: Settings }
             ]"
             :key="tab.id"
             class="flex items-center gap-2 py-3 border-b-2 transition-colors"
@@ -294,6 +323,26 @@ useHead({
                 {{ formatRelativeTime(activity.timestamp) }}
               </p>
             </div>
+          </div>
+        </div>
+
+
+        <!-- Settings Tab -->
+        <div v-else-if="activeTab === 'settings'" class="space-y-4">
+          <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
+            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">Migrate Personal Books</h3>
+            <p class="text-gray-500 dark:text-gray-400 mb-6">
+              Move all your existing personal scan history to this group. The books will be visible to all group members and you will remain the "Added By" user.
+            </p>
+            
+            <button
+              class="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              :disabled="isMigrating"
+              @click="migrateBooks"
+            >
+              <BookOpen class="w-4 h-4" />
+              {{ isMigrating ? 'Migrating...' : 'Move My Books to This Group' }}
+            </button>
           </div>
         </div>
       </div>
