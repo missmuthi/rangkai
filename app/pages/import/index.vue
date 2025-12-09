@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Upload, FileText, AlertCircle, CheckCircle } from 'lucide-vue-next'
+import { Upload, FileText, AlertCircle, CheckCircle, Download } from 'lucide-vue-next'
 
 definePageMeta({
   layout: 'app',
@@ -17,7 +17,38 @@ const file = ref<File | null>(null)
 const selectedGroupId = ref<string>('')
 const isDragging = ref(false)
 const isUploading = ref(false)
-const uploadResult = ref<{ success: number, errors: number, total: number } | null>(null)
+const uploadResult = ref<{ 
+  success: number, 
+  errors: number, 
+  total: number,
+  logs: Array<{ row: number, isbn?: string, title?: string, message: string }> 
+} | null>(null)
+
+function downloadErrorLog() {
+  if (!uploadResult.value?.logs) return
+  
+  const headers = ['Row', 'Message', 'ISBN', 'Title']
+  const rows = uploadResult.value.logs.map(l => [
+    l.row,
+    `"${l.message.replace(/"/g, '""')}"`,
+    `"${(l.isbn || '').replace(/"/g, '""')}"`,
+    `"${(l.title || '').replace(/"/g, '""')}"`
+  ])
+  
+  const csvContent = [
+    headers.join(','),
+    ...rows.map(r => r.join(','))
+  ].join('\n')
+  
+  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' })
+  const url = URL.createObjectURL(blob)
+  const link = document.createElement('a')
+  link.setAttribute('href', url)
+  link.setAttribute('download', `import_errors_${new Date().toISOString().split('T')[0]}.csv`)
+  document.body.appendChild(link)
+  link.click()
+  document.body.removeChild(link)
+}
 
 // Fetch groups on mount so user can choose target
 onMounted(() => {
@@ -56,7 +87,12 @@ async function handleUpload() {
   }
 
   try {
-    const res = await $fetch<{ success: number, errors: number, total: number }>('/api/import/slims', {
+    const res = await $fetch<{ 
+      success: number, 
+      errors: number, 
+      total: number,
+      logs: Array<{ row: number, isbn?: string, title?: string, message: string }> 
+    }>('/api/import/slims', {
       method: 'POST',
       body: formData
     })
@@ -148,9 +184,9 @@ async function handleUpload() {
       <!-- Action Button -->
       <div class="mt-8 flex justify-end">
         <button
-          @click="handleUpload"
-          :disabled="!file || isUploading"
           class="flex items-center gap-2 px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+          :disabled="!file || isUploading"
+          @click="handleUpload"
         >
           <div v-if="isUploading" class="animate-spin rounded-full h-4 w-4 border-2 border-white/30 border-t-white" />
           <Upload v-else class="w-4 h-4" />
@@ -159,24 +195,66 @@ async function handleUpload() {
       </div>
 
       <!-- Result Summary -->
-      <div v-if="uploadResult" class="mt-8 p-4 rounded-lg bg-gray-50 dark:bg-gray-900/50 border border-gray-200 dark:border-gray-700">
-        <h3 class="font-semibold mb-3 flex items-center gap-2">
-          <CheckCircle v-if="uploadResult.errors === 0" class="w-5 h-5 text-green-500" />
-          <AlertCircle v-else class="w-5 h-5 text-orange-500" />
-          Import Summary
-        </h3>
-        <div class="grid grid-cols-3 gap-4 text-center">
-          <div class="p-3 bg-white dark:bg-gray-800 rounded-lg shadow-sm">
-            <div class="text-2xl font-bold text-gray-900 dark:text-white">{{ uploadResult.total }}</div>
-            <div class="text-xs text-gray-500 uppercase tracking-wide">Processed</div>
+      <div v-if="uploadResult" class="mt-8 space-y-4">
+        <div class="p-4 rounded-lg bg-gray-50 dark:bg-gray-900/50 border border-gray-200 dark:border-gray-700">
+          <h3 class="font-semibold mb-3 flex items-center gap-2">
+            <CheckCircle v-if="uploadResult.errors === 0" class="w-5 h-5 text-green-500" />
+            <AlertCircle v-else class="w-5 h-5 text-orange-500" />
+            Import Summary
+          </h3>
+          <div class="grid grid-cols-3 gap-4 text-center">
+            <div class="p-3 bg-white dark:bg-gray-800 rounded-lg shadow-sm">
+              <div class="text-2xl font-bold text-gray-900 dark:text-white">{{ uploadResult.total }}</div>
+              <div class="text-xs text-gray-500 uppercase tracking-wide">Processed</div>
+            </div>
+            <div class="p-3 bg-white dark:bg-gray-800 rounded-lg shadow-sm">
+              <div class="text-2xl font-bold text-green-600 dark:text-green-400">{{ uploadResult.success }}</div>
+              <div class="text-xs text-gray-500 uppercase tracking-wide">Success</div>
+            </div>
+            <div class="p-3 bg-white dark:bg-gray-800 rounded-lg shadow-sm">
+              <div class="text-2xl font-bold text-red-600 dark:text-red-400">{{ uploadResult.errors }}</div>
+              <div class="text-xs text-gray-500 uppercase tracking-wide">Errors</div>
+            </div>
           </div>
-          <div class="p-3 bg-white dark:bg-gray-800 rounded-lg shadow-sm">
-            <div class="text-2xl font-bold text-green-600 dark:text-green-400">{{ uploadResult.success }}</div>
-            <div class="text-xs text-gray-500 uppercase tracking-wide">Success</div>
+          
+          <div v-if="uploadResult.errors > 0" class="mt-4 flex justify-end">
+            <button 
+              class="text-sm font-medium text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 flex items-center gap-1"
+              @click="downloadErrorLog"
+            >
+              <Download class="w-4 h-4" /> Download Error Log
+            </button>
           </div>
-          <div class="p-3 bg-white dark:bg-gray-800 rounded-lg shadow-sm">
-            <div class="text-2xl font-bold text-red-600 dark:text-red-400">{{ uploadResult.errors }}</div>
-            <div class="text-xs text-gray-500 uppercase tracking-wide">Errors</div>
+        </div>
+
+        <!-- Error Details Preview -->
+        <div v-if="uploadResult.logs && uploadResult.logs.length > 0" class="border border-red-100 dark:border-red-900/30 rounded-lg overflow-hidden">
+          <div class="bg-red-50 dark:bg-red-900/20 px-4 py-2 border-b border-red-100 dark:border-red-900/30">
+            <h4 class="text-sm font-semibold text-red-800 dark:text-red-200">Error Details (First {{ Math.min(uploadResult.logs.length, 5) }} of {{ uploadResult.errors }})</h4>
+          </div>
+          <div class="max-h-60 overflow-y-auto bg-white dark:bg-gray-800 text-sm">
+            <table class="w-full text-left">
+              <thead class="bg-gray-50 dark:bg-gray-900 text-gray-500 dark:text-gray-400">
+                <tr>
+                  <th class="px-4 py-2 w-16">Row</th>
+                  <th class="px-4 py-2">Message</th>
+                  <th class="px-4 py-2">Details</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-gray-100 dark:divide-gray-700">
+                <tr v-for="(log, i) in uploadResult.logs.slice(0, 50)" :key="i" class="hover:bg-gray-50 dark:hover:bg-gray-700/50">
+                  <td class="px-4 py-2 font-mono text-gray-500">{{ log.row }}</td>
+                  <td class="px-4 py-2 text-red-600 dark:text-red-400">{{ log.message }}</td>
+                  <td class="px-4 py-2 text-gray-500">
+                    <span v-if="log.isbn" class="mr-2">ISBN: {{ log.isbn }}</span>
+                    <span v-if="log.title">Title: {{ log.title }}</span>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div v-if="uploadResult.logs.length > 50" class="px-4 py-2 bg-gray-50 dark:bg-gray-900 text-xs text-center text-gray-500">
+            ... and {{ uploadResult.errors - 50 }} more errors. Download log to see all.
           </div>
         </div>
       </div>

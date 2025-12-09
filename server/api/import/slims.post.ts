@@ -43,29 +43,50 @@ export default defineEventHandler(async (event) => {
   }
 
   const db = useDb()
+  // const db = useDb() already exists above
   const results = {
     total: 0,
     success: 0,
-    errors: 0
+    errors: 0,
+    logs: [] as Array<{ row: number, isbn?: string, title?: string, message: string }>
   }
 
   const now = new Date()
 
   // Process rows
   for (let i = 1; i < lines.length; i++) {
+    const rawRow = lines[i]
+    if (!rawRow.trim()) continue
+
     try {
       // Split by comma, handling quotes roughly
-      // TODO: Use better CSV parser
-      const row = lines[i].split(',').map(c => c.replace(/^"|"$/g, '').trim())
+      const row = rawRow.split(',').map(c => c.replace(/^"|"$/g, '').trim())
       
-      if (row.length < headers.length) continue
+      if (row.length < headers.length) {
+        results.errors++
+        results.logs.push({ 
+          row: i + 1, 
+          message: `Insufficient columns (Expected ${headers.length}, got ${row.length})` 
+        })
+        continue
+      }
 
       const isbn = row[isbnIdx].replace(/[-\s]/g, '')
       const title = row[titleIdx]
       const author = authorIdx !== -1 ? row[authorIdx] : null
       const ddc = ddcIdx !== -1 ? row[ddcIdx] : null
 
-      if (!isbn || !title) continue
+      if (!isbn) {
+        results.errors++
+        results.logs.push({ row: i + 1, title: title || 'Unknown', message: 'Missing ISBN' })
+        continue
+      }
+
+      if (!title) {
+        results.errors++
+        results.logs.push({ row: i + 1, isbn, message: 'Missing Title' })
+        continue
+      }
 
       results.total++
 
@@ -108,9 +129,13 @@ export default defineEventHandler(async (event) => {
       })
 
       results.success++
-    } catch (e) {
+    } catch (e: any) {
       console.error('Import error row ' + i, e)
       results.errors++
+      results.logs.push({ 
+        row: i + 1, 
+        message: e.message || 'Unknown database error' 
+      })
     }
   }
 
