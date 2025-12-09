@@ -112,7 +112,23 @@ export default defineEventHandler(async (event) => {
         columns: { id: true }
       })
 
-      // 2. Create Scan Record
+      // Check if user already has a scan with this ISBN
+      const existingScan = await db.query.scans.findFirst({
+        where: and(
+          eq(scans.userId, session.user.id),
+          eq(scans.isbn, isbn)
+        ),
+        columns: { id: true }
+      })
+
+      if (existingScan) {
+        // Skip duplicate
+        results.errors++
+        results.logs.push({ row: i + 1, isbn, title, message: 'Duplicate: Already in your library' })
+        continue
+      }
+
+      // 2. Create Scan Record (only if not duplicate)
       await db.insert(scans).values({
         id: uuidv4(),
         userId: session.user.id,
