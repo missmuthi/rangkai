@@ -1,5 +1,5 @@
 
-import { eq, sql, and, or, isNull, desc } from 'drizzle-orm'
+import { eq, sql, and, or, isNull, desc, like } from 'drizzle-orm'
 import { groups, groupMembers, scans, user } from '../../db/schema'
 import { useDb } from '../../utils/db'
 import { requireUserSession } from '../../utils/session'
@@ -8,6 +8,13 @@ import { requireUserSession } from '../../utils/session'
 export default defineEventHandler(async (event) => {
   const session = await requireUserSession(event)
   const groupId = getRouterParam(event, 'id')
+  const query = getQuery(event)
+  
+  // Pagination params
+  const page = Math.max(1, Number(query.page) || 1)
+  const limit = Math.min(100, Math.max(1, Number(query.limit) || 10))
+  const search = (query.search as string || '').trim()
+  const offset = (page - 1) * limit
   
   if (!groupId) {
     throw createError({ statusCode: 400, message: 'Group ID is required' })
@@ -50,12 +57,28 @@ export default defineEventHandler(async (event) => {
     .leftJoin(user, eq(groupMembers.userId, user.id))
     .where(eq(groupMembers.groupId, groupId))
 
-  // 4. Get recent scans (books) for this group
-  const recentScans = await db.query.scans.findMany({
-    where: eq(scans.groupId, groupId),
-    orderBy: (s, { desc }) => [desc(s.createdAt)],
-    limit: 50
-  })
+  // 4. Get scans (books) for this group with pagination and search
+  let scansQuery = db.select().from(scans).where(eq(scans.groupId, groupId))
+  
+  // Apply search filter if provided
+  if (search) {
+    const searchPattern = `%${search}%`
+    scansQuery = db.select().from(scans).where(
+      and(
+        eq(scans.groupId, groupId),
+        or(
+          like(scans.title, searchPattern),
+          like(scans.isbn, searchPattern),
+          like(scans.authors, searchPattern)
+        )
+      )
+    )
+  }
+  
+  const paginatedScans = await scansQuery
+    .orderBy(desc(scans.createdAt))
+    .limit(limit)
+    .offset(offset)
 
   // 5. Build activity timeline
   const activities: Array<{
@@ -77,7 +100,7 @@ export default defineEventHandler(async (event) => {
   }
 
   // Add scans
-  for (const s of recentScans) {
+  for (const s of paginatedScans) {
     const memberInfo = members.find(m => m.userId === s.userId)
     activities.push({
       type: 'scan',
@@ -115,14 +138,35 @@ export default defineEventHandler(async (event) => {
 
   const totalScanCount = Number(totalResult[0]?.count || 0)
 
-  // 8. Get total group book count (for accurate UI display)
-  const groupBookResult = await db.select({
+  // 8. Get total group book count (for accurate UI display and pagination)
+  // If search is active, count only matching results
+  let groupBookCountQuery = db.select({
     count: sql<number>`count(*)`
   })
   .from(scans)
   .where(eq(scans.groupId, groupId))
   
+  if (search) {
+    const searchPattern = `%${search}%`
+    groupBookCountQuery = db.select({
+      count: sql<number>`count(*)`
+    })
+    .from(scans)
+    .where(
+      and(
+        eq(scans.groupId, groupId),
+        or(
+          like(scans.title, searchPattern),
+          like(scans.isbn, searchPattern),
+          like(scans.authors, searchPattern)
+        )
+      )
+    )
+  }
+  
+  const groupBookResult = await groupBookCountQuery
   const groupBookCount = Number(groupBookResult[0]?.count || 0)
+  const totalPages = Math.ceil(groupBookCount / limit)
 
   // 8. Get Leaderboard (Top 5 Contributors)
   // Only fetching if enabled or if owner (privacy logic can be handled in UI too, but safer here)
@@ -167,7 +211,7 @@ export default defineEventHandler(async (event) => {
       role: m.role,
       joinedAt: m.joinedAt
     })),
-    scans: recentScans.map(s => {
+    scans: paginatedScans.map(s => {
       const memberInfo = members.find(m => m.userId === s.userId)
       return {
         id: s.id,
@@ -186,6 +230,12 @@ export default defineEventHandler(async (event) => {
     personalScanCount,
     totalScanCount,
     groupBookCount,
-    leaderboard
+    leaderboard,
+    pagination: {
+      page,
+      limit,
+      total: groupBookCount,
+      totalPages
+    }
   }
 })

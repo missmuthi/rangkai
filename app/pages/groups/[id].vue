@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Users, BookOpen, Activity, ArrowLeft, Copy, Download, Trash2, Clock, Settings, Trophy } from 'lucide-vue-next'
+import { Users, BookOpen, Activity, ArrowLeft, Copy, Download, Trash2, Clock, Settings, Trophy, Search, ChevronLeft, ChevronRight } from 'lucide-vue-next'
 import { useClipboard } from '@vueuse/core'
 
 definePageMeta({
@@ -14,13 +14,37 @@ const groupId = computed(() => route.params.id as string)
 const { copy } = useClipboard()
 const toast = useToast()
 
-// Fetch group data
-const { data, pending, error, refresh } = await useFetch(`/api/groups/${groupId.value}`, {
+// Books pagination state (declared before useFetch so they're available for the URL)
+const booksSearch = ref('')
+const booksPage = ref(1)
+const booksLimit = ref(10)
+
+// Computed URL for books with pagination
+const fetchUrl = computed(() => {
+  const params = new URLSearchParams()
+  params.set('page', String(booksPage.value))
+  params.set('limit', String(booksLimit.value))
+  if (booksSearch.value) params.set('search', booksSearch.value)
+  return `/api/groups/${groupId.value}?${params.toString()}`
+})
+
+// Fetch group data with reactive URL
+const { data, pending, error, refresh } = await useFetch(fetchUrl, {
   key: `group-${groupId.value}`
 })
 
 const activeTab = ref<'members' | 'books' | 'activity' | 'settings'>('members')
 const isMigrating = ref(false)
+
+// Debounced search handler
+let searchTimeout: ReturnType<typeof setTimeout>
+function onSearchInput(value: string) {
+  clearTimeout(searchTimeout)
+  searchTimeout = setTimeout(() => {
+    booksSearch.value = value
+    booksPage.value = 1 // Reset to first page on search
+  }, 300)
+}
 
 async function migrateBooks() {
   if (!confirm('Move all your personal books to this group? This cannot be undone efficiently.')) return
@@ -317,34 +341,91 @@ class="font-black text-lg w-8 text-center flex items-center justify-center shrin
 
 
         <!-- Books Tab -->
-        <div v-else-if="activeTab === 'books'" class="space-y-3">
+        <div v-else-if="activeTab === 'books'" class="space-y-4">
+          <!-- Search and Controls -->
+          <div class="flex flex-col sm:flex-row gap-3 items-start sm:items-center justify-between">
+            <div class="relative flex-1 w-full sm:max-w-md">
+              <Search class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+              <input
+                type="text"
+                placeholder="Search by title, ISBN, or author..."
+                class="w-full pl-10 pr-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                :value="booksSearch"
+                @input="onSearchInput(($event.target as HTMLInputElement).value)"
+              />
+            </div>
+            <div class="flex items-center gap-2">
+              <span class="text-sm text-gray-500">Show:</span>
+              <select
+                v-model="booksLimit"
+                class="px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 text-sm focus:ring-2 focus:ring-indigo-500"
+                @change="booksPage = 1"
+              >
+                <option :value="10">10</option>
+                <option :value="25">25</option>
+                <option :value="50">50</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Empty State -->
           <div v-if="data.scans.length === 0" class="text-center py-12 text-gray-500">
             <BookOpen class="w-12 h-12 mx-auto mb-4 opacity-50" />
-            <p>No books in this group yet.</p>
+            <p v-if="booksSearch">No books match "{{ booksSearch }}"</p>
+            <p v-else>No books in this group yet.</p>
             <p class="text-sm mt-1">Use the scanner or import to add books.</p>
           </div>
           
-          <div
-            v-for="scan in data.scans"
-            :key="scan.id"
-            class="flex items-center justify-between p-4 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 hover:border-indigo-300 transition-colors cursor-pointer"
-            @click="$router.push(`/book/${scan.isbn}`)"
-          >
-            <div class="flex-1 min-w-0">
-              <p class="font-medium text-gray-900 dark:text-white truncate">
-                {{ scan.title || 'Untitled' }}
-              </p>
-              <div class="flex items-center gap-3 mt-1 text-sm text-gray-500">
-                <span class="font-mono">{{ scan.isbn }}</span>
-                <span v-if="scan.ddc" class="px-1.5 py-0.5 bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 rounded text-xs">
-                  DDC: {{ scan.ddc }}
-                </span>
+          <!-- Book List -->
+          <div class="space-y-3">
+            <div
+              v-for="scan in data.scans"
+              :key="scan.id"
+              class="flex items-center justify-between p-4 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 hover:border-indigo-300 transition-colors cursor-pointer"
+              @click="$router.push(`/book/${scan.isbn}`)"
+            >
+              <div class="flex-1 min-w-0">
+                <p class="font-medium text-gray-900 dark:text-white truncate">
+                  {{ scan.title || 'Untitled' }}
+                </p>
+                <div class="flex items-center gap-3 mt-1 text-sm text-gray-500">
+                  <span class="font-mono">{{ scan.isbn }}</span>
+                  <span v-if="scan.ddc" class="px-1.5 py-0.5 bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 rounded text-xs">
+                    DDC: {{ scan.ddc }}
+                  </span>
+                </div>
+              </div>
+              
+              <div class="text-right text-sm text-gray-500 ml-4">
+                <p>Added by <span class="font-medium">{{ scan.addedBy }}</span></p>
+                <p class="text-xs">{{ formatDate(scan.createdAt) }}</p>
               </div>
             </div>
-            
-            <div class="text-right text-sm text-gray-500 ml-4">
-              <p>Added by <span class="font-medium">{{ scan.addedBy }}</span></p>
-              <p class="text-xs">{{ formatDate(scan.createdAt) }}</p>
+          </div>
+
+          <!-- Pagination Controls -->
+          <div v-if="data.pagination && data.pagination.totalPages > 1" class="flex items-center justify-between pt-4 border-t border-gray-200 dark:border-gray-700">
+            <p class="text-sm text-gray-500">
+              Showing {{ ((data.pagination.page - 1) * data.pagination.limit) + 1 }}-{{ Math.min(data.pagination.page * data.pagination.limit, data.pagination.total) }} of {{ data.pagination.total }}
+            </p>
+            <div class="flex items-center gap-2">
+              <button
+                class="flex items-center gap-1 px-3 py-1.5 text-sm border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed"
+                :disabled="booksPage <= 1"
+                @click="booksPage--"
+              >
+                <ChevronLeft class="w-4 h-4" /> Prev
+              </button>
+              <span class="text-sm text-gray-600 dark:text-gray-400">
+                Page {{ data.pagination.page }} of {{ data.pagination.totalPages }}
+              </span>
+              <button
+                class="flex items-center gap-1 px-3 py-1.5 text-sm border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed"
+                :disabled="booksPage >= data.pagination.totalPages"
+                @click="booksPage++"
+              >
+                Next <ChevronRight class="w-4 h-4" />
+              </button>
             </div>
           </div>
         </div>
