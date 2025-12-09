@@ -11,6 +11,19 @@ export function useScanner() {
     beep.play().catch(() => {}) // Ignore auto-play errors
   }
 
+  // Haptic feedback (vibration)
+  const vibrate = () => {
+    if ('vibrate' in navigator) {
+      navigator.vibrate(50) // Short 50ms vibration
+    }
+  }
+
+  // Combined feedback on scan success
+  const triggerScanFeedback = () => {
+    playBeep()
+    vibrate()
+  }
+
   async function startScanner(
     elementId: string,
     onResult: (text: string) => void,
@@ -41,7 +54,7 @@ export function useScanner() {
         { facingMode: 'environment' },
         config,
         (decodedText) => {
-          playBeep()
+          triggerScanFeedback()
           onResult(decodedText)
         },
         (_errorMessage) => {

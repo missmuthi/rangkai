@@ -8,6 +8,7 @@ const router = useRouter()
 const toast = useToast()
 const { book, loading, error, searchByISBN, cleanMetadata } = useBookSearch()
 const { startScanner } = useScanner()
+const { isOnline, queue: offlineQueue, addToQueue, syncQueue, isSyncing } = useOfflineQueue()
 
 const scannerRef = ref<HTMLElement | null>(null)
 const lastScan = ref('')
@@ -33,6 +34,12 @@ async function onScanSuccess(decodedText: string) {
 
   // Validate ISBN format
   if (!/^(97[89])?\d{9}[\dXx]$/.test(isbn)) {
+    return
+  }
+
+  // If offline, add to offline queue
+  if (!isOnline.value) {
+    addToQueue(isbn, autoClean.value)
     return
   }
 
@@ -108,6 +115,18 @@ onMounted(() => {
         {{ sessionQueue.length }} scanned
       </div>
     </Transition>
+
+    <!-- Offline Indicator -->
+    <div v-if="!isOnline" class="fixed top-4 left-4 z-50 bg-red-500 text-white px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1">
+      <span class="animate-pulse">●</span> Offline
+    </div>
+
+    <!-- Offline Queue Badge -->
+    <div v-if="offlineQueue.length > 0" 
+         class="fixed top-4 left-1/2 -translate-x-1/2 z-50 bg-yellow-500 text-black px-3 py-1 rounded-full text-xs font-bold cursor-pointer"
+         @click="syncQueue">
+      {{ isSyncing ? 'Syncing...' : `${offlineQueue.length} queued` }}
+    </div>
 
     <!-- Scanner Viewport -->
     <div class="relative">
