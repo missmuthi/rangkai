@@ -79,8 +79,9 @@ async function handleAiClean() {
        scanId.value = saved.id
     }
     
-    // Update local state
-    book.value = cleaned
+    // Update local state by merging to preserve reactivity
+    // Use spread to ensure all existing properties are kept and new ones are added
+    book.value = { ...book.value, ...cleaned, isAiEnhanced: true }
     startCooldown()
   } catch (err: any) {
     console.error('[Book Details] AI clean failed:', err)
