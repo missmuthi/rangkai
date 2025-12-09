@@ -1,5 +1,11 @@
 <script setup lang="ts">
-import { Users, Plus, LogIn, ExternalLink, Copy } from 'lucide-vue-next'
+import { Users, Plus, LogIn, Copy } from 'lucide-vue-next'
+import { useClipboard } from '@vueuse/core'
+
+definePageMeta({
+  layout: 'app',
+  middleware: 'auth'
+})
 
 useHead({
   title: 'Library Groups - Rangkai'

@@ -27,7 +27,7 @@ export const useGroups = () => {
   }
 
   async function joinGroup(code: string) {
-    const res = await $fetch<{ success: true, groupId: string }>('/api/groups/join', {
+    const res = await $fetch<{ success: true; groupId: string; message?: string }>('/api/groups/join', {
       method: 'POST',
       body: { code }
     })

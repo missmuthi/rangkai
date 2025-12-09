@@ -1,6 +1,11 @@
 <script setup lang="ts">
 import { Upload, FileText, AlertCircle, CheckCircle } from 'lucide-vue-next'
 
+definePageMeta({
+  layout: 'app',
+  middleware: 'auth'
+})
+
 useHead({
   title: 'Import Books - Rangkai'
 })
