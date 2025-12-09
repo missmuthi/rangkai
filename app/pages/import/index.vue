@@ -50,6 +50,21 @@ function downloadErrorLog() {
   document.body.removeChild(link)
 }
 
+function downloadTemplate() {
+  const headers = ['ISBN', 'Title', 'Author', 'Classification', 'Publisher', 'Year']
+  const example = ['9780141036144', '1984', 'George Orwell', '823.912', 'Penguin', '2008']
+  const csvContent = [headers.join(','), example.join(',')].join('\n')
+  
+  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' })
+  const url = URL.createObjectURL(blob)
+  const link = document.createElement('a')
+  link.setAttribute('href', url)
+  link.setAttribute('download', 'rangkai_import_template.csv')
+  document.body.appendChild(link)
+  link.click()
+  document.body.removeChild(link)
+}
+
 // Fetch groups on mount so user can choose target
 onMounted(() => {
   fetchGroups()
@@ -262,16 +277,27 @@ async function handleUpload() {
 
     <!-- Help / Instructions -->
     <div class="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg text-sm text-blue-800 dark:text-blue-200">
-      <h4 class="font-semibold mb-2 flex items-center gap-2">
-        <AlertCircle class="w-4 h-4" />
-        CSV Format Requirements
-      </h4>
-      <ul class="list-disc list-inside space-y-1 ml-1 opacity-80">
-        <li>File must be a valid CSV (Comma Separated Values)</li>
-        <li>Must contain headers row</li>
-        <li>Required columns: <strong>ISBN</strong> and <strong>Title</strong> (or "Judul")</li>
-        <li>Recommended: Author (Pengarang), Classification (DDC)</li>
-      </ul>
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h4 class="font-semibold mb-2 flex items-center gap-2">
+            <AlertCircle class="w-4 h-4" />
+            CSV Format Requirements
+          </h4>
+          <ul class="list-disc list-inside space-y-1 ml-1 opacity-80">
+            <li>File must be a valid CSV (Comma Separated Values)</li>
+            <li>Must contain headers row</li>
+            <li>Required columns: <strong>ISBN</strong> and <strong>Title</strong> (or "Judul")</li>
+            <li>Recommended: Author (Pengarang), Classification (DDC)</li>
+          </ul>
+        </div>
+        <button 
+          class="shrink-0 flex items-center gap-2 px-4 py-2 bg-blue-100 dark:bg-blue-800 text-blue-700 dark:text-blue-100 rounded-lg hover:bg-blue-200 dark:hover:bg-blue-700 transition-colors text-xs font-semibold"
+          @click="downloadTemplate"
+        >
+          <Download class="w-3 h-3" />
+          Download Example CSV
+        </button>
+      </div>
     </div>
   </div>
 </template>
