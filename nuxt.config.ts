@@ -24,9 +24,10 @@ export default defineNuxtConfig({
     ]
   },
   routeRules: {
-    // Landing page & static content - Cached (ISR)
-    '/': { prerender: true },
-    '/about': { prerender: true },
+    // Landing page & static content
+    // Prerender disabled due to build-time binding issues. Falling back to Edge SSR.
+    // '/': { prerender: true },
+    // '/about': { prerender: true },
     
     // User Dashboard & protected routes - Client-side Only (SPA)
     // Avoids "Hydration Mismatch" and speeds up navigation for logged-in users
