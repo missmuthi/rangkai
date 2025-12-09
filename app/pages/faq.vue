@@ -82,19 +82,39 @@ const faqs: FaqItem[] = [
     category: 'Exporting Data',
     icon: Download,
     question: 'How do I export to SLiMS?',
-    answer: '1. Go to your History page\n2. Click "Export All" button (top right)\n3. A CSV file will download automatically\n4. Open SLiMS admin panel\n5. Go to Bibliography → Import\n6. Upload the CSV file\n7. Map fields if needed\n8. Click "Import"\n\nThe CSV is UTF-8 encoded with BOM for Excel compatibility.'
+    answer: '1. Go to your History page\n2. Click "CSV (SLiMS)" button (top right)\n3. A CSV file will download automatically\n4. Open SLiMS admin panel\n5. Go to Bibliography → Import\n6. Upload the CSV file\n7. Map fields if needed\n8. Click "Import"\n\nThe CSV is UTF-8 encoded with BOM for Excel compatibility.'
+  },
+  {
+    category: 'Exporting Data',
+    icon: Download,
+    question: 'How do I export to Koha (MARC21)?',
+    answer: '1. Go to your History page\n2. Click "MARC21" button\n3. A .mrc file will download\n4. In Koha: Tools → Stage MARC Records for Import\n5. Upload the .mrc file\n6. Complete the import wizard\n\nMARC21 includes all standard fields: ISBN, title, authors, DDC, LCC, subjects, and more.'
   },
   {
     category: 'Exporting Data',
     icon: Download,
     question: 'What fields are included in the export?',
-    answer: 'The SLiMS export includes:\n• Title\n• Authors (standardized)\n• ISBN\n• Publisher\n• Publication Year\n• Language\n• Page Count\n• DDC/LCC Classification (if available)\n• Subject Headings\n• Cover Image URL\n\nAll fields are SLiMS-compatible for direct import.'
+    answer: 'Both exports include:\n• Title\n• Authors (standardized)\n• ISBN-10/13\n• Publisher\n• Publication Year\n• DDC/LCC Classification\n• Subject Headings\n• Series, Edition, Collation\n\nMARC21 additionally includes proper field tags (020, 245, 082, 650, etc.) for direct library system import.'
+  },
+  
+  // Rapid Fire & Batch Scanning
+  {
+    category: 'Scanning Books',
+    icon: ScanBarcode,
+    question: 'What is Rapid Fire mode?',
+    answer: 'Rapid Fire mode lets you scan multiple books continuously:\n1. Go to /scan/mobile\n2. Rapid Fire mode is ON by default\n3. Scan books - each ISBN is queued (not processed yet)\n4. See the badge counter increment\n5. When done, tap "Finish & Process All"\n6. All books are fetched and saved in batch\n\nPerfect for shelf-reading or receiving new shipments!'
   },
   {
-    category: 'Exporting Data',
-    icon: Download,
-    question: 'Can I export selected books only?',
-    answer: 'Currently, Rangkai exports all scans in your history. To export specific books:\n1. Delete unwanted scans from your history\n2. Click "Export All"\n3. Re-scan deleted books later if needed\n\nSelective export is planned for a future update.'
+    category: 'Scanning Books',
+    icon: ScanBarcode,
+    question: 'Can I paste a list of ISBNs?',
+    answer: 'Yes! Use Smart Batch Mode:\n1. Go to /scan/batch\n2. Paste your ISBNs (any format: one per line, comma-separated, or mixed)\n3. The system auto-detects valid ISBNs\n4. Review the parsed list\n5. Click "Process All"\n\nSupports 50+ ISBNs at once!'
+  },
+  {
+    category: 'Scanning Books',
+    icon: ScanBarcode,
+    question: 'Does scanning work offline?',
+    answer: 'Limited offline support:\n• Scan barcodes offline → ISBNs are saved to local queue\n• See "● Offline" badge when disconnected\n• When back online, scans auto-sync\n• Tap the yellow queue badge to manually sync\n\nNote: Metadata lookup and AI Clean require internet.'
   },
   
   // PWA Installation

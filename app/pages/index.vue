@@ -15,13 +15,13 @@ const { isAuthenticated } = useAuth()
 const features = [
   {
     icon: 'i-lucide-download',
-    title: 'One-Click SLiMS Export',
-    description: 'Export directly to SLiMS-compatible CSV format. No manual reformatting required. Just scan, clean, and import.'
+    title: 'Export to SLiMS & Koha',
+    description: 'One-click export to SLiMS CSV or MARC21 format. Direct import to Koha, SLiMS, or any library system supporting standard formats.'
   },
   {
-    icon: 'i-lucide-scan-line',
-    title: 'Instant Barcode Scanning',
-    description: 'Point your phone camera at any ISBN barcode and get complete book details in seconds. Works with ISBN-10 and ISBN-13.'
+    icon: 'i-lucide-zap',
+    title: 'Rapid Fire Scanning',
+    description: 'Scan dozens of books without closing the camera. Batch mode queues ISBNs for bulk processing. Perfect for shelf-reading.'
   },
   {
     icon: 'i-lucide-database',
@@ -34,14 +34,14 @@ const features = [
     description: 'Gemini AI automatically normalizes author names, adds DDC/LCC classifications, and enriches subject headings—no manual work needed.'
   },
   {
-    icon: 'i-lucide-smartphone',
-    title: 'Works Offline on Any Device',
-    description: 'Install as a mobile app with offline access. Full-screen camera mode for faster scanning. No internet required once installed.'
+    icon: 'i-lucide-wifi-off',
+    title: 'Works Offline',
+    description: 'Scan books even without internet. Scans queue automatically and sync when you\'re back online. Perfect for stack rooms.'
   },
   {
-    icon: 'i-lucide-globe',
-    title: 'Access Your Library Anywhere',
-    description: 'Your catalog is securely stored in the cloud. Search, edit, and export from any device with automatic real-time sync.'
+    icon: 'i-lucide-keyboard',
+    title: 'Power User Features',
+    description: 'Keyboard shortcuts (Ctrl+Enter for AI Clean), batch paste 50+ ISBNs at once, haptic feedback on scan success.'
   }
 ]
 
