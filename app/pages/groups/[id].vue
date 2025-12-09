@@ -29,8 +29,10 @@ const fetchUrl = computed(() => {
 })
 
 // Fetch group data with reactive URL
+// Key must change when params change to trigger refetch (not just URL)
 const { data, pending, error, refresh } = await useFetch(fetchUrl, {
-  key: `group-${groupId.value}`
+  key: computed(() => `group-${groupId.value}-p${booksPage.value}-l${booksLimit.value}-s${booksSearch.value}`),
+  watch: [booksPage, booksLimit, booksSearch]
 })
 
 const activeTab = ref<'members' | 'books' | 'activity' | 'settings'>('members')
