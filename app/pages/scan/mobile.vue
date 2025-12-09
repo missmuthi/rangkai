@@ -194,9 +194,10 @@ onMounted(() => {
         <span class="text-xs">Home</span>
       </NuxtLink>
       
-      <div class="flex flex-col items-center gap-1 px-4 border-l border-r border-gray-800">
-        <span class="text-xs text-gray-500 font-mono">{{ lastScan || 'Ready' }}</span>
-      </div>
+      <NuxtLink to="/scan/batch" class="flex flex-col items-center gap-1 text-amber-400 hover:text-amber-300 transition-colors p-2">
+        <component :is="resolveComponent('LucideClipboardList')" class="h-5 w-5" />
+        <span class="text-xs">Batch</span>
+      </NuxtLink>
 
       <NuxtLink to="/history" class="flex flex-col items-center gap-1 text-gray-400 hover:text-white transition-colors p-2">
         <component :is="resolveComponent('LucideHistory')" class="h-5 w-5" />
