@@ -33,12 +33,15 @@ const memberSince = computed(() => {
     <div class="flex items-center gap-4">
       <!-- Avatar -->
       <div class="relative">
-        <img
+        <NuxtImg
           v-if="profile?.avatar"
           :src="profile.avatar"
           :alt="profile.name || 'User avatar'"
           class="w-20 h-20 rounded-full object-cover ring-4 ring-indigo-50 dark:ring-gray-700"
-        >
+          width="80"
+          height="80"
+          provider="ipx"
+        />
         <div
           v-else
           class="w-20 h-20 rounded-full bg-indigo-100 dark:bg-indigo-900 flex items-center justify-center ring-4 ring-indigo-50 dark:ring-gray-700"

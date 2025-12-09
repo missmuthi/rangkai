@@ -15,10 +15,7 @@ const emit = defineEmits<{
 }>()
 
 const coverUrl = computed(() => {
-  if (props.book.thumbnail) {
-    return `/api/image-proxy?url=${encodeURIComponent(props.book.thumbnail)}`
-  }
-  return '/images/no-cover.svg'
+  return props.book.thumbnail || '/images/no-cover.svg'
 })
 </script>
 
@@ -27,12 +24,16 @@ const coverUrl = computed(() => {
     <div class="flex">
       <!-- Cover Image -->
       <div class="w-24 h-36 flex-shrink-0 bg-gray-100 dark:bg-gray-700">
-        <img
+        <NuxtImg
           :src="coverUrl"
           :alt="book.title || 'Book cover'"
           class="w-full h-full object-cover"
           loading="lazy"
-        >
+          width="96"
+          height="144"
+          provider="ipx"
+          placeholder
+        />
       </div>
 
       <!-- Book Info -->

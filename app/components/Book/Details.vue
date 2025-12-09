@@ -92,12 +92,15 @@ onMounted(() => {
             <!-- Cover & Basic Info -->
             <div class="flex gap-6">
               <div class="w-32 flex-shrink-0">
-                <img
+                <NuxtImg
                   v-if="localBook.thumbnail"
-                  :src="`/api/image-proxy?url=${encodeURIComponent(localBook.thumbnail)}`"
+                  :src="localBook.thumbnail"
                   :alt="localBook.title || 'Book cover'"
                   class="w-full rounded-lg shadow"
-                >
+                  width="128"
+                  provider="ipx"
+                  placeholder
+                />
                 <div v-else class="w-full aspect-[2/3] bg-gray-200 dark:bg-gray-700 rounded-lg flex items-center justify-center">
                   <span class="text-gray-400">No Cover</span>
                 </div>

@@ -12,8 +12,45 @@ export default defineNuxtConfig({
     '@nuxthub/core',
     '@nuxt/eslint',
     '@nuxt/ui',
-    '@vite-pwa/nuxt'
+    '@vite-pwa/nuxt',
+    '@nuxt/image'
   ],
+  image: {
+    domains: [
+      'books.google.com',
+      'covers.openlibrary.org',
+      'tile.loc.gov',
+      'opac.perpusnas.go.id'
+    ]
+  },
+  routeRules: {
+    // Landing page & static content - Cached (ISR)
+    '/': { prerender: true },
+    '/about': { prerender: true },
+    
+    // User Dashboard & protected routes - Client-side Only (SPA)
+    // Avoids "Hydration Mismatch" and speeds up navigation for logged-in users
+    '/dashboard/**': { ssr: false },
+    '/history/**': { ssr: false },
+    '/settings/**': { ssr: false },
+    '/scan/**': { ssr: false },
+    '/profile/**': { ssr: false },
+
+    // Public Book Details - Stale-While-Revalidate (SWR)
+    // Cache for 1 hour (3600s), revalidate in background
+    '/book/**': { swr: 3600 },
+    
+    // Experimental pages
+    '/diagnostics/**': { ssr: false },
+    
+    // API Caching Rules
+    // User-specific APIs: No Cache
+    '/api/scan/**': { cache: false },
+    '/api/me/**': { cache: false },
+    
+    // Public Data APIs: Cache for 1 day
+    '/api/stats/**': { swr: 86400 },
+  },
   colorMode: {
     classSuffix: ''
   },
