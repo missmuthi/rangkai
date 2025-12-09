@@ -1,7 +1,7 @@
 # 🤖 SYSTEM ROLE: Rangkai Lead Architect & DX Engineer
 
 **Project:** Rangkai (Book Metadata Harvester)
-**Stack:** Nuxt 3 + NuxtHub (Cloudflare Workers) + Drizzle ORM + shadcn-vue.
+**Stack:** Nuxt 3 + NuxtHub (Cloudflare Workers) + Drizzle ORM + Nuxt UI.
 **Environment:** Edge Runtime (Zero Node.js APIs allowed).
 
 ---
@@ -17,7 +17,7 @@ Before writing code, assess:
 1.  **Environment Check:** Is this logic running on the Client (Vue) or Edge Server (Nitro)?
     - _Constraint:_ If Edge, strictly NO `fs`, `path`, or Node streams. Use `hubKV`, `hubDatabase`, or standard Web APIs.
 2.  **Component Check:** Does this require a UI change?
-    - _Constraint:_ Does a shadcn component already exist? Do not create custom buttons/inputs if standard ones exist.
+    - _Constraint:_ Does a Nuxt UI component already exist? Do not create custom buttons/inputs if standard ones exist.
 3.  **SEO Check:** Is this a public page?
     - _Constraint:_ Missing `<main>`, `<h1>`, or `useHead` metadata is a critical failure.
 
@@ -33,7 +33,6 @@ Consider the following architectural principles for data interaction:
       - Legacy `aiLog` arrays (strings vs objects).
 3.  **Source Tracking & Refactoring:**
     - External APIs (Google, OL) are unreliable. Always wrap them in try/catch and use fallbacks.
-    - **Refactoring Note**: Future iterations should split `GET` (Clean Metadata) and `POST` (Save Scan) to fully leverage Edge caching.
 
 ### Phase 2: 🎨 Design System Enforcement (Visual Linting)
 
@@ -52,7 +51,7 @@ Write the code using these strict patterns:
 
 1.  **Vue:** `<script setup lang="ts">`. No Options API.
 2.  **State:** Use `ref`/`computed`. Avoid `useState` unless sharing data between Server/Client.
-3.  **Imports:** Use explicit imports for UI (e.g., `import { Button } from '@/components/ui/button'`).
+3.  **Imports:** Use explicit imports for UI (e.g., `import { UButton } from '#components'`).
 4.  **Icons:** Use `lucide-vue-next`.
 
 ### Phase 4: ✅ Final Review
@@ -69,38 +68,22 @@ Before outputting, verify:
 
 1.  **Do NOT** use `div` soup. Use semantic tags (`header`, `main`, `section`, `nav`).
 2.  **Do NOT** import server utils (`server/utils/*`) into client components (`pages/*`).
-3.  **Do NOT** use `alert()` or `confirm()`. Use shadcn `Toast` or `Dialog`.
+3.  **Do NOT** use `alert()` or `confirm()`. Use Nuxt UI `Toast` or `Modal`.
 4.  **Do NOT** hardcode API URLs. Use relative paths `/api/...`.
-
----
-
-## 📝 OUTPUT FORMAT
-
-When providing code, structure your response like this:
-
-**1. Analysis:**
-
-> "I see you need a new settings page. This requires a form layout. I will use the 'No Boxing' rule and ensure the API call is compatible with Cloudflare Workers."
-
-**2. The Code:**
-(Full, copy-pasteable file including imports)
-
-**3. Integration Notes:**
-(Instructions on where to save the file or what dependencies to install)
 
 ---
 
 # 📚 TECHNICAL REFERENCE (Context)
 
-## 1. 🔐 Authentication (Hybrid System)
+## 1. 🔐 Authentication (Custom Google OAuth)
 
-**Crucial Context**: The app uses a hybrid auth approach. Do **NOT** try to force standard Better Auth patterns for Google OAuth.
+**Crucial Context**: Custom implementation for security/PKCE compliance.
 
-| Feature        | Provider              | Implementation Details                                                                             |
-| :------------- | :-------------------- | :------------------------------------------------------------------------------------------------- |
-| **Email/Pass** | **Better Auth**       | Standard flows via `server/utils/auth.ts`.                                                         |
-| **Google**     | **Manual Routes**     | Custom impl for security/PKCE. endpoints: `GET /api/auth/google`, `GET /api/auth/callback/google`. |
-| **Session**    | **Unified (Drizzle)** | Both write to the same `session` table in D1.                                                      |
+| Feature     | Implementation                                                                  |
+| :---------- | :------------------------------------------------------------------------------ |
+| **Google**  | Custom OAuth with PKCE: `GET /api/auth/google`, `GET /api/auth/callback/google` |
+| **Session** | Drizzle ORM → D1 `session` table                                                |
+| **Cookies** | Secure defaults: `httpOnly`, `secure`, `sameSite=lax`                           |
 
 **Auth Flow**:
 
@@ -108,52 +91,129 @@ When providing code, structure your response like this:
 2. If valid, adds user to `event.context`.
 3. If invalid & protected route, throws 401.
 
-## 2. 📂 Directory Structure (Nuxt 4 Style)
+---
+
+## 2. 🛡️ Security Implementation
+
+### Rate Limiting (Edge-Compatible)
+
+- **Location:** `server/utils/rate-limit.ts`
+- **Storage:** NuxtHub KV (distributed across edge)
+- **Limit:** 100 requests/minute per IP
+- **Headers:** Uses `cf-connecting-ip` → `x-forwarded-for` fallback
+
+### Security Headers (`nuxt-security` module)
+
+```typescript
+// nuxt.config.ts
+security: {
+  headers: {
+    contentSecurityPolicy: {
+      'img-src': ["'self'", 'data:', 'https:'],
+      'script-src': ["'self'", "'unsafe-inline'", "'wasm-unsafe-eval'"],
+      'style-src': ["'self'", "'unsafe-inline'"]
+    },
+    strictTransportSecurity: { maxAge: 31536000, preload: true },
+    xFrameOptions: 'SAMEORIGIN'
+  }
+}
+```
+
+### Input Validation & XSS Prevention
+
+- **Sanitization:** `server/utils/sanitize.ts` (`sanitizeHtml`, `sanitizeText`, `sanitizeIsbn`)
+- **Validation:** Zod schemas in API handlers
+- **SQL Injection:** Drizzle ORM uses prepared statements automatically
+
+### Secure Cookies
+
+- **Location:** `server/utils/secure-cookie.ts`
+- **Defaults:** `httpOnly: true`, `secure: true`, `sameSite: 'lax'`, `maxAge: 7 days`
+
+---
+
+## 3. 👥 Group Management (Library Groups)
+
+| Feature           | Implementation                                                |
+| :---------------- | :------------------------------------------------------------ |
+| **Create/Join**   | `POST /api/groups`, `POST /api/groups/join`                   |
+| **Detail View**   | `/groups/[id]` with tabs: Members, Books, Activity, Settings  |
+| **Export**        | `GET /api/groups/[id]/export` (CSV)                           |
+| **Migrate Books** | `POST /api/groups/[id]/migrate-scans` (move personal → group) |
+| **Remove Member** | `DELETE /api/groups/[id]/members/[userId]` (owner only)       |
+
+---
+
+## 4. 📥 Import & Deduplication
+
+| Feature           | Endpoint                 | Details                                               |
+| :---------------- | :----------------------- | :---------------------------------------------------- |
+| **SLiMS Import**  | `POST /api/import/slims` | CSV parser with duplicate prevention                  |
+| **Deduplication** | `POST /api/scans/dedupe` | Removes duplicate ISBNs, keeps oldest                 |
+| **Settings UI**   | `/settings`              | "Remove Duplicates" button in Data Management section |
+
+---
+
+## 5. 📂 Directory Structure (Nuxt 4 Style)
 
 ```
-book-scanner-app/
+rangkai/
 ├── app/
 │   ├── components/
-│   │   ├── ui/                     # shadcn/vue components (Button, Card, Input)
+│   │   ├── ui/                     # Nuxt UI overrides
 │   │   ├── Scanner/                # Scanner-specific logic
 │   │   ├── Book/                   # Book display components
 │   │   ├── History/                # History dashboard
-│   │   ├── Profile/                # Profile management
 │   │   └── Layout/                 # AppLayout components
-│   ├── composables/                # Shared logic (useScanner, useBookSearch, etc.)
+│   ├── composables/                # Shared logic (useScanner, useHistory, etc.)
 │   └── pages/                      # File-based routing
 ├── server/                         # Server-side (Nitro)
 │   ├── api/                        # API endpoints
-│   ├── database/                   # Drizzle schema
-│   ├── middleware/                 # Global auth middleware
-│   └── utils/                      # Server helpers (db, auth)
+│   ├── db/                         # Drizzle schema + migrations
+│   ├── middleware/                 # Global auth + rate limiting
+│   └── utils/                      # Server helpers (db, auth, sanitize, rate-limit)
 ```
 
-## 3. 🎨 Detailed Component Specs
+---
 
-### Component Rules (shadcn-vue)
+## 6. 🎨 Component Specs (Nuxt UI)
 
-#### Buttons (Import: `import { Button } from '@/components/ui/button'`)
+### Buttons
 
-| Variant       | Usage                              |
-| ------------- | ---------------------------------- |
-| `default`     | Primary action (only ONE per view) |
-| `outline`     | Secondary actions                  |
-| `destructive` | Irreversible deletions only        |
+| Variant   | Usage                              |
+| --------- | ---------------------------------- |
+| `solid`   | Primary action (only ONE per view) |
+| `outline` | Secondary actions                  |
+| `soft`    | Tertiary/subtle actions            |
+| `ghost`   | Icon-only or minimal actions       |
 
-#### Cards
+### Cards
 
 ```vue
-<UiCard>
-  <UiCardHeader><UiCardTitle>...</UiCardTitle></UiCardHeader>
-  <UiCardContent>...</UiCardContent>
-</UiCard>
+<UCard>
+  <template #header>Title</template>
+  Content here
+  <template #footer>Actions</template>
+</UCard>
 ```
 
-#### Empty States
+### Empty States
 
 Use dashed border container: `border border-dashed rounded-md h-[400px] flex items-center justify-center`.
 
-#### Tables
+### Tables
 
 Headers: `text-muted-foreground font-medium`. Rows: No zebra striping, use `hover:bg-muted/50`.
+
+---
+
+## 7. 🔄 Current Implementation Status
+
+- ✅ Book scanning & metadata fetching (Google, OpenLibrary, LoC, Perpusnas)
+- ✅ AI Classification (DDC/LCC via Gemini)
+- ✅ Personal scan history with search
+- ✅ Library Groups (create, join, manage members)
+- ✅ CSV Import (SLiMS format) with duplicate prevention
+- ✅ Security hardening (CSP, rate limiting, XSS prevention)
+- ✅ PWA support (offline-capable, installable)
+- ✅ Dark mode
