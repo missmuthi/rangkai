@@ -259,6 +259,25 @@ export const groupMembers = sqliteTable('group_members', {
   uniqueIndex('idx_group_members_unique').on(table.groupId, table.userId),
 ])
 
+/**
+ * Activity Logs table - Audit trail for user actions
+ * Tracks who did what in groups for accountability
+ */
+export const activityLogs = sqliteTable('activity_logs', {
+  id: text('id').primaryKey(),
+  userId: text('user_id').notNull().references(() => user.id),
+  groupId: text('group_id').references(() => groups.id, { onDelete: 'cascade' }),
+  action: text('action').notNull(), // 'create', 'update', 'delete', 'ai_clean', 'export'
+  entityType: text('entity_type').notNull(), // 'scan', 'group', 'member'
+  entityId: text('entity_id').notNull(),
+  details: text('details'), // JSON with field changes
+  createdAt: integer('created_at', { mode: 'timestamp' }).notNull(),
+}, (table) => [
+  index('idx_activity_group').on(table.groupId),
+  index('idx_activity_user').on(table.userId),
+  index('idx_activity_created').on(table.createdAt),
+])
+
 // =============================================================================
 // RELATIONS (Drizzle ORM)
 // =============================================================================
@@ -306,6 +325,17 @@ export const groupMembersRelations = relations(groupMembers, ({ one }) => ({
   user: one(user, {
     fields: [groupMembers.userId],
     references: [user.id],
+  }),
+}))
+
+export const activityLogsRelations = relations(activityLogs, ({ one }) => ({
+  user: one(user, {
+    fields: [activityLogs.userId],
+    references: [user.id],
+  }),
+  group: one(groups, {
+    fields: [activityLogs.groupId],
+    references: [groups.id],
   }),
 }))
 
@@ -359,6 +389,9 @@ export type NewGroupMember = typeof groupMembers.$inferInsert
 
 export type ScansHistory = typeof scansHistory.$inferSelect
 export type NewScansHistory = typeof scansHistory.$inferInsert
+
+export type ActivityLog = typeof activityLogs.$inferSelect
+export type NewActivityLog = typeof activityLogs.$inferInsert
 
 // ============================================================================
 // CLASSIFICATION CACHE TABLE (RAG System)
