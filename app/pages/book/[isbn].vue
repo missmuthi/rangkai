@@ -15,6 +15,15 @@ const cleanError = ref<string | null>(null)
 const showDebug = ref(false)
 let cooldownTimer: NodeJS.Timeout
 
+// Keyboard shortcuts - Ctrl+Enter for AI Clean
+useKeyboardShortcuts({
+  onAiClean: () => {
+    if (!isCleaning.value && book.value && cooldown.value <= 0) {
+      handleAiClean()
+    }
+  }
+})
+
 // Steps for AI loader
 const STEPS = [
   'Searching OpenLibrary sources...',
