@@ -46,6 +46,35 @@ const themeOptions = [
   { label: 'Light', value: 'light', icon: 'i-lucide-sun' },
   { label: 'Dark', value: 'dark', icon: 'i-lucide-moon' }
 ]
+
+// Dedupe state
+const isDeduping = ref(false)
+const dedupeResult = ref<{ removed: number; checked: number } | null>(null)
+
+const handleDedupe = async () => {
+  try {
+    isDeduping.value = true
+    dedupeResult.value = null
+    const result = await $fetch<{ removed: number; checked: number; message: string }>('/api/scans/dedupe', {
+      method: 'POST'
+    })
+    dedupeResult.value = result
+    toast.add({
+      title: 'Cleanup Complete',
+      description: result.message,
+      color: result.removed > 0 ? 'green' : 'gray'
+    })
+  } catch (e: unknown) {
+    const err = e as { data?: { message?: string } }
+    toast.add({
+      title: 'Error',
+      description: err.data?.message || 'Failed to remove duplicates',
+      color: 'red'
+    })
+  } finally {
+    isDeduping.value = false
+  }
+}
 </script>
 
 <template>
@@ -142,6 +171,50 @@ const themeOptions = [
           >
             {{ theme.label }}
           </span>
+        </div>
+      </div>
+    </UCard>
+
+    <!-- Data Management Section -->
+    <UCard>
+      <template #header>
+        <div class="flex items-center gap-3">
+          <div class="p-2 rounded-lg bg-primary/10">
+            <UIcon name="i-lucide-database" class="w-5 h-5 text-primary" />
+          </div>
+          <div>
+            <h3 class="font-semibold text-gray-900 dark:text-white">Data Management</h3>
+            <p class="text-sm text-gray-500 dark:text-gray-400">
+              Manage your library data
+            </p>
+          </div>
+        </div>
+      </template>
+
+      <div class="space-y-4">
+        <div class="flex items-start justify-between gap-4">
+          <div class="flex-1">
+            <h4 class="font-medium text-gray-900 dark:text-white text-sm">Remove Duplicate Books</h4>
+            <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
+              Find and remove duplicate entries from your library. Keeps the oldest scan for each ISBN.
+            </p>
+            <div v-if="dedupeResult" class="mt-2 text-sm">
+              <span v-if="dedupeResult.removed > 0" class="text-green-600 dark:text-green-400">
+                ✓ Removed {{ dedupeResult.removed }} duplicate(s)
+              </span>
+              <span v-else class="text-gray-500">
+                No duplicates found
+              </span>
+            </div>
+          </div>
+          <UButton
+            :loading="isDeduping"
+            variant="soft"
+            icon="i-lucide-copy-x"
+            @click="handleDedupe"
+          >
+            {{ isDeduping ? 'Cleaning...' : 'Remove Duplicates' }}
+          </UButton>
         </div>
       </div>
     </UCard>
