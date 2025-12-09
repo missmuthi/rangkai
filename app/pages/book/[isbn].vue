@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import BibliographicRecord from '~/components/BibliographicRecord.vue'
-import { ArrowLeft, Sparkles, Edit, RotateCcw } from 'lucide-vue-next'
+import { ArrowLeft, Sparkles, Edit } from 'lucide-vue-next'
 import Button from '@/components/ui/Button.vue'
 import Skeleton from '@/components/ui/Skeleton.vue'
 
@@ -65,24 +65,32 @@ async function handleAiClean() {
     const cleaned = await cleanMetadata(book.value)
     console.log('[Book Details] AI clean successful:', cleaned)
     
-    // Save to server
-    if (scanId.value) {
-      await $fetch(`/api/scans/${scanId.value}`, {
-        method: 'PATCH',
-        body: cleaned
-      })
-    } else {
-       const saved = await $fetch('/api/scans', {
-         method: 'POST',
-         body: cleaned
-       })
-       scanId.value = saved.id
-    }
-    
-    // Update local state by merging to preserve reactivity
-    // Use spread to ensure all existing properties are kept and new ones are added
+    // OPTIMISTIC: Update UI immediately after AI returns
     book.value = { ...book.value, ...cleaned, isAiEnhanced: true }
+    clearInterval(stepInterval)
+    isCleaning.value = false
     startCooldown()
+    
+    // Background save (don't block UI)
+    const savePromise = scanId.value
+      ? $fetch(`/api/scans/${scanId.value}`, { method: 'PATCH', body: cleaned })
+      : $fetch<{ id: string }>('/api/scans', { method: 'POST', body: cleaned })
+    
+    savePromise
+      .then((result) => {
+        if (!scanId.value && result?.id) scanId.value = result.id
+        console.log('[Book Details] Background save complete')
+      })
+      .catch((saveErr) => {
+        console.error('[Book Details] Background save failed:', saveErr)
+        // Show warning toast but don't rollback - data is good locally
+        const toast = useToast()
+        toast.add({
+          title: 'Sync warning',
+          description: 'Changes saved locally but not synced to server.',
+          color: 'yellow'
+        })
+      })
   } catch (err: any) {
     console.error('[Book Details] AI clean failed:', err)
     
