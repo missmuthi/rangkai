@@ -1,9 +1,9 @@
 
 import { eq, and } from 'drizzle-orm'
-import { groups, groupMembers } from '../db/schema'
+import { groups, groupMembers } from '../../db/schema'
 import { v4 as uuidv4 } from 'uuid'
-import { useDb } from '../utils/db'
-import { requireUserSession } from '../utils/session'
+import { useDb } from '../../utils/db'
+import { requireUserSession } from '../../utils/session'
 
 function generateInviteCode() {
   return Math.random().toString(36).substring(2, 8).toUpperCase()
