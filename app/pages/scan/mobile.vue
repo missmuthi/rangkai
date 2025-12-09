@@ -4,13 +4,21 @@ definePageMeta({
   layout: 'scanner'
 })
 
-const { book, scanId, loading, error, searchByISBN, cleanMetadata } = useBookSearch()
+const router = useRouter()
+const toast = useToast()
+const { book, loading, error, searchByISBN, cleanMetadata } = useBookSearch()
 const { startScanner } = useScanner()
 
 const scannerRef = ref<HTMLElement | null>(null)
 const lastScan = ref('')
 const lastScanAt = ref(0)
 const autoClean = ref(true)
+
+// Rapid Fire Mode
+const isRapidMode = ref(true)
+const sessionQueue = ref<string[]>([])
+const isProcessing = ref(false)
+const processProgress = ref(0)
 
 async function onScanSuccess(decodedText: string) {
   // Debounce duplicates (3 second window)
@@ -28,26 +36,79 @@ async function onScanSuccess(decodedText: string) {
     return
   }
 
-  // Fetch metadata & Auto-save (handled by server)
-  await searchByISBN(isbn)
-
-  // Auto-clean if enabled
-  if (autoClean.value && book.value) {
-    book.value = await cleanMetadata(book.value)
+  if (isRapidMode.value) {
+    // Rapid Fire: Queue only, don't process yet
+    if (!sessionQueue.value.includes(isbn)) {
+      sessionQueue.value.push(isbn)
+      // Beep is already played by useScanner
+    }
+  } else {
+    // Normal mode: Process immediately
+    await searchByISBN(isbn)
+    if (autoClean.value && book.value) {
+      book.value = await cleanMetadata(book.value)
+    }
   }
+}
+
+function removeFromQueue(isbn: string) {
+  sessionQueue.value = sessionQueue.value.filter(i => i !== isbn)
+}
+
+function clearSession() {
+  sessionQueue.value = []
+}
+
+async function processSession() {
+  if (sessionQueue.value.length === 0) return
+  
+  isProcessing.value = true
+  processProgress.value = 0
+  const total = sessionQueue.value.length
+  let processed = 0
+  
+  for (const isbn of sessionQueue.value) {
+    try {
+      await searchByISBN(isbn)
+      if (autoClean.value && book.value) {
+        await cleanMetadata(book.value)
+      }
+      processed++
+      processProgress.value = Math.round((processed / total) * 100)
+    } catch (err) {
+      console.error(`Failed to process ${isbn}:`, err)
+      // Continue with others
+    }
+  }
+  
+  toast.add({
+    title: 'Batch complete!',
+    description: `Processed ${processed} of ${total} books`,
+    color: 'green'
+  })
+  
+  sessionQueue.value = []
+  isProcessing.value = false
+  router.push('/history')
 }
 
 onMounted(() => {
   if (scannerRef.value) {
-    // Start scanner when mounted
     startScanner('scanner-reader', onScanSuccess, (err) => console.warn(err))
   }
 })
-// onUnmounted is handled by useScanner composable
 </script>
 
 <template>
-  <div class="min-h-screen bg-gray-900 text-white">
+  <div class="min-h-screen bg-gray-900 text-white pb-20">
+    <!-- Floating Badge Counter -->
+    <Transition name="bounce">
+      <div v-if="isRapidMode && sessionQueue.length > 0" 
+           class="fixed top-4 right-4 z-50 bg-green-500 text-white px-4 py-2 rounded-full font-bold text-lg shadow-lg">
+        {{ sessionQueue.length }} scanned
+      </div>
+    </Transition>
+
     <!-- Scanner Viewport -->
     <div class="relative">
       <div id="scanner-reader" ref="scannerRef" class="w-full aspect-[4/3]" />
@@ -56,34 +117,74 @@ onMounted(() => {
       <div class="absolute inset-0 pointer-events-none">
         <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-24 border-2 border-green-400 rounded-lg" />
       </div>
+      
+      <!-- Mode Badge -->
+      <div class="absolute top-2 left-2 px-2 py-1 rounded text-xs font-bold" 
+           :class="isRapidMode ? 'bg-amber-500' : 'bg-blue-500'">
+        {{ isRapidMode ? '⚡ RAPID FIRE' : '📖 NORMAL' }}
+      </div>
     </div>
 
     <!-- Controls -->
-    <div class="p-4 space-y-4">
-      <label class="flex items-center gap-2">
-        <input v-model="autoClean" type="checkbox" class="rounded" >
-        <span>Auto-clean metadata with AI</span>
-      </label>
-    </div>
-
-    <!-- Result Panel -->
-    <div v-if="loading" class="p-4">
-      <div class="animate-pulse bg-gray-800 h-32 rounded-lg" />
-    </div>
-
-    <div v-else-if="error" class="p-4">
-      <div class="bg-red-900/50 text-red-300 p-4 rounded-lg">
-        {{ error }}
+    <div class="p-4 space-y-3 border-b border-gray-800">
+      <div class="flex items-center justify-between">
+        <label class="flex items-center gap-2 cursor-pointer">
+          <input v-model="isRapidMode" type="checkbox" class="rounded">
+          <span class="text-sm">Rapid Fire Mode</span>
+        </label>
+        
+        <label class="flex items-center gap-2 cursor-pointer">
+          <input v-model="autoClean" type="checkbox" class="rounded">
+          <span class="text-sm">Auto AI Clean</span>
+        </label>
       </div>
     </div>
 
-    <div v-else-if="book" class="p-4">
-      <!-- Show saved state indicator -->
-      <div v-if="scanId" class="mb-2 text-green-400 text-center text-sm font-medium animate-in fade-in slide-in-from-top-2">
-        ✓ Saved to history
+    <!-- Rapid Fire: Session Queue -->
+    <div v-if="isRapidMode" class="p-4">
+      <div v-if="sessionQueue.length === 0" class="text-center text-gray-500 py-8">
+        <p class="text-4xl mb-2">📚</p>
+        <p>Point camera at barcodes to start scanning</p>
+        <p class="text-xs mt-1">Books will be queued for batch processing</p>
       </div>
       
-      <BookCard :book="book" :show-actions="false" />
+      <div v-else class="space-y-3">
+        <div class="flex justify-between items-center">
+          <span class="font-bold text-green-400">{{ sessionQueue.length }} books queued</span>
+          <button class="text-red-400 text-sm hover:text-red-300" @click="clearSession">
+            Clear All
+          </button>
+        </div>
+        
+        <!-- Queue List -->
+        <div class="max-h-40 overflow-y-auto space-y-2">
+          <div v-for="isbn in sessionQueue" :key="isbn" 
+               class="flex justify-between items-center bg-gray-800 p-2 rounded text-sm font-mono">
+            <span>{{ isbn }}</span>
+            <button class="text-gray-500 hover:text-red-400 px-2" @click="removeFromQueue(isbn)">×</button>
+          </div>
+        </div>
+        
+        <!-- Process Button -->
+        <button 
+          :disabled="isProcessing"
+          class="w-full py-3 bg-green-600 hover:bg-green-500 disabled:bg-gray-700 rounded-lg font-bold text-lg transition-colors"
+          @click="processSession"
+        >
+          <span v-if="isProcessing">Processing... {{ processProgress }}%</span>
+          <span v-else>✓ Finish & Process All</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Normal Mode: Result Panel -->
+    <div v-else class="p-4">
+      <div v-if="loading" class="animate-pulse bg-gray-800 h-32 rounded-lg" />
+      <div v-else-if="error" class="bg-red-900/50 text-red-300 p-4 rounded-lg">{{ error }}</div>
+      <div v-else-if="book"><BookCard :book="book" :show-actions="false" /></div>
+      <div v-else class="text-center text-gray-500 py-8">
+        <p>Point camera at a barcode to scan</p>
+      </div>
     </div>
 
     <!-- Navigation Footer -->
@@ -94,7 +195,7 @@ onMounted(() => {
       </NuxtLink>
       
       <div class="flex flex-col items-center gap-1 px-4 border-l border-r border-gray-800">
-         <span class="text-xs text-gray-500 font-mono">{{ lastScan || 'Ready to Scan' }}</span>
+        <span class="text-xs text-gray-500 font-mono">{{ lastScan || 'Ready' }}</span>
       </div>
 
       <NuxtLink to="/history" class="flex flex-col items-center gap-1 text-gray-400 hover:text-white transition-colors p-2">
@@ -104,3 +205,18 @@ onMounted(() => {
     </div>
   </div>
 </template>
+
+<style scoped>
+.bounce-enter-active {
+  animation: bounce-in 0.3s;
+}
+.bounce-leave-active {
+  animation: bounce-in 0.2s reverse;
+}
+@keyframes bounce-in {
+  0% { transform: scale(0); }
+  50% { transform: scale(1.2); }
+  100% { transform: scale(1); }
+}
+</style>
+
