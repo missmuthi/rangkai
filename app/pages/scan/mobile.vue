@@ -7,7 +7,6 @@ definePageMeta({
 const router = useRouter()
 const toast = useToast()
 const { book, loading, error, searchByISBN, cleanMetadata } = useBookSearch()
-const { startScanner } = useScanner()
 const { isOnline, queue: offlineQueue, addToQueue, syncQueue, isSyncing } = useOfflineQueue()
 const { isScanning, startScanner } = useScanner()
 
