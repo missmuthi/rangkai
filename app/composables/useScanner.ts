@@ -78,23 +78,60 @@ export function useScanner() {
     onResult: (text: string) => void,
     onError?: (error: string) => void
   ) {
+    console.log('[Scanner] Starting scanner initialization...')
+    console.log('[Scanner] Element ID:', elementId)
+    
     try {
       // Allow e2e tests to disable camera usage
       if (typeof window !== 'undefined' && (window as any).__SCANNER_DISABLED__) {
+        console.log('[Scanner] Scanner disabled by test flag')
         isScanning.value = false
         error.value = null
         return
       }
 
       if (scanner.value) {
+        console.log('[Scanner] Previous scanner instance found, stopping...')
         await stopScanner()
       }
 
-      // Dynamic import to reduce bundle size
-      const { Html5Qrcode, Html5QrcodeSupportedFormats } = await import('html5-qrcode')
+      // Check if element exists
+      const element = document.getElementById(elementId)
+      console.log('[Scanner] Target element:', element ? 'found' : 'NOT FOUND')
+      if (!element) {
+        throw new Error(`Element with id "${elementId}" not found in DOM`)
+      }
 
+      // Check camera permissions
+      console.log('[Scanner] Checking camera permissions...')
+      try {
+        const permissions = await navigator.permissions.query({ name: 'camera' as PermissionName })
+        console.log('[Scanner] Camera permission state:', permissions.state)
+      } catch (permErr) {
+        console.log('[Scanner] Could not query camera permission:', permErr)
+      }
+
+      // Check available cameras
+      console.log('[Scanner] Enumerating media devices...')
+      try {
+        const devices = await navigator.mediaDevices.enumerateDevices()
+        const cameras = devices.filter(d => d.kind === 'videoinput')
+        console.log('[Scanner] Available cameras:', cameras.length)
+        cameras.forEach((cam, i) => {
+          console.log(`[Scanner]   Camera ${i}: ${cam.label || 'unnamed'} (${cam.deviceId.slice(0, 8)}...)`)
+        })
+      } catch (devErr) {
+        console.log('[Scanner] Could not enumerate devices:', devErr)
+      }
+
+      // Dynamic import to reduce bundle size
+      console.log('[Scanner] Importing html5-qrcode library...')
+      const { Html5Qrcode, Html5QrcodeSupportedFormats } = await import('html5-qrcode')
+      console.log('[Scanner] Library imported successfully')
+
+      console.log('[Scanner] Creating Html5Qrcode instance...')
       const instance = new Html5Qrcode(elementId, { 
-        verbose: false,
+        verbose: true, // Enable verbose logging
         useBarCodeDetectorIfSupported: true,
         formatsToSupport: [
           Html5QrcodeSupportedFormats.EAN_13,
@@ -105,6 +142,7 @@ export function useScanner() {
           Html5QrcodeSupportedFormats.QR_CODE
         ]
       })
+      console.log('[Scanner] Html5Qrcode instance created')
       
       scanner.value = instance
       
@@ -114,29 +152,35 @@ export function useScanner() {
         aspectRatio: 4 / 3,
         disableFlip: true // better for 1D barcodes
       }
+      console.log('[Scanner] Config:', JSON.stringify(config))
 
+      console.log('[Scanner] Starting camera with facingMode: environment...')
       await instance.start(
         { facingMode: 'environment' },
         config,
         (decodedText) => {
+          console.log('[Scanner] Scan success:', decodedText)
           triggerScanFeedback()
           onResult(decodedText)
         },
         (_errorMessage) => {
           // Ignore frequent scanning errors, only report critical ones if needed
-          // onError(errorMessage) 
+          // console.log('[Scanner] Scan error:', _errorMessage)
         }
       )
       
+      console.log('[Scanner] Camera started successfully!')
       isScanning.value = true
       error.value = null
     } catch (e: unknown) {
-      error.value = (e instanceof Error) ? e.message : 'Failed to start camera'
+      const errorMessage = (e instanceof Error) ? e.message : 'Failed to start camera'
+      console.error('[Scanner] FAILED TO START:', errorMessage)
+      console.error('[Scanner] Full error:', e)
+      error.value = errorMessage
       isScanning.value = false
       if (onError && error.value) {
         onError(error.value)
       }
-      console.error('Scanner failed to start', e)
     }
   }
 
