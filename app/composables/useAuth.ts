@@ -71,7 +71,7 @@ export const useAuth = () => {
 
   // Email/Password Sign In
   async function signIn(email: string, password: string) {
-    const response = await $fetch('/api/auth/sign-in/email', {
+    const response = await $fetch('/api/auth/sign-in/email' as string, {
       method: 'POST' as const,
       body: { email, password },
       credentials: 'include',

@@ -104,7 +104,7 @@ export default defineEventHandler(async (event) => {
         enhancedAt: targetVersion.enhancedAt,
         aiLog: targetVersion.aiLog,
         jsonData: targetVersion.jsonData,
-        status: targetVersion.status,
+        status: targetVersion.status ?? 'pending',
         notes: targetVersion.notes,
         updatedAt: new Date()
       })

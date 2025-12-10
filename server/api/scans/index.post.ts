@@ -8,7 +8,7 @@ import { requireAuth } from '../../utils/auth'
 interface CreateScanBody {
   isbn: string
   title?: string
-  authors?: string
+  authors?: string[]
   publisher?: string
   description?: string
   status?: string
@@ -31,7 +31,7 @@ export default defineEventHandler(async (event) => {
       userId: user.id,
       isbn: body.isbn,
       title: body.title || '',
-      authors: body.authors || '',
+      authors: body.authors || [],
       publisher: body.publisher || '',
       description: body.description || '',
       status: body.status || 'pending',

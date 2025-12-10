@@ -41,7 +41,7 @@ describe('useSlimsExport', () => {
             if (prop === 'href') downloadedUrl = value
             if (prop === 'download') downloadedFilename = value
             // dynamic assignment
-            (target as any)[prop] = value
+            ;(target as any)[prop] = value
             return true
           },
           get(target, prop) {

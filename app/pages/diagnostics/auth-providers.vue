@@ -36,7 +36,7 @@ const providerEntries = computed(() => {
           type="button"
           class="inline-flex items-center gap-2 rounded-md border border-gray-200 px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
           :disabled="pending"
-          @click="refresh"
+          @click="() => refresh()"
         >
           <span v-if="pending" class="h-4 w-4 animate-spin rounded-full border-2 border-gray-300 border-t-gray-600" />
           <span v-else class="h-4 w-4 text-gray-500">↻</span>

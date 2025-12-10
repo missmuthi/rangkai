@@ -142,7 +142,7 @@ export function useScanner() {
   const setTorch = async (enabled: boolean) => {
     if (!scanner.value || !torchSupported.value) return
     try {
-      await scanner.value.applyVideoConstraints({ advanced: [{ torch: enabled }] })
+      await scanner.value.applyVideoConstraints({ advanced: [{ torch: enabled } as any] })
       torchOn.value = enabled
     } catch (err) {
       console.error('[Scanner] Failed to toggle torch:', err)
@@ -280,8 +280,8 @@ export function useScanner() {
               label: cam.label || `Camera ${index + 1}`
             }))
             const fallbackCamera = fallbackList.find(cam => cam.id === options?.deviceId) || fallbackList[0]
-            console.log('[Scanner] Retrying with camera ID:', fallbackCamera.id)
-            started = await tryStart(fallbackCamera.id, `deviceId: ${fallbackCamera.id}`)
+            console.log('[Scanner] Retrying with camera ID:', fallbackCamera!.id)
+            started = await tryStart(fallbackCamera!.id, `deviceId: ${fallbackCamera!.id}`)
           }
         } catch (cameraListErr) {
           lastError = cameraListErr

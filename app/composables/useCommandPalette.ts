@@ -18,13 +18,17 @@ export function useCommandPalette() {
   const cmdK = keys['Meta+K']
   const ctrlK = keys['Ctrl+K']
 
-  whenever(cmdK, () => {
-    isOpen.value = !isOpen.value
-  })
+  if (cmdK) {
+    whenever(cmdK, () => {
+      isOpen.value = !isOpen.value
+    })
+  }
 
-  whenever(ctrlK, () => {
-    isOpen.value = !isOpen.value
-  })
+  if (ctrlK) {
+    whenever(ctrlK, () => {
+      isOpen.value = !isOpen.value
+    })
+  }
 
   // Navigation actions
   const navigationActions = ref<CommandPaletteAction[]>([

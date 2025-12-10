@@ -182,7 +182,7 @@ function copyDebug() {
             :class="[
               'gap-2 min-w-[140px] transition-all duration-300',
               !book.isAiEnhanced && !isCleaning && cooldown === 0 ? 'shadow-[0_0_20px_rgba(99,102,241,0.5),0_0_40px_rgba(99,102,241,0.2)] animate-pulse' : ''
-            ]"
+            ].join(' ')"
             :disabled="isCleaning || cooldown > 0"
             @click="handleAiClean"
           >

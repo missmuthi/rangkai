@@ -100,7 +100,7 @@ export function buildMarc21Record(book: BookData): string {
     fields.push({
       tag: '100',
       indicators: '1 ',
-      subfields: [{ code: 'a', value: authors[0] }]
+      subfields: [{ code: 'a', value: authors[0]! }]
     })
   }
   

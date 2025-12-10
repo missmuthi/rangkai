@@ -73,7 +73,7 @@ async function main() {
   
   // Verify formats
   console.log('Verifying formats:')
-  for (const { filename, size } of icons) {
+  for (const { filename } of icons) {
     const iconPath = join(PUBLIC_DIR, filename)
     if (existsSync(iconPath)) {
       const metadata = await sharp(iconPath).metadata()

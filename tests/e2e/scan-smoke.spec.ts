@@ -4,7 +4,7 @@ test.describe('Scanner page (camera disabled for test)', () => {
   test.beforeEach(async ({ page }) => {
     // Prevent real camera access; hook is consumed in useScanner
     await page.addInitScript(() => {
-      // @ts-expect-error test flag
+      // @ts-expect-error: setting global test flag for scanner mock
       window.__SCANNER_DISABLED__ = true
     })
   })

@@ -126,9 +126,9 @@ const selectedCameraLabel = computed(() => {
 async function refreshCamerasList() {
   const cameras = await listCameras()
   if (!selectedCameraId.value && cameras.length > 0) {
-    selectedCameraId.value = cameras[0].id
+    selectedCameraId.value = cameras[0]!.id
   } else if (cameras.length > 0 && !cameras.find(cam => cam.id === selectedCameraId.value)) {
-    selectedCameraId.value = cameras[0].id
+    selectedCameraId.value = cameras[0]!.id
   }
 }
 
@@ -159,7 +159,7 @@ async function retryScanner() {
 async function switchCamera() {
   if (availableCameras.value.length < 2) return
   const currentIndex = availableCameras.value.findIndex(c => c.id === selectedCameraId.value)
-  const next = availableCameras.value[(currentIndex + 1) % availableCameras.value.length]
+  const next = availableCameras.value[(currentIndex + 1) % availableCameras.value.length]!
   selectedCameraId.value = next.id
   await retryScanner()
 }
@@ -179,7 +179,7 @@ onMounted(() => {
 
 watch(availableCameras, (cameras) => {
   if (!selectedCameraId.value && cameras.length > 0) {
-    selectedCameraId.value = cameras[0].id
+    selectedCameraId.value = cameras[0]!.id
   }
 })
 </script>

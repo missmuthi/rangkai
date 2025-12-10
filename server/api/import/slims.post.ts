@@ -75,12 +75,12 @@ export default defineEventHandler(async (event) => {
 
   // Process rows
   for (let i = 1; i < lines.length; i++) {
-    const rawRow = lines[i]
+    const rawRow = lines[i]!
     if (!rawRow.trim()) continue
 
     try {
       // Split by comma, handling quotes roughly
-      const row = rawRow.split(',').map(c => c.replace(/^"|"$/g, '').trim())
+      const row = rawRow!.split(',').map(c => c.replace(/^"|"$/g, '').trim())
       
       if (row.length < headers.length) {
         results.errors++
@@ -91,7 +91,7 @@ export default defineEventHandler(async (event) => {
         continue
       }
 
-      const isbn = row[isbnIdx].replace(/[-\s]/g, '')
+      const isbn = row[isbnIdx]!.replace(/[-\s]/g, '')
       const title = row[titleIdx]
       const author = authorIdx !== -1 ? row[authorIdx] : null
       const ddc = ddcIdx !== -1 ? row[ddcIdx] : null
