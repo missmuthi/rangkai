@@ -46,6 +46,14 @@ export default defineNuxtConfig({
         'base-uri': ["'self'"],
         'form-action': ["'self'"]
       },
+      // CRITICAL: Allow camera access for barcode scanner
+      permissionsPolicy: {
+        camera: ['self'],  // Allow camera for this origin
+        microphone: [],    // Block microphone (not needed)
+        geolocation: [],   // Block geolocation (not needed)
+        'display-capture': [], // Block screen capture
+        fullscreen: ['self']   // Allow fullscreen for scanner UX
+      },
       crossOriginEmbedderPolicy: false,
       strictTransportSecurity: {
         maxAge: 31536000,
