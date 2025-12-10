@@ -8,7 +8,7 @@ const router = useRouter()
 const toast = useToast()
 const { book, loading, error, searchByISBN, cleanMetadata } = useBookSearch()
 const { isOnline, queue: offlineQueue, addToQueue, syncQueue, isSyncing } = useOfflineQueue()
-const { isScanning, startScanner } = useScanner()
+const { isScanning, error: scannerError, startScanner } = useScanner()
 
 const scannerRef = ref<HTMLElement | null>(null)
 const lastScan = ref('')
@@ -99,16 +99,28 @@ async function processSession() {
   router.push('/history')
 }
 
+const cameraError = ref<string | null>(null)
+
 async function initScanner() {
   await nextTick()
-  if (!scannerRef.value) return
+  if (!scannerRef.value) {
+    cameraError.value = 'Scanner element not found in DOM'
+    return
+  }
+  cameraError.value = null
   startScanner('scanner-reader', onScanSuccess, (err) => {
+    cameraError.value = err
     toast.add({
       title: 'Camera error',
       description: err,
       color: 'red'
     })
   })
+}
+
+function retryScanner() {
+  cameraError.value = null
+  initScanner()
 }
 
 onMounted(() => {
@@ -144,14 +156,27 @@ v-if="offlineQueue.length > 0"
     <div class="relative">
       <div id="scanner-reader" ref="scannerRef" class="w-full aspect-[4/3]" />
 
-      <!-- Scan Overlay -->
-      <div class="absolute inset-0 pointer-events-none">
+      <!-- Camera Error Overlay -->
+      <div v-if="cameraError || scannerError" class="absolute inset-0 bg-red-900/90 flex flex-col items-center justify-center p-6 text-center">
+        <div class="text-4xl mb-4">📷❌</div>
+        <h3 class="text-xl font-bold text-red-200 mb-2">Camera Failed</h3>
+        <p class="text-red-300 text-sm mb-4 max-w-xs">{{ cameraError || scannerError }}</p>
+        <button 
+          class="px-4 py-2 bg-white text-red-900 rounded-lg font-bold hover:bg-red-100"
+          @click="retryScanner"
+        >
+          🔄 Retry Camera
+        </button>
+      </div>
+
+      <!-- Scan Overlay (only show when no error) -->
+      <div v-if="!cameraError && !scannerError" class="absolute inset-0 pointer-events-none">
         <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-24 border-2 border-green-400 rounded-lg" />
       </div>
 
       <!-- Scanner Status -->
       <div class="absolute top-2 right-2 px-2 py-1 rounded text-xs font-bold bg-black/50 border border-gray-700">
-        {{ isScanning ? 'Scanning…' : 'Starting camera' }}
+        {{ cameraError || scannerError ? '❌ Error' : (isScanning ? 'Scanning…' : 'Starting camera') }}
       </div>
       
       <!-- Mode Badge -->
