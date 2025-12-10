@@ -1,0 +1,10 @@
+priority,name,url,metadataPrefix,region,status,aggregator,notes
+1,INLISLite v3 Demo (Official),http://demo.inlislitev3.perpusnas.go.id/opac/oai,marcxml,Jakarta,active,false,
+2,BP Batam,http://opacinlis.bpbatam.go.id/oaipmh/oai.aspx,marcxml,Batam,active,false,
+3,Pekanbaru,http://pustaka-srv.pekanbaru.go.id:4580/inlislite3/opac/oai,marcxml,Riau,active,false,
+4,Permata Cendekia,https://perpustakaanpermatacendekia.com/inlislite3/opac/,oai_dc,School,active,false,
+5,Kabupaten Bone,https://inlislite-dispeka.bone.go.id/opac/oai,oai_dc,Sulsel,active,false,
+6,Samarinda,http://inlislite.samarindakota.go.id:8123/inlislite3/opac/oai,marcxml,Kaltim,active,false,
+7,Banjarmasin,http://125.167.232.208:12345/opac/oaipmh/oai.aspx,marcxml,Kalsel,active,false,
+8,OneSearch (Aggregator),https://onesearch.id,oai_dc,National,active,true,"Discovery index; not always ISBN-direct"
+9,Perpusnas E-Journal,https://ejournal.perpusnas.go.id/mp/oai,oai_dc,E-Journal,active,true,"Articles; not for books"

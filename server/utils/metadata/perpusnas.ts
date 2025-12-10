@@ -19,6 +19,8 @@ const PERPUSNAS_ENDPOINTS = {
   primary: 'https://inlislitev3.perpusnas.go.id/opac/oai',
   // Fallbacks if primary is down
   fallbacks: [
+    'https://inlislite.perpusnas.go.id/opac/oai', // Main site HTTPS
+    'https://demo.inlislitev3.perpusnas.go.id/opac/oai', // HTTPS demo
     'http://demo.inlislitev3.perpusnas.go.id/opac/oai', // HTTP demo
     'http://203.176.180.116:8123/opac/oai', // Legacy endpoint
   ]
@@ -26,6 +28,20 @@ const PERPUSNAS_ENDPOINTS = {
 
 // Request timeout (Cloudflare Workers limit is 30s, but don't wait that long)
 const TIMEOUT_MS = 8000
+
+const parseEnvList = (value?: string): string[] =>
+  (value || '')
+    .split(',')
+    .map(v => v.trim())
+    .filter(Boolean)
+
+const getEndpointList = () => {
+  const envPreferred = parseEnvList(process.env.PERPUSNAS_OAI_ENDPOINTS)
+  const envExtra = parseEnvList(process.env.PERPUSNAS_OAI_FALLBACKS)
+  const defaults = [PERPUSNAS_ENDPOINTS.primary, ...PERPUSNAS_ENDPOINTS.fallbacks]
+  // Env-preferred first, then defaults, then extra fallbacks (easier to experiment without code changes)
+  return [...envPreferred, ...defaults, ...envExtra]
+}
 
 // XML Parser configuration
 const xmlParser = new XMLParser({
@@ -222,7 +238,7 @@ export async function fetchPerpusnas(isbn: string): Promise<PerpusnasResult> {
   let lastError: string | null = null
 
   // Try each endpoint until one works
-  for (const endpoint of [PERPUSNAS_ENDPOINTS.primary, ...PERPUSNAS_ENDPOINTS.fallbacks]) {
+  for (const endpoint of getEndpointList()) {
     try {
       const controller = new AbortController()
       const timeoutId = setTimeout(() => controller.abort(), TIMEOUT_MS)
@@ -360,11 +376,13 @@ export async function testPerpusnasConnection(): Promise<{
   responseTime: number
   errors?: string[]
   error?: string
+  endpointsTested?: string[]
 }> {
   const startTime = Date.now()
   const errors: string[] = []
+  const endpoints = getEndpointList()
 
-  for (const endpoint of [PERPUSNAS_ENDPOINTS.primary, ...PERPUSNAS_ENDPOINTS.fallbacks]) {
+  for (const endpoint of endpoints) {
     try {
       const controller = new AbortController()
       const timeoutId = setTimeout(() => controller.abort(), 5000)
@@ -375,7 +393,10 @@ export async function testPerpusnasConnection(): Promise<{
 
       const response = await fetch(`${endpoint}?${params.toString()}`, {
         signal: controller.signal,
-        headers: { 'Accept': 'application/xml, text/xml' }
+        headers: { 
+          'Accept': 'application/xml, text/xml',
+          'User-Agent': 'Rangkai/2.0 (Indonesian Library Cataloging Tool)'
+        }
       })
 
       clearTimeout(timeoutId)
@@ -397,9 +418,10 @@ export async function testPerpusnasConnection(): Promise<{
 
   return {
     available: false,
-    endpoint: 'none',
-    responseTime: Date.now() - startTime,
-    errors,
-    error: errors[errors.length - 1] || 'All endpoints unreachable'
+      endpoint: 'none',
+      responseTime: Date.now() - startTime,
+      errors,
+    error: errors[errors.length - 1] || 'All endpoints unreachable',
+    endpointsTested: endpoints
   }
 }

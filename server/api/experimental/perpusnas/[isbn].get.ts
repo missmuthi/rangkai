@@ -20,6 +20,7 @@ export default defineEventHandler(async (event) => {
       action: 'connectivity_test',
       ...result,
       errors: result.errors,
+      endpointsTested: result.endpointsTested,
       timestamp: new Date().toISOString()
     }
   }

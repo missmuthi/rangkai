@@ -1,0 +1,85 @@
+[
+  {
+    "priority": 1,
+    "name": "INLISLite v3 Demo (Official)",
+    "url": "http://demo.inlislitev3.perpusnas.go.id/opac/oai",
+    "metadataPrefix": "marcxml",
+    "region": "Jakarta",
+    "status": "active",
+    "aggregator": false
+  },
+  {
+    "priority": 2,
+    "name": "BP Batam",
+    "url": "http://opacinlis.bpbatam.go.id/oaipmh/oai.aspx",
+    "metadataPrefix": "marcxml",
+    "region": "Batam",
+    "status": "active",
+    "aggregator": false
+  },
+  {
+    "priority": 3,
+    "name": "Pekanbaru",
+    "url": "http://pustaka-srv.pekanbaru.go.id:4580/inlislite3/opac/oai",
+    "metadataPrefix": "marcxml",
+    "region": "Riau",
+    "status": "active",
+    "aggregator": false
+  },
+  {
+    "priority": 4,
+    "name": "Permata Cendekia",
+    "url": "https://perpustakaanpermatacendekia.com/inlislite3/opac/",
+    "metadataPrefix": "oai_dc",
+    "region": "School",
+    "status": "active",
+    "aggregator": false
+  },
+  {
+    "priority": 5,
+    "name": "Kabupaten Bone",
+    "url": "https://inlislite-dispeka.bone.go.id/opac/oai",
+    "metadataPrefix": "oai_dc",
+    "region": "Sulsel",
+    "status": "active",
+    "aggregator": false
+  },
+  {
+    "priority": 6,
+    "name": "Samarinda",
+    "url": "http://inlislite.samarindakota.go.id:8123/inlislite3/opac/oai",
+    "metadataPrefix": "marcxml",
+    "region": "Kaltim",
+    "status": "active",
+    "aggregator": false
+  },
+  {
+    "priority": 7,
+    "name": "Banjarmasin",
+    "url": "http://125.167.232.208:12345/opac/oaipmh/oai.aspx",
+    "metadataPrefix": "marcxml",
+    "region": "Kalsel",
+    "status": "active",
+    "aggregator": false
+  },
+  {
+    "priority": 8,
+    "name": "OneSearch (Aggregator)",
+    "url": "https://onesearch.id",
+    "metadataPrefix": "oai_dc",
+    "region": "National",
+    "status": "active",
+    "aggregator": true,
+    "notes": "Discovery index; not always ISBN-direct"
+  },
+  {
+    "priority": 9,
+    "name": "Perpusnas E-Journal",
+    "url": "https://ejournal.perpusnas.go.id/mp/oai",
+    "metadataPrefix": "oai_dc",
+    "region": "E-Journal",
+    "status": "active",
+    "aggregator": true,
+    "notes": "Articles; not for books"
+  }
+]
