@@ -1,9 +1,17 @@
 import type { Html5Qrcode, Html5QrcodeCameraScanConfig } from 'html5-qrcode'
 
+type CameraConfig = Parameters<Html5Qrcode['start']>[0]
+type PermissionState = 'prompt' | 'granted' | 'denied' | 'unsupported'
+type CameraDevice = { id: string; label: string }
+
 export function useScanner() {
   const isScanning = ref(false)
   const error = ref<string | null>(null)
   const scanner = ref<Html5Qrcode | null>(null)
+  const availableCameras = ref<CameraDevice[]>([])
+  const permissionState = ref<PermissionState>('prompt')
+  const torchSupported = ref(false)
+  const torchOn = ref(false)
 
   // Sound effect with fallback to Web Audio API
   let beepAudio: HTMLAudioElement | null = null
@@ -73,10 +81,79 @@ export function useScanner() {
     vibrate()
   }
 
+  const formatError = (err: unknown) => {
+    if (typeof err === 'string') {
+      return err
+    }
+    if (err && typeof err === 'object' && 'message' in err) {
+      return String((err as { message?: string }).message)
+    }
+    return 'Failed to start camera'
+  }
+
+  const listCameras = async () => {
+    if (typeof navigator === 'undefined' || !navigator.mediaDevices?.enumerateDevices) {
+      availableCameras.value = []
+      return []
+    }
+    try {
+      const devices = await navigator.mediaDevices.enumerateDevices()
+      const cameras = devices.filter(device => device.kind === 'videoinput')
+      availableCameras.value = cameras.map((camera, index) => ({
+        id: camera.deviceId,
+        label: camera.label || `Camera ${index + 1}`
+      }))
+      return availableCameras.value
+    } catch (err) {
+      console.error('[Scanner] Failed to enumerate cameras:', err)
+      availableCameras.value = []
+      return []
+    }
+  }
+
+  const checkPermission = async () => {
+    if (typeof navigator === 'undefined' || !navigator.permissions?.query) {
+      permissionState.value = 'unsupported'
+      return permissionState.value
+    }
+    try {
+      const permission = await navigator.permissions.query({ name: 'camera' as PermissionName })
+      permissionState.value = permission.state as PermissionState
+      permission.onchange = () => {
+        permissionState.value = permission.state as PermissionState
+      }
+    } catch (err) {
+      console.log('[Scanner] Could not query permission API:', err)
+      permissionState.value = 'unsupported'
+    }
+    return permissionState.value
+  }
+
+  const updateTorchSupport = () => {
+    torchSupported.value = false
+    torchOn.value = false
+    if (!scanner.value) return
+    const capabilities = (scanner.value as any).getRunningTrackCapabilities?.() as MediaTrackCapabilities | undefined
+    if (!capabilities) return
+    const supported = 'torch' in capabilities ? Boolean((capabilities as any).torch) : false
+    torchSupported.value = supported
+  }
+
+  const setTorch = async (enabled: boolean) => {
+    if (!scanner.value || !torchSupported.value) return
+    try {
+      await scanner.value.applyVideoConstraints({ advanced: [{ torch: enabled }] })
+      torchOn.value = enabled
+    } catch (err) {
+      console.error('[Scanner] Failed to toggle torch:', err)
+    }
+  }
+
   async function startScanner(
     elementId: string,
     onResult: (text: string) => void,
-    onError?: (error: string) => void
+    onError?: (error: string) => void,
+    options?: { deviceId?: string }
   ) {
     console.log('[Scanner] Starting scanner initialization...')
     console.log('[Scanner] Element ID:', elementId)
@@ -104,25 +181,19 @@ export function useScanner() {
 
       // Check camera permissions
       console.log('[Scanner] Checking camera permissions...')
-      try {
-        const permissions = await navigator.permissions.query({ name: 'camera' as PermissionName })
-        console.log('[Scanner] Camera permission state:', permissions.state)
-      } catch (permErr) {
-        console.log('[Scanner] Could not query camera permission:', permErr)
+      const permission = await checkPermission()
+      console.log('[Scanner] Camera permission state:', permission)
+      if (permission === 'denied') {
+        throw new Error('Camera access is blocked. Please enable it in browser settings.')
       }
 
       // Check available cameras
       console.log('[Scanner] Enumerating media devices...')
-      try {
-        const devices = await navigator.mediaDevices.enumerateDevices()
-        const cameras = devices.filter(d => d.kind === 'videoinput')
-        console.log('[Scanner] Available cameras:', cameras.length)
-        cameras.forEach((cam, i) => {
-          console.log(`[Scanner]   Camera ${i}: ${cam.label || 'unnamed'} (${cam.deviceId.slice(0, 8)}...)`)
-        })
-      } catch (devErr) {
-        console.log('[Scanner] Could not enumerate devices:', devErr)
-      }
+      const cameras = await listCameras()
+      console.log('[Scanner] Available cameras:', cameras.length)
+      cameras.forEach((cam, i) => {
+        console.log(`[Scanner]   Camera ${i}: ${cam.label} (${cam.id.slice(0, 8)}...)`)
+      })
 
       // Dynamic import to reduce bundle size
       console.log('[Scanner] Importing html5-qrcode library...')
@@ -154,26 +225,75 @@ export function useScanner() {
       }
       console.log('[Scanner] Config:', JSON.stringify(config))
 
-      console.log('[Scanner] Starting camera with facingMode: environment...')
-      await instance.start(
-        { facingMode: 'environment' },
-        config,
-        (decodedText) => {
-          console.log('[Scanner] Scan success:', decodedText)
-          triggerScanFeedback()
-          onResult(decodedText)
-        },
-        (_errorMessage) => {
-          // Ignore frequent scanning errors, only report critical ones if needed
-          // console.log('[Scanner] Scan error:', _errorMessage)
+      let lastError: unknown = null
+      const tryStart = async (cameraConfig: CameraConfig, label: string) => {
+        console.log(`[Scanner] Starting camera with ${label}...`)
+        try {
+          await instance.start(
+            cameraConfig,
+            config,
+            (decodedText) => {
+              console.log('[Scanner] Scan success:', decodedText)
+              triggerScanFeedback()
+              onResult(decodedText)
+            },
+            (_errorMessage) => {
+              // Ignore frequent scanning errors, only report critical ones if needed
+              // console.log('[Scanner] Scan error:', _errorMessage)
+            }
+          )
+          console.log('[Scanner] Camera started successfully!')
+          isScanning.value = true
+          error.value = null
+          updateTorchSupport()
+          return true
+        } catch (startErr) {
+          lastError = startErr
+          console.error(`[Scanner] Failed to start with ${label}:`, startErr)
+          return false
         }
+      }
+
+      const attempts: { config: CameraConfig; label: string }[] = []
+      if (options?.deviceId) {
+        attempts.push({ config: options.deviceId, label: `deviceId: ${options.deviceId}` })
+      }
+      attempts.push(
+        { config: { facingMode: 'environment' }, label: 'facingMode: environment' },
+        { config: { facingMode: 'user' }, label: 'facingMode: user' }
       )
-      
-      console.log('[Scanner] Camera started successfully!')
-      isScanning.value = true
-      error.value = null
+
+      let started = false
+      for (const attempt of attempts) {
+        started = await tryStart(attempt.config, attempt.label)
+        if (started) break
+      }
+
+      if (!started) {
+        try {
+          const cameras = await Html5Qrcode.getCameras()
+          console.log('[Scanner] Available cameras for fallback:', cameras.length)
+          const fallbackList = cameras.filter(Boolean)
+          if (fallbackList.length > 0) {
+            availableCameras.value = fallbackList.map((cam, index) => ({
+              id: cam.id,
+              label: cam.label || `Camera ${index + 1}`
+            }))
+            const fallbackCamera = fallbackList.find(cam => cam.id === options?.deviceId) || fallbackList[0]
+            console.log('[Scanner] Retrying with camera ID:', fallbackCamera.id)
+            started = await tryStart(fallbackCamera.id, `deviceId: ${fallbackCamera.id}`)
+          }
+        } catch (cameraListErr) {
+          lastError = cameraListErr
+          console.error('[Scanner] Failed to list cameras for fallback:', cameraListErr)
+        }
+      }
+
+      if (!started) {
+        throw lastError ?? new Error('Failed to start camera')
+      }
     } catch (e: unknown) {
-      const errorMessage = (e instanceof Error) ? e.message : 'Failed to start camera'
+      const errorMessage = formatError(e)
       console.error('[Scanner] FAILED TO START:', errorMessage)
       console.error('[Scanner] Full error:', e)
       error.value = errorMessage
@@ -194,6 +314,8 @@ export function useScanner() {
         console.error('Failed to stop scanner', e)
       } finally {
         scanner.value = null
+        torchSupported.value = false
+        torchOn.value = false
       }
     }
   }
@@ -206,6 +328,12 @@ export function useScanner() {
     isScanning,
     error,
     startScanner,
-    stopScanner
+    stopScanner,
+    availableCameras,
+    permissionState,
+    torchSupported,
+    torchOn,
+    setTorch,
+    listCameras
   }
 }

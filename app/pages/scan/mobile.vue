@@ -8,7 +8,18 @@ const router = useRouter()
 const toast = useToast()
 const { book, loading, error, searchByISBN, cleanMetadata } = useBookSearch()
 const { isOnline, queue: offlineQueue, addToQueue, syncQueue, isSyncing } = useOfflineQueue()
-const { isScanning, error: scannerError, startScanner } = useScanner()
+const { 
+  isScanning, 
+  error: scannerError, 
+  startScanner, 
+  stopScanner, 
+  availableCameras, 
+  permissionState, 
+  torchSupported, 
+  torchOn, 
+  setTorch, 
+  listCameras 
+} = useScanner()
 
 const scannerRef = ref<HTMLElement | null>(null)
 const lastScan = ref('')
@@ -100,6 +111,26 @@ async function processSession() {
 }
 
 const cameraError = ref<string | null>(null)
+const selectedCameraId = ref<string | null>(null)
+const permissionLabel = computed(() => {
+  if (permissionState.value === 'granted') return 'Camera allowed'
+  if (permissionState.value === 'denied') return 'Camera blocked in browser'
+  if (permissionState.value === 'unsupported') return 'Permission status unavailable'
+  return 'Allow camera to start scanning'
+})
+const selectedCameraLabel = computed(() => {
+  const match = availableCameras.value.find(cam => cam.id === selectedCameraId.value)
+  return match?.label || 'Default camera'
+})
+
+async function refreshCamerasList() {
+  const cameras = await listCameras()
+  if (!selectedCameraId.value && cameras.length > 0) {
+    selectedCameraId.value = cameras[0].id
+  } else if (cameras.length > 0 && !cameras.find(cam => cam.id === selectedCameraId.value)) {
+    selectedCameraId.value = cameras[0].id
+  }
+}
 
 async function initScanner() {
   await nextTick()
@@ -108,23 +139,48 @@ async function initScanner() {
     return
   }
   cameraError.value = null
-  startScanner('scanner-reader', onScanSuccess, (err) => {
+  await refreshCamerasList()
+  await startScanner('scanner-reader', onScanSuccess, (err) => {
     cameraError.value = err
     toast.add({
       title: 'Camera error',
       description: err,
       color: 'red'
     })
-  })
+  }, { deviceId: selectedCameraId.value || undefined })
 }
 
-function retryScanner() {
+async function retryScanner() {
   cameraError.value = null
-  initScanner()
+  await stopScanner()
+  await initScanner()
+}
+
+async function switchCamera() {
+  if (availableCameras.value.length < 2) return
+  const currentIndex = availableCameras.value.findIndex(c => c.id === selectedCameraId.value)
+  const next = availableCameras.value[(currentIndex + 1) % availableCameras.value.length]
+  selectedCameraId.value = next.id
+  await retryScanner()
+}
+
+async function onCameraSelectChange() {
+  await retryScanner()
+}
+
+async function toggleTorch() {
+  if (!torchSupported.value) return
+  await setTorch(!torchOn.value)
 }
 
 onMounted(() => {
   initScanner()
+})
+
+watch(availableCameras, (cameras) => {
+  if (!selectedCameraId.value && cameras.length > 0) {
+    selectedCameraId.value = cameras[0].id
+  }
 })
 </script>
 
@@ -185,11 +241,19 @@ class="absolute top-2 left-2 px-2 py-1 rounded text-xs font-bold"
            :class="isRapidMode ? 'bg-amber-500' : 'bg-blue-500'">
         {{ isRapidMode ? '⚡ RAPID FIRE' : '📖 NORMAL' }}
       </div>
+
+      <div class="absolute bottom-2 left-2 px-2 py-1 rounded text-xs bg-black/50 border border-gray-800">
+        {{ selectedCameraLabel }}
+      </div>
+
+      <div class="absolute bottom-2 right-2 px-2 py-1 rounded text-xs bg-black/50 border border-gray-800">
+        {{ permissionLabel }}
+      </div>
     </div>
 
     <!-- Controls -->
     <div class="p-4 space-y-3 border-b border-gray-800">
-      <div class="flex items-center justify-between">
+      <div class="flex items-center justify-between flex-wrap gap-3">
         <label class="flex items-center gap-2 cursor-pointer">
           <input v-model="isRapidMode" type="checkbox" class="rounded">
           <span class="text-sm">Rapid Fire Mode</span>
@@ -199,6 +263,51 @@ class="absolute top-2 left-2 px-2 py-1 rounded text-xs font-bold"
           <input v-model="autoClean" type="checkbox" class="rounded">
           <span class="text-sm">Auto AI Clean</span>
         </label>
+      </div>
+
+      <div class="flex flex-wrap items-center gap-2 text-xs text-gray-300">
+        <span class="px-2 py-1 bg-gray-800 border border-gray-700 rounded">
+          {{ permissionLabel }}
+        </span>
+
+        <button 
+          class="px-2 py-1 rounded bg-gray-800 border border-gray-700 hover:border-gray-500"
+          @click="refreshCamerasList"
+        >
+          ↻ Refresh devices
+        </button>
+
+        <button 
+          v-if="availableCameras.length > 1"
+          class="px-2 py-1 rounded bg-gray-800 border border-gray-700 hover:border-gray-500"
+          @click="switchCamera"
+        >
+          🔁 Switch camera
+        </button>
+
+        <select
+          v-if="availableCameras.length > 0"
+          v-model="selectedCameraId"
+          class="bg-gray-900 border border-gray-700 rounded px-2 py-1 text-xs"
+          @change="onCameraSelectChange"
+        >
+          <option 
+            v-for="cam in availableCameras" 
+            :key="cam.id"
+            :value="cam.id"
+          >
+            {{ cam.label }}
+          </option>
+        </select>
+
+        <button
+          v-if="torchSupported"
+          class="px-2 py-1 rounded border text-xs"
+          :class="torchOn ? 'bg-amber-500 border-amber-400 text-black' : 'bg-gray-800 border-gray-700 text-gray-200'"
+          @click="toggleTorch"
+        >
+          {{ torchOn ? 'Flash on' : 'Flash off' }}
+        </button>
       </div>
     </div>
 
