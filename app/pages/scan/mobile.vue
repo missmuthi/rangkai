@@ -15,6 +15,7 @@ const {
   stopScanner, 
   availableCameras, 
   permissionState, 
+  requestCameraAccess,
   torchSupported, 
   torchOn, 
   setTorch, 
@@ -112,6 +113,7 @@ async function processSession() {
 
 const cameraError = ref<string | null>(null)
 const selectedCameraId = ref<string | null>(null)
+const isRequestingPermission = ref(false)
 const permissionLabel = computed(() => {
   if (permissionState.value === 'granted') return 'Camera allowed'
   if (permissionState.value === 'denied') return 'Camera blocked in browser'
@@ -154,6 +156,30 @@ async function retryScanner() {
   cameraError.value = null
   await stopScanner()
   await initScanner()
+}
+
+async function requestPermission() {
+  if (isRequestingPermission.value) return
+  isRequestingPermission.value = true
+  try {
+    await requestCameraAccess()
+    toast.add({
+      title: 'Camera ready',
+      description: 'Permission granted. Starting scanner…',
+      color: 'green'
+    })
+    await retryScanner()
+  } catch (err) {
+    const message = err instanceof Error ? err.message : 'Unable to request camera access'
+    cameraError.value = message
+    toast.add({
+      title: 'Camera blocked',
+      description: message,
+      color: 'red'
+    })
+  } finally {
+    isRequestingPermission.value = false
+  }
 }
 
 async function switchCamera() {
@@ -223,6 +249,14 @@ v-if="offlineQueue.length > 0"
         >
           🔄 Retry Camera
         </button>
+        <button
+          v-if="permissionState !== 'granted'"
+          class="mt-2 px-4 py-2 bg-amber-400 text-black rounded-lg font-bold hover:bg-amber-300 disabled:opacity-50"
+          :disabled="isRequestingPermission"
+          @click="requestPermission"
+        >
+          {{ isRequestingPermission ? 'Requesting…' : 'Allow Camera' }}
+        </button>
       </div>
 
       <!-- Scan Overlay (only show when no error) -->
@@ -269,6 +303,15 @@ class="absolute top-2 left-2 px-2 py-1 rounded text-xs font-bold"
         <span class="px-2 py-1 bg-gray-800 border border-gray-700 rounded">
           {{ permissionLabel }}
         </span>
+
+        <button 
+          v-if="permissionState !== 'granted'"
+          class="px-2 py-1 rounded bg-amber-500 text-black font-semibold hover:bg-amber-400 disabled:opacity-60"
+          :disabled="isRequestingPermission"
+          @click="requestPermission"
+        >
+          {{ isRequestingPermission ? 'Requesting…' : 'Allow camera' }}
+        </button>
 
         <button 
           class="px-2 py-1 rounded bg-gray-800 border border-gray-700 hover:border-gray-500"

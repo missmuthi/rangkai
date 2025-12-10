@@ -91,6 +91,18 @@ export function useScanner() {
     return 'Failed to start camera'
   }
 
+  const describePermissionIssue = (err: unknown) => {
+    if (err instanceof DOMException) {
+      if (err.name === 'NotAllowedError') {
+        return 'Camera access is blocked. Allow access in your browser settings and reload.'
+      }
+      if (err.name === 'NotFoundError') {
+        return 'No camera found on this device.'
+      }
+    }
+    return formatError(err)
+  }
+
   const listCameras = async () => {
     if (typeof navigator === 'undefined' || !navigator.mediaDevices?.enumerateDevices) {
       availableCameras.value = []
@@ -112,21 +124,55 @@ export function useScanner() {
   }
 
   const checkPermission = async () => {
+    console.log('[Scanner] checkPermission called')
+    console.log('[Scanner] navigator exists:', typeof navigator !== 'undefined')
+    console.log('[Scanner] navigator.permissions exists:', typeof navigator !== 'undefined' && !!navigator.permissions)
+    console.log('[Scanner] navigator.permissions.query exists:', typeof navigator !== 'undefined' && !!navigator.permissions?.query)
+    console.log('[Scanner] navigator.mediaDevices exists:', typeof navigator !== 'undefined' && !!navigator.mediaDevices)
+    console.log('[Scanner] navigator.mediaDevices.getUserMedia exists:', typeof navigator !== 'undefined' && !!navigator.mediaDevices?.getUserMedia)
+    
     if (typeof navigator === 'undefined' || !navigator.permissions?.query) {
+      console.log('[Scanner] Permission API not available, returning unsupported')
       permissionState.value = 'unsupported'
       return permissionState.value
     }
     try {
+      console.log('[Scanner] Querying camera permission...')
       const permission = await navigator.permissions.query({ name: 'camera' as PermissionName })
+      console.log('[Scanner] Permission query result:', permission.state)
       permissionState.value = permission.state as PermissionState
       permission.onchange = () => {
+        console.log('[Scanner] Permission changed to:', permission.state)
         permissionState.value = permission.state as PermissionState
       }
     } catch (err) {
       console.log('[Scanner] Could not query permission API:', err)
+      console.log('[Scanner] Error type:', typeof err)
+      console.log('[Scanner] Error message:', err instanceof Error ? err.message : String(err))
       permissionState.value = 'unsupported'
     }
+    console.log('[Scanner] Final permission state:', permissionState.value)
     return permissionState.value
+  }
+
+  const requestCameraAccess = async () => {
+    if (typeof navigator === 'undefined' || !navigator.mediaDevices?.getUserMedia) {
+      permissionState.value = 'unsupported'
+      throw new Error('Camera is not available on this device/browser.')
+    }
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } })
+      permissionState.value = 'granted'
+      stream.getTracks().forEach(track => track.stop())
+      return true
+    } catch (err) {
+      console.error('[Scanner] Camera permission request failed:', err)
+      const message = describePermissionIssue(err)
+      if (err instanceof DOMException && err.name === 'NotAllowedError') {
+        permissionState.value = 'denied'
+      }
+      throw new Error(message)
+    }
   }
 
   const updateTorchSupport = () => {
@@ -183,8 +229,9 @@ export function useScanner() {
       console.log('[Scanner] Checking camera permissions...')
       const permission = await checkPermission()
       console.log('[Scanner] Camera permission state:', permission)
-      if (permission === 'denied') {
-        throw new Error('Camera access is blocked. Please enable it in browser settings.')
+      if (permission !== 'granted') {
+        console.log('[Scanner] Requesting camera permission via getUserMedia...')
+        await requestCameraAccess()
       }
 
       // Check available cameras
@@ -331,6 +378,7 @@ export function useScanner() {
     stopScanner,
     availableCameras,
     permissionState,
+    requestCameraAccess,
     torchSupported,
     torchOn,
     setTorch,
