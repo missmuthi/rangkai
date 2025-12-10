@@ -19,7 +19,58 @@ const booksSearch = ref('')
 const booksPage = ref(1)
 const booksLimit = ref(10)
 
-// Computed URL for books with pagination
+// Interface for the API response
+interface GroupDetailResponse {
+  group: {
+    id: string
+    name: string
+    description: string | null
+    inviteCode: string | null
+    ownerId: string
+    createdAt: string
+    updatedAt: string | null
+    settings: any
+  }
+  members: Array<{
+    id: string
+    userId: string
+    name: string | null
+    email: string | null
+    role: string
+    joinedAt: string
+  }>
+  scans: Array<{
+    id: string
+    isbn: string
+    title: string | null
+    authors: unknown
+    ddc: string | null
+    status: string
+    createdAt: string
+    addedBy: string
+  }>
+  activities: Array<{
+    type: 'join' | 'scan'
+    userId: string
+    userName: string | null
+    timestamp: string
+    data?: { isbn?: string; title?: string | null }
+  }>
+  currentUserRole: string
+  isOwner: boolean
+  personalScanCount: number
+  totalScanCount: number
+  groupBookCount: number
+  leaderboard: Array<{ userId: string; count: number; userName: string | null }>
+  pagination: {
+    page: number
+    limit: number
+    total: number
+    totalPages: number
+  }
+}
+
+// Computeds for URL
 const fetchUrl = computed(() => {
   const params = new URLSearchParams()
   params.set('page', String(booksPage.value))
@@ -29,10 +80,10 @@ const fetchUrl = computed(() => {
 })
 
 // Fetch group data with reactive URL
-// Key must change when params change to trigger refetch (not just URL)
-const { data, pending, error, refresh } = await useFetch(fetchUrl, {
+// Key must change when params change to trigger refetch
+const { data, pending, error, refresh } = await useFetch<GroupDetailResponse>(fetchUrl, {
   key: computed(() => `group-${groupId.value}-p${booksPage.value}-l${booksLimit.value}-s${booksSearch.value}`),
-  watch: [booksPage, booksLimit, booksSearch]
+  watch: [groupId, booksPage, booksLimit, booksSearch]
 })
 
 const activeTab = ref<'members' | 'books' | 'activity' | 'settings'>('members')
@@ -112,6 +163,11 @@ function formatDate(date: string | Date) {
     year: 'numeric'
   })
 }
+
+watch(groupId, () => {
+  booksPage.value = 1
+  booksSearch.value = ''
+})
 
 function formatRelativeTime(date: string | Date) {
   const now = new Date()
@@ -354,7 +410,7 @@ class="font-black text-lg w-8 text-center flex items-center justify-center shrin
                 class="w-full pl-10 pr-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                 :value="booksSearch"
                 @input="onSearchInput(($event.target as HTMLInputElement).value)"
-              />
+              >
             </div>
             <div class="flex items-center gap-2">
               <span class="text-sm text-gray-500">Show:</span>

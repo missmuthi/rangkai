@@ -9,6 +9,7 @@ const toast = useToast()
 const { book, loading, error, searchByISBN, cleanMetadata } = useBookSearch()
 const { startScanner } = useScanner()
 const { isOnline, queue: offlineQueue, addToQueue, syncQueue, isSyncing } = useOfflineQueue()
+const { isScanning, startScanner } = useScanner()
 
 const scannerRef = ref<HTMLElement | null>(null)
 const lastScan = ref('')
@@ -99,10 +100,20 @@ async function processSession() {
   router.push('/history')
 }
 
+async function initScanner() {
+  await nextTick()
+  if (!scannerRef.value) return
+  startScanner('scanner-reader', onScanSuccess, (err) => {
+    toast.add({
+      title: 'Camera error',
+      description: err,
+      color: 'red'
+    })
+  })
+}
+
 onMounted(() => {
-  if (scannerRef.value) {
-    startScanner('scanner-reader', onScanSuccess, (err) => console.warn(err))
-  }
+  initScanner()
 })
 </script>
 
@@ -137,6 +148,11 @@ v-if="offlineQueue.length > 0"
       <!-- Scan Overlay -->
       <div class="absolute inset-0 pointer-events-none">
         <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-24 border-2 border-green-400 rounded-lg" />
+      </div>
+
+      <!-- Scanner Status -->
+      <div class="absolute top-2 right-2 px-2 py-1 rounded text-xs font-bold bg-black/50 border border-gray-700">
+        {{ isScanning ? 'Scanning…' : 'Starting camera' }}
       </div>
       
       <!-- Mode Badge -->
@@ -243,4 +259,3 @@ v-for="isbn in sessionQueue" :key="isbn"
   100% { transform: scale(1); }
 }
 </style>
-

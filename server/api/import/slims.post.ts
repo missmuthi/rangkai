@@ -1,6 +1,6 @@
 
 import { eq, and } from 'drizzle-orm'
-import { books, scans } from '../../db/schema'
+import { books, scans, groupMembers } from '../../db/schema'
 import { v4 as uuidv4 } from 'uuid'
 import { useDb } from '../../utils/db'
 import { requireUserSession } from '../../utils/session'
@@ -28,11 +28,31 @@ export default defineEventHandler(async (event) => {
   const rawGroupId = groupIdPart ? groupIdPart.data.toString().trim() : ''
   const groupId = rawGroupId.length > 0 ? rawGroupId : null
   const csvContent = filePart.data.toString()
+  const db = useDb()
+
+  // If importing into a group, ensure the user is a member of that group
+  if (groupId) {
+    const membership = await db.query.groupMembers.findFirst({
+      where: and(
+        eq(groupMembers.groupId, groupId),
+        eq(groupMembers.userId, session.user.id)
+      )
+    })
+
+    if (!membership) {
+      throw createError({ statusCode: 403, message: 'You are not allowed to import into this group' })
+    }
+  }
   
   // Basic CSV Parser (assuming simple SLiMS export)
   // In production, might need a robust library like 'csv-parse'
   const lines = csvContent.split('\n').filter(l => l.trim().length > 0)
-  const headers = lines[0].split(',').map(h => h.replace(/^"|"$/g, '').trim().toLowerCase())
+  
+  if (lines.length === 0) {
+    throw createError({ statusCode: 400, message: 'CSV file is empty' })
+  }
+
+  const headers = lines[0]!.split(',').map(h => h.replace(/^"|"$/g, '').trim().toLowerCase())
   
   // Find column indices
   const isbnIdx = headers.findIndex(h => h.includes('isbn'))
@@ -44,8 +64,6 @@ export default defineEventHandler(async (event) => {
     throw createError({ statusCode: 400, message: 'Invalid CSV format: Missing ISBN or Title column' })
   }
 
-  const db = useDb()
-  // const db = useDb() already exists above
   const results = {
     total: 0,
     success: 0,

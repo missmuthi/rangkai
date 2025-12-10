@@ -13,7 +13,7 @@ const loadingStep = ref('')
 const cooldown = ref(0)
 const cleanError = ref<string | null>(null)
 const showDebug = ref(false)
-let cooldownTimer: NodeJS.Timeout
+let cooldownTimer: NodeJS.Timeout | undefined
 
 // Keyboard shortcuts - Ctrl+Enter for AI Clean
 useKeyboardShortcuts({
@@ -51,7 +51,7 @@ function startCooldown() {
   cooldown.value = 10
   cooldownTimer = setInterval(() => {
     cooldown.value--
-    if (cooldown.value <= 0) clearInterval(cooldownTimer)
+    if (cooldown.value <= 0 && cooldownTimer) clearInterval(cooldownTimer)
   }, 1000)
 }
 
@@ -61,12 +61,12 @@ async function handleAiClean() {
   isCleaning.value = true
   cleanError.value = null
   let stepIdx = 0
-  loadingStep.value = STEPS[0]
+  loadingStep.value = STEPS[0]!
   
   // Cycle steps
   const stepInterval = setInterval(() => {
     stepIdx = (stepIdx + 1) % STEPS.length
-    loadingStep.value = STEPS[stepIdx]
+    loadingStep.value = STEPS[stepIdx]!
   }, 1500)
   
   try {
@@ -87,7 +87,7 @@ async function handleAiClean() {
     
     savePromise
       .then((result) => {
-        if (!scanId.value && result?.id) scanId.value = result.id
+        if (!scanId.value && (result as any)?.id) scanId.value = (result as any).id
         console.log('[Book Details] Background save complete')
       })
       .catch((saveErr) => {

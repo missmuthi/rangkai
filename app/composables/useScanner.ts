@@ -30,24 +30,40 @@ export function useScanner() {
     onError?: (error: string) => void
   ) {
     try {
+      // Allow e2e tests to disable camera usage
+      if (typeof window !== 'undefined' && (window as any).__SCANNER_DISABLED__) {
+        isScanning.value = false
+        error.value = null
+        return
+      }
+
       if (scanner.value) {
         await stopScanner()
       }
 
       // Dynamic import to reduce bundle size
-      const { Html5Qrcode } = await import('html5-qrcode')
+      const { Html5Qrcode, Html5QrcodeSupportedFormats } = await import('html5-qrcode')
 
       const instance = new Html5Qrcode(elementId, { 
         verbose: false,
-        useBarCodeDetectorIfSupported: true
+        useBarCodeDetectorIfSupported: true,
+        formatsToSupport: [
+          Html5QrcodeSupportedFormats.EAN_13,
+          Html5QrcodeSupportedFormats.EAN_8,
+          Html5QrcodeSupportedFormats.UPC_A,
+          Html5QrcodeSupportedFormats.CODE_128,
+          Html5QrcodeSupportedFormats.CODE_39,
+          Html5QrcodeSupportedFormats.QR_CODE
+        ]
       })
       
       scanner.value = instance
       
       const config: Html5QrcodeCameraScanConfig = { 
-        fps: 10, 
-        qrbox: { width: 250, height: 150 },
-        aspectRatio: 1.0
+        fps: 12, 
+        qrbox: { width: 320, height: 200 },
+        aspectRatio: 4 / 3,
+        disableFlip: true // better for 1D barcodes
       }
 
       await instance.start(
@@ -71,6 +87,7 @@ export function useScanner() {
       if (onError && error.value) {
         onError(error.value)
       }
+      console.error('Scanner failed to start', e)
     }
   }
 

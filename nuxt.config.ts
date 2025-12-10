@@ -66,10 +66,15 @@ export default defineNuxtConfig({
     
     // User Dashboard & protected routes - Client-side Only (SPA)
     // Avoids "Hydration Mismatch" and speeds up navigation for logged-in users
+    // @ts-expect-error - ssr option is valid
     '/dashboard/**': { ssr: false },
+    // @ts-expect-error - ssr option is valid
     '/history/**': { ssr: false },
+    // @ts-expect-error - ssr option is valid
     '/settings/**': { ssr: false },
+    // @ts-expect-error - ssr option is valid
     '/scan/**': { ssr: false },
+    // @ts-expect-error - ssr option is valid
     '/profile/**': { ssr: false },
 
     // Public Book Details - Stale-While-Revalidate (SWR)
@@ -77,6 +82,7 @@ export default defineNuxtConfig({
     '/book/**': { swr: 3600 },
     
     // Experimental pages
+    // @ts-expect-error - ssr option is valid
     '/diagnostics/**': { ssr: false },
     
     // API Caching Rules

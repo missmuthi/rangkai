@@ -13,6 +13,7 @@ useHead({
 const toast = useToast()
 const { groups, fetchGroups } = useGroups()
 
+const fileInput = ref<HTMLInputElement | null>(null)
 const file = ref<File | null>(null)
 const selectedGroupId = ref<string>('')
 const isDragging = ref(false)
@@ -73,21 +74,32 @@ onMounted(() => {
 function onFileSelect(event: Event) {
   const input = event.target as HTMLInputElement
   if (input.files && input.files.length > 0) {
-    file.value = input.files[0]
+    file.value = input.files[0] || null
     uploadResult.value = null
+    if (!file.value && fileInput.value) {
+      fileInput.value.value = ''
+    }
   }
 }
 
 function onDrop(event: DragEvent) {
   isDragging.value = false
-  if (event.dataTransfer?.files && event.dataTransfer.files.length > 0) {
-    const droppedFile = event.dataTransfer.files[0]
-    if (droppedFile.type === 'text/csv' || droppedFile.name.endsWith('.csv')) {
+  const dt = event.dataTransfer
+  if (dt && dt.files && dt.files.length > 0) {
+    const droppedFile = dt.files[0]
+    if (droppedFile && (droppedFile.type === 'text/csv' || droppedFile.name.endsWith('.csv'))) {
       file.value = droppedFile
       uploadResult.value = null
     } else {
       toast.add({ title: 'Please upload a CSV file', color: 'red' })
     }
+  }
+}
+
+function clearSelectedFile() {
+  file.value = null
+  if (fileInput.value) {
+    fileInput.value.value = ''
   }
 }
 
@@ -119,7 +131,7 @@ async function handleUpload() {
     } else {
       toast.add({ title: 'Import failed completely', color: 'red' })
     }
-    file.value = null // Reset file but show result
+    clearSelectedFile() // Reset file but show result
   } catch (e) {
     toast.add({ title: 'Upload failed', description: 'Please check your CSV format and try again.', color: 'red' })
   } finally {
@@ -167,7 +179,7 @@ async function handleUpload() {
         @dragover.prevent="isDragging = true"
         @dragleave.prevent="isDragging = false"
         @drop.prevent="onDrop"
-        @click="$refs.fileInput.click()"
+        @click="fileInput?.click()"
       >
         <input
           ref="fileInput"
@@ -183,7 +195,7 @@ async function handleUpload() {
           <p class="text-sm text-gray-500 mb-4">{{ (file.size / 1024).toFixed(1) }} KB</p>
           <button 
             class="text-sm text-red-500 hover:text-red-600"
-            @click.stop="file = null"
+            @click.stop="clearSelectedFile()"
           >
             Remove file
           </button>
