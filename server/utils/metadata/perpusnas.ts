@@ -15,10 +15,11 @@ import { createEmptyMetadata } from './types'
 // ============================================================================
 
 const PERPUSNAS_ENDPOINTS = {
-  // Primary: INLIS Lite v3 demo server (most reliable)
-  primary: 'http://demo.inlislitev3.perpusnas.go.id/opac/oai',
+  // Primary: HTTPS endpoint (Cloudflare may block plain HTTP on some deployments)
+  primary: 'https://inlislitev3.perpusnas.go.id/opac/oai',
   // Fallbacks if primary is down
   fallbacks: [
+    'http://demo.inlislitev3.perpusnas.go.id/opac/oai', // HTTP demo
     'http://203.176.180.116:8123/opac/oai', // Legacy endpoint
   ]
 }
@@ -218,6 +219,7 @@ function parseMarcXML(marcRecord: any): PerpusnasRawRecord | null {
 export async function fetchPerpusnas(isbn: string): Promise<PerpusnasResult> {
   const startTime = Date.now()
   const normalizedIsbn = isbn.replace(/[^0-9X]/gi, '')
+  let lastError: string | null = null
 
   // Try each endpoint until one works
   for (const endpoint of [PERPUSNAS_ENDPOINTS.primary, ...PERPUSNAS_ENDPOINTS.fallbacks]) {
@@ -306,6 +308,7 @@ export async function fetchPerpusnas(isbn: string): Promise<PerpusnasResult> {
 
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : String(error)
+      lastError = errorMessage
       
       // If it's an abort, it's a timeout
       if (errorMessage.includes('abort')) {
@@ -326,7 +329,7 @@ export async function fetchPerpusnas(isbn: string): Promise<PerpusnasResult> {
       endpoint: 'all_failed',
       durationMs: Date.now() - startTime
     },
-    error: 'All Perpusnas endpoints failed or timed out'
+    error: `All Perpusnas endpoints failed or timed out${lastError ? ` (last error: ${lastError})` : ''}`
   }
 }
 
@@ -355,9 +358,11 @@ export async function testPerpusnasConnection(): Promise<{
   available: boolean
   endpoint: string
   responseTime: number
+  errors?: string[]
   error?: string
 }> {
   const startTime = Date.now()
+  const errors: string[] = []
 
   for (const endpoint of [PERPUSNAS_ENDPOINTS.primary, ...PERPUSNAS_ENDPOINTS.fallbacks]) {
     try {
@@ -382,7 +387,10 @@ export async function testPerpusnasConnection(): Promise<{
           responseTime: Date.now() - startTime
         }
       }
-    } catch {
+      errors.push(`HTTP ${response.status} from ${endpoint}`)
+    } catch (err) {
+      const message = err instanceof Error ? err.message : String(err)
+      errors.push(`${endpoint} -> ${message}`)
       continue
     }
   }
@@ -391,6 +399,7 @@ export async function testPerpusnasConnection(): Promise<{
     available: false,
     endpoint: 'none',
     responseTime: Date.now() - startTime,
-    error: 'All endpoints unreachable'
+    errors,
+    error: errors[errors.length - 1] || 'All endpoints unreachable'
   }
 }

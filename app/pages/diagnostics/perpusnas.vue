@@ -20,6 +20,7 @@ const isLoading = ref(false)
 const connectionStatus = ref<any>(null)
 const searchResult = ref<any>(null)
 const error = ref<string | null>(null)
+const endpointErrors = ref<string[]>([])
 
 // Test connection on mount
 onMounted(async () => {
@@ -29,9 +30,11 @@ onMounted(async () => {
 // Test Perpusnas connectivity
 async function testConnection() {
   connectionStatus.value = null
+  endpointErrors.value = []
   try {
     const result = await $fetch('/api/experimental/perpusnas/test')
     connectionStatus.value = result
+    endpointErrors.value = result.errors || []
   } catch (e: any) {
     connectionStatus.value = { available: false, error: e.message }
   }
@@ -120,6 +123,13 @@ const sampleIsbns = [
         <p class="text-sm text-muted-foreground">
           {{ connectionStatus.error || 'All Perpusnas endpoints are unreachable' }}
         </p>
+        <UAccordion v-if="endpointErrors.length" :items="[{ label: 'Error details', slot: 'errors' }]">
+          <template #errors>
+            <ul class="text-xs text-muted-foreground space-y-1">
+              <li v-for="(err, idx) in endpointErrors" :key="idx">• {{ err }}</li>
+            </ul>
+          </template>
+        </UAccordion>
         <p class="text-xs text-muted-foreground">
           Note: Perpusnas servers may be slow during peak hours (9am-5pm WIB)
         </p>
