@@ -15,6 +15,7 @@ const {
   stopScanner, 
   availableCameras, 
   permissionState, 
+  secureContextOk,
   requestCameraAccess,
   torchSupported, 
   torchOn, 
@@ -115,6 +116,7 @@ const cameraError = ref<string | null>(null)
 const selectedCameraId = ref<string | null>(null)
 const isRequestingPermission = ref(false)
 const permissionLabel = computed(() => {
+  if (!secureContextOk.value) return 'Use HTTPS or localhost to enable camera'
   if (permissionState.value === 'granted') return 'Camera allowed'
   if (permissionState.value === 'denied') return 'Camera blocked in browser'
   if (permissionState.value === 'unsupported') return 'Permission status unavailable'

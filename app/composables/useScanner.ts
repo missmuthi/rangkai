@@ -10,6 +10,7 @@ export function useScanner() {
   const scanner = ref<Html5Qrcode | null>(null)
   const availableCameras = ref<CameraDevice[]>([])
   const permissionState = ref<PermissionState>('prompt')
+  const secureContextOk = ref(true)
   const torchSupported = ref(false)
   const torchOn = ref(false)
 
@@ -91,10 +92,31 @@ export function useScanner() {
     return 'Failed to start camera'
   }
 
+  const buildSecureContextError = () => {
+    if (typeof window !== 'undefined' && !window.isSecureContext) {
+      return 'Camera requires HTTPS or localhost. Open the secure version of this page and reload.'
+    }
+    return null
+  }
+
+  const assertSecureContext = () => {
+    const message = buildSecureContextError()
+    if (message) {
+      secureContextOk.value = false
+      permissionState.value = 'denied'
+      throw new Error(message)
+    }
+    secureContextOk.value = true
+  }
+
   const describePermissionIssue = (err: unknown) => {
+    const secureContextError = buildSecureContextError()
+    if (secureContextError) {
+      return secureContextError
+    }
     if (err instanceof DOMException) {
       if (err.name === 'NotAllowedError') {
-        return 'Camera access is blocked. Allow access in your browser settings and reload.'
+        return 'Camera access is blocked. Tap the lock icon in your browser and allow camera for this site, then reload.'
       }
       if (err.name === 'NotFoundError') {
         return 'No camera found on this device.'
@@ -160,6 +182,7 @@ export function useScanner() {
       permissionState.value = 'unsupported'
       throw new Error('Camera is not available on this device/browser.')
     }
+    assertSecureContext()
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } })
       permissionState.value = 'granted'
@@ -205,6 +228,7 @@ export function useScanner() {
     console.log('[Scanner] Element ID:', elementId)
     
     try {
+      assertSecureContext()
       // Allow e2e tests to disable camera usage
       if (typeof window !== 'undefined' && (window as any).__SCANNER_DISABLED__) {
         console.log('[Scanner] Scanner disabled by test flag')
@@ -379,6 +403,7 @@ export function useScanner() {
     availableCameras,
     permissionState,
     requestCameraAccess,
+    secureContextOk,
     torchSupported,
     torchOn,
     setTorch,
