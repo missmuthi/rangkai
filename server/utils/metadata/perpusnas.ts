@@ -23,6 +23,16 @@ const PERPUSNAS_ENDPOINTS = {
     'https://demo.inlislitev3.perpusnas.go.id/opac/oai', // HTTPS demo
     'http://demo.inlislitev3.perpusnas.go.id/opac/oai', // HTTP demo
     'http://203.176.180.116:8123/opac/oai', // Legacy endpoint
+    // Community/partner INLIS instances (from registry)
+    'http://opacinlis.bpbatam.go.id/oaipmh/oai.aspx',
+    'http://pustaka-srv.pekanbaru.go.id:4580/inlislite3/opac/oai',
+    'https://perpustakaanpermatacendekia.com/inlislite3/opac/',
+    'https://inlislite-dispeka.bone.go.id/opac/oai',
+    'http://inlislite.samarindakota.go.id:8123/inlislite3/opac/oai',
+    'http://125.167.232.208:12345/opac/oaipmh/oai.aspx',
+    // Aggregators (lower priority, might not be ISBN-direct)
+    'https://onesearch.id',
+    'https://ejournal.perpusnas.go.id/mp/oai'
   ]
 }
 
