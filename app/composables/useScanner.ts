@@ -5,10 +5,59 @@ export function useScanner() {
   const error = ref<string | null>(null)
   const scanner = ref<Html5Qrcode | null>(null)
 
-  // Sound effect
-  const beep = new Audio('/sounds/beep.mp3')
+  // Sound effect with fallback to Web Audio API
+  let beepAudio: HTMLAudioElement | null = null
+  let audioContext: AudioContext | null = null
+
+  const initAudio = () => {
+    if (typeof window === 'undefined') return
+    
+    // Try to load audio file
+    try {
+      beepAudio = new Audio('/sounds/beep.mp3')
+      beepAudio.preload = 'auto'
+    } catch {
+      beepAudio = null
+    }
+  }
+
+  // Initialize on first use
+  initAudio()
+
   const playBeep = () => {
-    beep.play().catch(() => {}) // Ignore auto-play errors
+    // Try HTML Audio first
+    if (beepAudio) {
+      beepAudio.currentTime = 0
+      beepAudio.play().catch(() => {
+        // Fallback to Web Audio API beep
+        playWebAudioBeep()
+      })
+      return
+    }
+    // Fallback to Web Audio API
+    playWebAudioBeep()
+  }
+
+  const playWebAudioBeep = () => {
+    try {
+      if (!audioContext) {
+        audioContext = new (window.AudioContext || (window as any).webkitAudioContext)()
+      }
+      const oscillator = audioContext.createOscillator()
+      const gainNode = audioContext.createGain()
+      
+      oscillator.connect(gainNode)
+      gainNode.connect(audioContext.destination)
+      
+      oscillator.frequency.value = 1000 // 1000 Hz beep
+      oscillator.type = 'sine'
+      gainNode.gain.value = 0.3
+      
+      oscillator.start()
+      oscillator.stop(audioContext.currentTime + 0.1) // 100ms beep
+    } catch {
+      // Silently fail if Web Audio API is not available
+    }
   }
 
   // Haptic feedback (vibration)
