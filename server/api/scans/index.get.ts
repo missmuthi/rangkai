@@ -1,6 +1,6 @@
 /**
  * GET /api/scans - List all scans for the authenticated user
- * Supports pagination via ?limit=50&offset=0
+ * Supports pagination via ?page=1&limit=25
  */
 
 import { requireAuth } from "../../utils/auth";
@@ -8,13 +8,14 @@ import { requireAuth } from "../../utils/auth";
 export default defineEventHandler(async (event) => {
   const user = await requireAuth(event);
 
-  // Pagination params with sensible defaults
+  // Pagination params with sensible defaults (like groups)
   const query = getQuery(event);
-  const limit = Math.min(Number(query.limit) || 50, 100); // Max 100 per request
-  const offset = Number(query.offset) || 0;
+  const page = Math.max(1, Number(query.page) || 1);
+  const limit = Math.min(Number(query.limit) || 25, 100); // Default 25, max 100
+  const offset = (page - 1) * limit;
 
   console.info(
-    `[api:scans] Listing scans for user ${user.id} (limit=${limit}, offset=${offset})`
+    `[api:scans] Listing scans for user ${user.id} (page=${page}, limit=${limit})`
   );
 
   try {
@@ -26,6 +27,7 @@ export default defineEventHandler(async (event) => {
       .bind(user.id)
       .first<{ total: number }>();
     const total = countResult?.total || 0;
+    const totalPages = Math.ceil(total / limit);
 
     // Fetch paginated results with LIMIT and OFFSET
     const { results } = await d1
@@ -98,10 +100,12 @@ export default defineEventHandler(async (event) => {
     return {
       scans: validScans,
       count: validScans.length,
-      total,
-      limit,
-      offset,
-      hasMore: offset + limit < total,
+      pagination: {
+        page,
+        limit,
+        total,
+        totalPages,
+      },
     };
   } catch (error: unknown) {
     const msg = error instanceof Error ? error.message : String(error);
@@ -110,10 +114,12 @@ export default defineEventHandler(async (event) => {
     return {
       scans: [],
       count: 0,
-      total: 0,
-      limit,
-      offset,
-      hasMore: false,
+      pagination: {
+        page: 1,
+        limit,
+        total: 0,
+        totalPages: 0,
+      },
     };
   }
 });
