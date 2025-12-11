@@ -55,18 +55,33 @@ const {
  * Handle detected barcodes from the scanner
  */
 const onDetect = (detectedCodes: DetectedCode[]) => {
-  if (!detectedCodes || detectedCodes.length === 0) return;
+  console.log("[ScannerNative] onDetect called:", detectedCodes);
+
+  if (!detectedCodes || detectedCodes.length === 0) {
+    console.log("[ScannerNative] No codes detected");
+    return;
+  }
 
   const result = detectedCodes[0];
-  if (!result?.rawValue) return;
+  console.log("[ScannerNative] First result:", result);
+
+  if (!result?.rawValue) {
+    console.log("[ScannerNative] No rawValue in result");
+    return;
+  }
 
   const code = result.rawValue;
+  console.log("[ScannerNative] Code detected:", code, "Format:", result.format);
 
   // Check if we should process this scan (debounce + cooldown)
-  if (!shouldProcessScan(code)) return;
+  if (!shouldProcessScan(code)) {
+    console.log("[ScannerNative] Skipping - cooldown/debounce active");
+    return;
+  }
 
   // Record the scan and trigger cooldown
   recordScan(code);
+  console.log("[ScannerNative] Emitting scan event:", code);
 
   // Emit to parent
   emit("scan", code);
@@ -131,7 +146,7 @@ const toggleTorch = () => {
 
     <!-- Inactive/Error State -->
     <div
-      v-if="!active || errorMsg"
+      v-if="!props.active || errorMsg"
       class="absolute inset-0 flex items-center justify-center bg-gray-900"
     >
       <p v-if="errorMsg" class="text-red-400 text-center px-4">
@@ -168,7 +183,7 @@ const toggleTorch = () => {
     </button>
 
     <!-- Scanning Indicator -->
-    <div v-if="active && !errorMsg" class="absolute top-2 right-2">
+    <div v-if="props.active && !errorMsg" class="absolute top-2 right-2">
       <span class="flex h-3 w-3">
         <span
           class="animate-ping absolute inline-flex h-full w-full rounded-full opacity-75"

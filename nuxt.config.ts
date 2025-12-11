@@ -152,7 +152,7 @@ export default defineNuxtConfig({
     },
     workbox: {
       // Use GenerateSW for automatic service worker
-      globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
+      globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2,wasm}'],
       // Cache strategy for app shell (instant load)
       runtimeCaching: [
         {
