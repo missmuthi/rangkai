@@ -1,79 +1,122 @@
 <script setup lang="ts">
 /**
  * Perpusnas Experimental Testing Page
- * 
+ *
  * Tests the Perpusnas OAI-PMH integration in isolation.
  * Allows manual ISBN input and displays results with timing.
  */
 definePageMeta({
-  layout: 'default'
-})
+  layout: "default",
+});
 
 useSeoMeta({
-  title: 'Perpusnas API Test | Rangkai Diagnostics',
-  description: 'Experimental page for testing Perpusnas OAI-PMH integration'
-})
+  title: "Perpusnas API Test | Rangkai Diagnostics",
+  description: "Experimental page for testing Perpusnas OAI-PMH integration",
+});
+
+// Types
+interface ConnectionStatus {
+  available: boolean;
+  error?: string;
+  endpoint?: string;
+  responseTime?: number;
+}
+
+interface SearchResult {
+  found: boolean;
+  timing: {
+    total: number;
+    fetchDuration: number;
+    endpoint: string;
+  };
+  meta: {
+    source: string;
+  };
+  book?: {
+    title?: string;
+    authors?: string[];
+    publisher?: string;
+    publishedDate?: string;
+    language?: string;
+    publishPlace?: string;
+    subjects?: string;
+  };
+  error?: string;
+  request?: {
+    isbn: string;
+  };
+  errors?: string[];
+  endpointsTested?: string[];
+}
 
 // State
-const isbn = ref('')
-const isLoading = ref(false)
-const connectionStatus = ref<any>(null)
-const searchResult = ref<any>(null)
-const error = ref<string | null>(null)
-const endpointErrors = ref<string[]>([])
-const endpointsTested = ref<string[]>([])
+const isbn = ref("");
+const isLoading = ref(false);
+const connectionStatus = ref<ConnectionStatus | null>(null);
+const searchResult = ref<SearchResult | null>(null);
+const error = ref<string | null>(null);
+const endpointErrors = ref<string[]>([]);
+const endpointsTested = ref<string[]>([]);
 
 // Test connection on mount
 onMounted(async () => {
-  await testConnection()
-})
+  await testConnection();
+});
 
 // Test Perpusnas connectivity
 async function testConnection() {
-  connectionStatus.value = null
-  endpointErrors.value = []
-  endpointsTested.value = []
+  connectionStatus.value = null;
+  endpointErrors.value = [];
+  endpointsTested.value = [];
   try {
-    const result = await $fetch('/api/experimental/perpusnas/test')
-    connectionStatus.value = result
-    endpointErrors.value = result.errors || []
-    endpointsTested.value = result.endpointsTested || []
-  } catch (e: any) {
-    connectionStatus.value = { available: false, error: e.message }
+    const result = await $fetch<
+      ConnectionStatus & { errors?: string[]; endpointsTested?: string[] }
+    >("/api/experimental/perpusnas/test");
+    connectionStatus.value = result;
+    endpointErrors.value = result.errors || [];
+    endpointsTested.value = result.endpointsTested || [];
+  } catch (e: unknown) {
+    const message = e instanceof Error ? e.message : String(e);
+    connectionStatus.value = { available: false, error: message };
   }
 }
 
 // Search by ISBN
 async function searchByIsbn() {
-  if (!isbn.value.trim()) return
+  if (!isbn.value.trim()) return;
 
-  isLoading.value = true
-  error.value = null
-  searchResult.value = null
+  isLoading.value = true;
+  error.value = null;
+  searchResult.value = null;
 
   try {
-    const result = await $fetch(`/api/experimental/perpusnas/${isbn.value}`)
-    searchResult.value = result
-  } catch (e: any) {
-    error.value = e.data?.message || e.message || 'Unknown error'
+    const result = await $fetch<SearchResult>(
+      `/api/experimental/perpusnas/${isbn.value}`
+    );
+    searchResult.value = result;
+  } catch (e: unknown) {
+    const err = e as { data?: { message?: string }; message?: string };
+    error.value = err.data?.message || err.message || "Unknown error";
   } finally {
-    isLoading.value = false
+    isLoading.value = false;
   }
 }
 
 // Sample Indonesian ISBNs for testing
 const sampleIsbns = [
-  { isbn: '9786020332093', title: 'Filosofi Teras (Popular)' },
-  { isbn: '9786232128000', title: 'Laut Bercerita' },
-  { isbn: '9789791227957', title: 'Laskar Pelangi' },
-]
+  { isbn: "9786020332093", title: "Filosofi Teras (Popular)" },
+  { isbn: "9786232128000", title: "Laut Bercerita" },
+  { isbn: "9789791227957", title: "Laskar Pelangi" },
+];
 </script>
 
 <template>
   <div class="container mx-auto px-4 py-8 max-w-4xl">
     <!-- Header -->
     <div class="mb-8">
-      <div class="inline-flex items-center gap-2 rounded-full bg-yellow-500/10 border border-yellow-500/20 px-3 py-1 text-sm font-medium text-yellow-500 mb-4">
+      <div
+        class="inline-flex items-center gap-2 rounded-full bg-yellow-500/10 border border-yellow-500/20 px-3 py-1 text-sm font-medium text-yellow-500 mb-4"
+      >
         <UIcon name="i-lucide-flask-conical" class="w-4 h-4" />
         <span>Experimental</span>
       </div>
@@ -102,7 +145,10 @@ const sampleIsbns = [
         </div>
       </template>
 
-      <div v-if="!connectionStatus" class="flex items-center gap-2 text-muted-foreground">
+      <div
+        v-if="!connectionStatus"
+        class="flex items-center gap-2 text-muted-foreground"
+      >
         <UIcon name="i-lucide-loader-2" class="w-4 h-4 animate-spin" />
         <span>Testing connection...</span>
       </div>
@@ -113,7 +159,12 @@ const sampleIsbns = [
           <span class="font-medium">Connected</span>
         </div>
         <div class="text-sm text-muted-foreground">
-          <p>Endpoint: <code class="bg-muted px-1 rounded text-xs">{{ connectionStatus.endpoint }}</code></p>
+          <p>
+            Endpoint:
+            <code class="bg-muted px-1 rounded text-xs">{{
+              connectionStatus.endpoint
+            }}</code>
+          </p>
           <p>Response time: {{ connectionStatus.responseTime }}ms</p>
         </div>
       </div>
@@ -124,16 +175,26 @@ const sampleIsbns = [
           <span class="font-medium">Connection Failed</span>
         </div>
         <p class="text-sm text-muted-foreground">
-          {{ connectionStatus.error || 'All Perpusnas endpoints are unreachable' }}
+          {{
+            connectionStatus.error || "All Perpusnas endpoints are unreachable"
+          }}
         </p>
-        <UAccordion v-if="endpointErrors.length" :items="[{ label: 'Error details', slot: 'errors' }]">
+        <UAccordion
+          v-if="endpointErrors.length"
+          :items="[{ label: 'Error details', slot: 'errors' }]"
+        >
           <template #errors>
             <ul class="text-xs text-muted-foreground space-y-1">
-              <li v-for="(err, idx) in endpointErrors" :key="idx">• {{ err }}</li>
+              <li v-for="(err, idx) in endpointErrors" :key="idx">
+                • {{ err }}
+              </li>
             </ul>
           </template>
         </UAccordion>
-        <div v-if="endpointsTested.length" class="text-xs text-muted-foreground">
+        <div
+          v-if="endpointsTested.length"
+          class="text-xs text-muted-foreground"
+        >
           Endpoints tried:
           <ul class="mt-1 space-y-1">
             <li v-for="(ep, idx) in endpointsTested" :key="idx">
@@ -154,7 +215,10 @@ const sampleIsbns = [
       </template>
 
       <form class="space-y-4" @submit.prevent="searchByIsbn">
-        <UFormGroup label="ISBN" hint="Enter Indonesian ISBN (978-602-xxx or 978-623-xxx)">
+        <UFormGroup
+          label="ISBN"
+          hint="Enter Indonesian ISBN (978-602-xxx or 978-623-xxx)"
+        >
           <UInput
             v-model="isbn"
             placeholder="e.g., 9786020332093"
@@ -207,9 +271,12 @@ const sampleIsbns = [
       <template #header>
         <div class="flex items-center justify-between">
           <h2 class="font-semibold">
-            {{ searchResult.found ? 'Book Found' : 'Not Found' }}
+            {{ searchResult.found ? "Book Found" : "Not Found" }}
           </h2>
-          <UBadge :color="searchResult.found ? 'green' : 'yellow'" variant="subtle">
+          <UBadge
+            :color="searchResult.found ? 'green' : 'yellow'"
+            variant="subtle"
+          >
             {{ searchResult.timing.total }}ms
           </UBadge>
         </div>
@@ -219,42 +286,74 @@ const sampleIsbns = [
       <div v-if="searchResult.book" class="space-y-4">
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <label class="text-xs font-medium text-muted-foreground uppercase">Title</label>
-            <p class="text-foreground font-medium">{{ searchResult.book.title || 'N/A' }}</p>
+            <label class="text-xs font-medium text-muted-foreground uppercase"
+              >Title</label
+            >
+            <p class="text-foreground font-medium">
+              {{ searchResult.book.title || "N/A" }}
+            </p>
           </div>
           <div>
-            <label class="text-xs font-medium text-muted-foreground uppercase">Authors</label>
-            <p class="text-foreground">{{ searchResult.book.authors?.join(', ') || 'N/A' }}</p>
+            <label class="text-xs font-medium text-muted-foreground uppercase"
+              >Authors</label
+            >
+            <p class="text-foreground">
+              {{ searchResult.book.authors?.join(", ") || "N/A" }}
+            </p>
           </div>
           <div>
-            <label class="text-xs font-medium text-muted-foreground uppercase">Publisher</label>
-            <p class="text-foreground">{{ searchResult.book.publisher || 'N/A' }}</p>
+            <label class="text-xs font-medium text-muted-foreground uppercase"
+              >Publisher</label
+            >
+            <p class="text-foreground">
+              {{ searchResult.book.publisher || "N/A" }}
+            </p>
           </div>
           <div>
-            <label class="text-xs font-medium text-muted-foreground uppercase">Year</label>
-            <p class="text-foreground">{{ searchResult.book.publishedDate || 'N/A' }}</p>
+            <label class="text-xs font-medium text-muted-foreground uppercase"
+              >Year</label
+            >
+            <p class="text-foreground">
+              {{ searchResult.book.publishedDate || "N/A" }}
+            </p>
           </div>
           <div>
-            <label class="text-xs font-medium text-muted-foreground uppercase">Language</label>
-            <p class="text-foreground">{{ searchResult.book.language || 'N/A' }}</p>
+            <label class="text-xs font-medium text-muted-foreground uppercase"
+              >Language</label
+            >
+            <p class="text-foreground">
+              {{ searchResult.book.language || "N/A" }}
+            </p>
           </div>
           <div>
-            <label class="text-xs font-medium text-muted-foreground uppercase">Publish Place</label>
-            <p class="text-foreground">{{ searchResult.book.publishPlace || 'N/A' }}</p>
+            <label class="text-xs font-medium text-muted-foreground uppercase"
+              >Publish Place</label
+            >
+            <p class="text-foreground">
+              {{ searchResult.book.publishPlace || "N/A" }}
+            </p>
           </div>
         </div>
 
         <div v-if="searchResult.book.subjects">
-          <label class="text-xs font-medium text-muted-foreground uppercase">Subjects</label>
+          <label class="text-xs font-medium text-muted-foreground uppercase"
+            >Subjects</label
+          >
           <p class="text-foreground">{{ searchResult.book.subjects }}</p>
         </div>
       </div>
 
       <!-- Not Found -->
       <div v-else class="text-center py-8">
-        <UIcon name="i-lucide-book-x" class="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+        <UIcon
+          name="i-lucide-book-x"
+          class="w-12 h-12 text-muted-foreground mx-auto mb-4"
+        />
         <p class="text-muted-foreground">
-          ISBN <code class="bg-muted px-1 rounded">{{ searchResult.request.isbn }}</code> 
+          ISBN
+          <code class="bg-muted px-1 rounded">{{
+            searchResult.request?.isbn
+          }}</code>
           was not found in Perpusnas database.
         </p>
         <p class="text-sm text-muted-foreground mt-2">
@@ -264,19 +363,27 @@ const sampleIsbns = [
 
       <!-- Timing Details -->
       <div class="mt-6 pt-4 border-t border-border">
-        <h3 class="text-sm font-medium text-muted-foreground mb-2">Performance Metrics</h3>
+        <h3 class="text-sm font-medium text-muted-foreground mb-2">
+          Performance Metrics
+        </h3>
         <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
           <div>
             <span class="text-muted-foreground">Total:</span>
-            <span class="font-mono ml-1">{{ searchResult.timing.total }}ms</span>
+            <span class="font-mono ml-1"
+              >{{ searchResult.timing.total }}ms</span
+            >
           </div>
           <div>
             <span class="text-muted-foreground">Fetch:</span>
-            <span class="font-mono ml-1">{{ searchResult.timing.fetchDuration }}ms</span>
+            <span class="font-mono ml-1"
+              >{{ searchResult.timing.fetchDuration }}ms</span
+            >
           </div>
           <div>
             <span class="text-muted-foreground">Endpoint:</span>
-            <span class="font-mono ml-1 text-xs">{{ searchResult.timing.endpoint }}</span>
+            <span class="font-mono ml-1 text-xs">{{
+              searchResult.timing.endpoint
+            }}</span>
           </div>
           <div>
             <span class="text-muted-foreground">Source:</span>
@@ -287,9 +394,15 @@ const sampleIsbns = [
     </UCard>
 
     <!-- Raw JSON (Collapsible) -->
-    <UAccordion v-if="searchResult" :items="[{ label: 'Raw API Response', slot: 'raw' }]">
+    <UAccordion
+      v-if="searchResult"
+      :items="[{ label: 'Raw API Response', slot: 'raw' }]"
+    >
       <template #raw>
-        <pre class="bg-muted p-4 rounded-lg overflow-x-auto text-xs font-mono">{{ JSON.stringify(searchResult, null, 2) }}</pre>
+        <pre
+          class="bg-muted p-4 rounded-lg overflow-x-auto text-xs font-mono"
+          >{{ JSON.stringify(searchResult, null, 2) }}</pre
+        >
       </template>
     </UAccordion>
 
@@ -300,7 +413,9 @@ const sampleIsbns = [
         <li>• Uses Perpusnas INLIS Lite v3 OAI-PMH endpoint</li>
         <li>• Parses MARCXML format (Library standard)</li>
         <li>• Timeout set to 8 seconds (Perpusnas can be slow)</li>
-        <li>• Best coverage for Indonesian publishers (978-602-*, 978-623-*)</li>
+        <li>
+          • Best coverage for Indonesian publishers (978-602-*, 978-623-*)
+        </li>
         <li>• This page is experimental and won't affect your scan history</li>
       </ul>
     </div>

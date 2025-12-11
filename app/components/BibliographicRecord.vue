@@ -4,7 +4,8 @@
  * Used in Modal and Book Details Page
  */
 import type { BookMetadata } from '~/types'
-import { Building2, Users, AlertTriangle, Check, Copy, Sparkles, ExternalLink } from 'lucide-vue-next'
+import Button from '@/components/ui/Button.vue'
+import { Building2, Users, AlertTriangle, Check, Copy, Sparkles, ExternalLink, Download } from 'lucide-vue-next'
 
 const props = defineProps<{
   book: BookMetadata
@@ -17,12 +18,55 @@ const emit = defineEmits<{
 
 // Copy state
 const copiedField = ref<string | null>(null)
+const isDownloading = ref(false)
+const toast = useToast()
 
 async function copyToClipboard(text: string | null | undefined, fieldName: string) {
   if (!text) return
   await navigator.clipboard.writeText(text)
   copiedField.value = fieldName
   setTimeout(() => { copiedField.value = null }, 2000)
+}
+
+const downloadFilename = computed(() => {
+  const base = props.book.title || props.book.isbn || 'book-cover'
+  const slug = base.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '')
+  return slug || 'book-cover'
+})
+
+async function downloadCover() {
+  if (!props.book.thumbnail || isDownloading.value) return
+
+  isDownloading.value = true
+  try {
+    const response = await fetch(`/api/image-proxy?url=${encodeURIComponent(props.book.thumbnail)}`)
+    if (!response.ok) {
+      throw new Error('Failed to fetch cover image')
+    }
+
+    const blob = await response.blob()
+    const extension = blob.type.split('/')[1] || 'jpg'
+    const objectUrl = URL.createObjectURL(blob)
+
+    const anchor = document.createElement('a')
+    anchor.href = objectUrl
+    anchor.download = `${downloadFilename.value}.${extension}`
+    document.body.appendChild(anchor)
+    anchor.click()
+    anchor.remove()
+    URL.revokeObjectURL(objectUrl)
+
+    toast.add({ title: 'Cover downloaded', color: 'green' })
+  } catch (error) {
+    console.error('Download cover failed', error)
+    toast.add({
+      title: 'Download failed',
+      description: 'Unable to download the cover right now.',
+      color: 'red'
+    })
+  } finally {
+    isDownloading.value = false
+  }
 }
 
 // Trust badge helpers
@@ -191,6 +235,18 @@ const coverUrl = computed(() => {
           loading="lazy"
         >
       </div>
+
+      <Button
+        variant="outline"
+        class="w-full justify-center gap-2"
+        :disabled="!book.thumbnail || isDownloading"
+        @click="downloadCover"
+      >
+        <Download class="w-4 h-4" />
+        <span v-if="isDownloading">Preparing...</span>
+        <span v-else-if="book.thumbnail">Download cover</span>
+        <span v-else>No cover available</span>
+      </Button>
 
       <!-- Classification Quick View -->
       <div class="p-4 bg-indigo-50 dark:bg-indigo-950/30 rounded-lg space-y-3 border border-indigo-100 dark:border-indigo-900/50">
