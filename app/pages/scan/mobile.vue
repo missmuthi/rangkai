@@ -1,215 +1,120 @@
 <script setup lang="ts">
+/**
+ * Mobile Scanner Page
+ * Uses native vue-qrcode-reader for hardware-accelerated barcode scanning
+ */
 definePageMeta({
-  middleware: 'auth',
-  layout: 'scanner'
-})
+  middleware: "auth",
+  layout: "scanner",
+});
 
-const router = useRouter()
-const toast = useToast()
-const { book, loading, error, searchByISBN, cleanMetadata } = useBookSearch()
-const { isOnline, queue: offlineQueue, addToQueue, syncQueue, isSyncing } = useOfflineQueue()
-const { 
-  isScanning, 
-  error: scannerError, 
-  startScanner, 
-  stopScanner, 
-  availableCameras, 
-  permissionState, 
-  secureContextOk,
-  requestCameraAccess,
-  torchSupported, 
-  torchOn, 
-  setTorch, 
-  listCameras 
-} = useScanner()
+const router = useRouter();
+const toast = useToast();
+const { book, loading, error, searchByISBN, cleanMetadata } = useBookSearch();
+const {
+  isOnline,
+  queue: offlineQueue,
+  addToQueue,
+  syncQueue,
+  isSyncing,
+} = useOfflineQueue();
 
-const scannerRef = ref<HTMLElement | null>(null)
-const lastScan = ref('')
-const lastScanAt = ref(0)
-const autoClean = ref(true)
+// Scanner state
+const scannerActive = ref(true);
+const scannerError = ref<string | null>(null);
 
 // Rapid Fire Mode
-const isRapidMode = ref(true)
-const sessionQueue = ref<string[]>([])
-const isProcessing = ref(false)
-const processProgress = ref(0)
+const isRapidMode = ref(true);
+const sessionQueue = ref<string[]>([]);
+const isProcessing = ref(false);
+const processProgress = ref(0);
+const autoClean = ref(true);
 
-async function onScanSuccess(decodedText: string) {
-  // Debounce duplicates (3 second window)
-  if (decodedText === lastScan.value && Date.now() - lastScanAt.value < 3000) {
-    return
-  }
-  lastScan.value = decodedText
-  lastScanAt.value = Date.now()
-
+/**
+ * Handle successful barcode scan
+ */
+function onScan(isbn: string) {
   // Normalize ISBN (remove hyphens/spaces)
-  const isbn = decodedText.replace(/[-\s]/g, '')
+  const normalizedIsbn = isbn.replace(/[-\s]/g, "");
 
-  // Validate ISBN format
-  if (!/^(97[89])?\d{9}[\dXx]$/.test(isbn)) {
-    return
+  // Validate ISBN format (ISBN-13 with 978/979 prefix)
+  if (!/^97[89]\d{10}$/.test(normalizedIsbn)) {
+    return;
   }
 
   // If offline, add to offline queue
   if (!isOnline.value) {
-    addToQueue(isbn, autoClean.value)
-    return
+    addToQueue(normalizedIsbn, autoClean.value);
+    toast.add({
+      title: "Queued for later",
+      description: `${normalizedIsbn} saved offline`,
+      color: "yellow",
+    });
+    return;
   }
 
   if (isRapidMode.value) {
     // Rapid Fire: Queue only, don't process yet
-    if (!sessionQueue.value.includes(isbn)) {
-      sessionQueue.value.push(isbn)
-      // Beep is already played by useScanner
+    if (!sessionQueue.value.includes(normalizedIsbn)) {
+      sessionQueue.value.push(normalizedIsbn);
     }
   } else {
-    // Normal mode: Process immediately
-    await searchByISBN(isbn)
-    if (autoClean.value && book.value) {
-      book.value = await cleanMetadata(book.value)
-    }
+    // Normal mode: Navigate to book page
+    router.push(`/book/${normalizedIsbn}`);
   }
+}
+
+/**
+ * Handle scanner errors
+ */
+function onScanError(message: string) {
+  scannerError.value = message;
+  toast.add({
+    title: "Camera error",
+    description: message,
+    color: "red",
+  });
 }
 
 function removeFromQueue(isbn: string) {
-  sessionQueue.value = sessionQueue.value.filter(i => i !== isbn)
+  sessionQueue.value = sessionQueue.value.filter((i) => i !== isbn);
 }
 
 function clearSession() {
-  sessionQueue.value = []
+  sessionQueue.value = [];
 }
 
 async function processSession() {
-  if (sessionQueue.value.length === 0) return
-  
-  isProcessing.value = true
-  processProgress.value = 0
-  const total = sessionQueue.value.length
-  let processed = 0
-  
+  if (sessionQueue.value.length === 0) return;
+
+  isProcessing.value = true;
+  processProgress.value = 0;
+  const total = sessionQueue.value.length;
+  let processed = 0;
+
   for (const isbn of sessionQueue.value) {
     try {
-      await searchByISBN(isbn)
+      await searchByISBN(isbn);
       if (autoClean.value && book.value) {
-        await cleanMetadata(book.value)
+        await cleanMetadata(book.value);
       }
-      processed++
-      processProgress.value = Math.round((processed / total) * 100)
+      processed++;
+      processProgress.value = Math.round((processed / total) * 100);
     } catch (err) {
-      console.error(`Failed to process ${isbn}:`, err)
-      // Continue with others
+      console.error(`Failed to process ${isbn}:`, err);
     }
   }
-  
+
   toast.add({
-    title: 'Batch complete!',
+    title: "Batch complete!",
     description: `Processed ${processed} of ${total} books`,
-    color: 'green'
-  })
-  
-  sessionQueue.value = []
-  isProcessing.value = false
-  router.push('/history')
+    color: "green",
+  });
+
+  sessionQueue.value = [];
+  isProcessing.value = false;
+  router.push("/history");
 }
-
-const cameraError = ref<string | null>(null)
-const selectedCameraId = ref<string | null>(null)
-const isRequestingPermission = ref(false)
-const permissionLabel = computed(() => {
-  if (!secureContextOk.value) return 'Use HTTPS or localhost to enable camera'
-  if (permissionState.value === 'granted') return 'Camera allowed'
-  if (permissionState.value === 'denied') return 'Camera blocked in browser'
-  if (permissionState.value === 'unsupported') return 'Permission status unavailable'
-  return 'Allow camera to start scanning'
-})
-const selectedCameraLabel = computed(() => {
-  const match = availableCameras.value.find(cam => cam.id === selectedCameraId.value)
-  return match?.label || 'Default camera'
-})
-
-async function refreshCamerasList() {
-  const cameras = await listCameras()
-  if (!selectedCameraId.value && cameras.length > 0) {
-    selectedCameraId.value = cameras[0]!.id
-  } else if (cameras.length > 0 && !cameras.find(cam => cam.id === selectedCameraId.value)) {
-    selectedCameraId.value = cameras[0]!.id
-  }
-}
-
-async function initScanner() {
-  await nextTick()
-  if (!scannerRef.value) {
-    cameraError.value = 'Scanner element not found in DOM'
-    return
-  }
-  cameraError.value = null
-  await refreshCamerasList()
-  await startScanner('scanner-reader', onScanSuccess, (err) => {
-    cameraError.value = err
-    toast.add({
-      title: 'Camera error',
-      description: err,
-      color: 'red'
-    })
-  }, { deviceId: selectedCameraId.value || undefined })
-}
-
-async function retryScanner() {
-  cameraError.value = null
-  await stopScanner()
-  await initScanner()
-}
-
-async function requestPermission() {
-  if (isRequestingPermission.value) return
-  isRequestingPermission.value = true
-  try {
-    await requestCameraAccess()
-    toast.add({
-      title: 'Camera ready',
-      description: 'Permission granted. Starting scanner…',
-      color: 'green'
-    })
-    await retryScanner()
-  } catch (err) {
-    const message = err instanceof Error ? err.message : 'Unable to request camera access'
-    cameraError.value = message
-    toast.add({
-      title: 'Camera blocked',
-      description: message,
-      color: 'red'
-    })
-  } finally {
-    isRequestingPermission.value = false
-  }
-}
-
-async function switchCamera() {
-  if (availableCameras.value.length < 2) return
-  const currentIndex = availableCameras.value.findIndex(c => c.id === selectedCameraId.value)
-  const next = availableCameras.value[(currentIndex + 1) % availableCameras.value.length]!
-  selectedCameraId.value = next.id
-  await retryScanner()
-}
-
-async function onCameraSelectChange() {
-  await retryScanner()
-}
-
-async function toggleTorch() {
-  if (!torchSupported.value) return
-  await setTorch(!torchOn.value)
-}
-
-onMounted(() => {
-  initScanner()
-})
-
-watch(availableCameras, (cameras) => {
-  if (!selectedCameraId.value && cameras.length > 0) {
-    selectedCameraId.value = cameras[0]!.id
-  }
-})
 </script>
 
 <template>
@@ -217,73 +122,45 @@ watch(availableCameras, (cameras) => {
     <!-- Floating Badge Counter -->
     <Transition name="bounce">
       <div
-v-if="isRapidMode && sessionQueue.length > 0" 
-           class="fixed top-4 right-4 z-50 bg-green-500 text-white px-4 py-2 rounded-full font-bold text-lg shadow-lg">
+        v-if="isRapidMode && sessionQueue.length > 0"
+        class="fixed top-4 right-4 z-50 bg-green-500 text-white px-4 py-2 rounded-full font-bold text-lg shadow-lg"
+      >
         {{ sessionQueue.length }} scanned
       </div>
     </Transition>
 
     <!-- Offline Indicator -->
-    <div v-if="!isOnline" class="fixed top-4 left-4 z-50 bg-red-500 text-white px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1">
+    <div
+      v-if="!isOnline"
+      class="fixed top-4 left-4 z-50 bg-red-500 text-white px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1"
+    >
       <span class="animate-pulse">●</span> Offline
     </div>
 
     <!-- Offline Queue Badge -->
     <div
-v-if="offlineQueue.length > 0" 
-         class="fixed top-4 left-1/2 -translate-x-1/2 z-50 bg-yellow-500 text-black px-3 py-1 rounded-full text-xs font-bold cursor-pointer"
-         @click="syncQueue">
-      {{ isSyncing ? 'Syncing...' : `${offlineQueue.length} queued` }}
+      v-if="offlineQueue.length > 0"
+      class="fixed top-4 left-1/2 -translate-x-1/2 z-50 bg-yellow-500 text-black px-3 py-1 rounded-full text-xs font-bold cursor-pointer"
+      @click="syncQueue"
+    >
+      {{ isSyncing ? "Syncing..." : `${offlineQueue.length} queued` }}
     </div>
 
-    <!-- Scanner Viewport -->
-    <div class="relative">
-      <div id="scanner-reader" ref="scannerRef" class="w-full aspect-[4/3]" />
+    <!-- Native Scanner Component -->
+    <ScannerNative
+      :active="scannerActive"
+      :formats="['ean_13']"
+      @scan="onScan"
+      @error="onScanError"
+    />
 
-      <!-- Camera Error Overlay -->
-      <div v-if="cameraError || scannerError" class="absolute inset-0 bg-red-900/90 flex flex-col items-center justify-center p-6 text-center">
-        <div class="text-4xl mb-4">📷❌</div>
-        <h3 class="text-xl font-bold text-red-200 mb-2">Camera Failed</h3>
-        <p class="text-red-300 text-sm mb-4 max-w-xs">{{ cameraError || scannerError }}</p>
-        <button 
-          class="px-4 py-2 bg-white text-red-900 rounded-lg font-bold hover:bg-red-100"
-          @click="retryScanner"
-        >
-          🔄 Retry Camera
-        </button>
-        <button
-          v-if="permissionState !== 'granted'"
-          class="mt-2 px-4 py-2 bg-amber-400 text-black rounded-lg font-bold hover:bg-amber-300 disabled:opacity-50"
-          :disabled="isRequestingPermission"
-          @click="requestPermission"
-        >
-          {{ isRequestingPermission ? 'Requesting…' : 'Allow Camera' }}
-        </button>
-      </div>
-
-      <!-- Scan Overlay (only show when no error) -->
-      <div v-if="!cameraError && !scannerError" class="absolute inset-0 pointer-events-none">
-        <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-24 border-2 border-green-400 rounded-lg" />
-      </div>
-
-      <!-- Scanner Status -->
-      <div class="absolute top-2 right-2 px-2 py-1 rounded text-xs font-bold bg-black/50 border border-gray-700">
-        {{ cameraError || scannerError ? '❌ Error' : (isScanning ? 'Scanning…' : 'Starting camera') }}
-      </div>
-      
-      <!-- Mode Badge -->
+    <!-- Mode Badge Overlay -->
+    <div class="absolute top-14 left-2 z-10">
       <div
-class="absolute top-2 left-2 px-2 py-1 rounded text-xs font-bold" 
-           :class="isRapidMode ? 'bg-amber-500' : 'bg-blue-500'">
-        {{ isRapidMode ? '⚡ RAPID FIRE' : '📖 NORMAL' }}
-      </div>
-
-      <div class="absolute bottom-2 left-2 px-2 py-1 rounded text-xs bg-black/50 border border-gray-800">
-        {{ selectedCameraLabel }}
-      </div>
-
-      <div class="absolute bottom-2 right-2 px-2 py-1 rounded text-xs bg-black/50 border border-gray-800">
-        {{ permissionLabel }}
+        class="px-2 py-1 rounded text-xs font-bold"
+        :class="isRapidMode ? 'bg-amber-500' : 'bg-blue-500'"
+      >
+        {{ isRapidMode ? "⚡ RAPID FIRE" : "📖 NORMAL" }}
       </div>
     </div>
 
@@ -291,99 +168,60 @@ class="absolute top-2 left-2 px-2 py-1 rounded text-xs font-bold"
     <div class="p-4 space-y-3 border-b border-gray-800">
       <div class="flex items-center justify-between flex-wrap gap-3">
         <label class="flex items-center gap-2 cursor-pointer">
-          <input v-model="isRapidMode" type="checkbox" class="rounded">
+          <input v-model="isRapidMode" type="checkbox" class="rounded" />
           <span class="text-sm">Rapid Fire Mode</span>
         </label>
-        
+
         <label class="flex items-center gap-2 cursor-pointer">
-          <input v-model="autoClean" type="checkbox" class="rounded">
+          <input v-model="autoClean" type="checkbox" class="rounded" />
           <span class="text-sm">Auto AI Clean</span>
         </label>
-      </div>
-
-      <div class="flex flex-wrap items-center gap-2 text-xs text-gray-300">
-        <span class="px-2 py-1 bg-gray-800 border border-gray-700 rounded">
-          {{ permissionLabel }}
-        </span>
-
-        <button 
-          v-if="permissionState !== 'granted'"
-          class="px-2 py-1 rounded bg-amber-500 text-black font-semibold hover:bg-amber-400 disabled:opacity-60"
-          :disabled="isRequestingPermission"
-          @click="requestPermission"
-        >
-          {{ isRequestingPermission ? 'Requesting…' : 'Allow camera' }}
-        </button>
-
-        <button 
-          class="px-2 py-1 rounded bg-gray-800 border border-gray-700 hover:border-gray-500"
-          @click="refreshCamerasList"
-        >
-          ↻ Refresh devices
-        </button>
-
-        <button 
-          v-if="availableCameras.length > 1"
-          class="px-2 py-1 rounded bg-gray-800 border border-gray-700 hover:border-gray-500"
-          @click="switchCamera"
-        >
-          🔁 Switch camera
-        </button>
-
-        <select
-          v-if="availableCameras.length > 0"
-          v-model="selectedCameraId"
-          class="bg-gray-900 border border-gray-700 rounded px-2 py-1 text-xs"
-          @change="onCameraSelectChange"
-        >
-          <option 
-            v-for="cam in availableCameras" 
-            :key="cam.id"
-            :value="cam.id"
-          >
-            {{ cam.label }}
-          </option>
-        </select>
-
-        <button
-          v-if="torchSupported"
-          class="px-2 py-1 rounded border text-xs"
-          :class="torchOn ? 'bg-amber-500 border-amber-400 text-black' : 'bg-gray-800 border-gray-700 text-gray-200'"
-          @click="toggleTorch"
-        >
-          {{ torchOn ? 'Flash on' : 'Flash off' }}
-        </button>
       </div>
     </div>
 
     <!-- Rapid Fire: Session Queue -->
     <div v-if="isRapidMode" class="p-4">
-      <div v-if="sessionQueue.length === 0" class="text-center text-gray-500 py-8">
+      <div
+        v-if="sessionQueue.length === 0"
+        class="text-center text-gray-500 py-8"
+      >
         <p class="text-4xl mb-2">📚</p>
         <p>Point camera at barcodes to start scanning</p>
         <p class="text-xs mt-1">Books will be queued for batch processing</p>
       </div>
-      
+
       <div v-else class="space-y-3">
         <div class="flex justify-between items-center">
-          <span class="font-bold text-green-400">{{ sessionQueue.length }} books queued</span>
-          <button class="text-red-400 text-sm hover:text-red-300" @click="clearSession">
+          <span class="font-bold text-green-400"
+            >{{ sessionQueue.length }} books queued</span
+          >
+          <button
+            class="text-red-400 text-sm hover:text-red-300"
+            @click="clearSession"
+          >
             Clear All
           </button>
         </div>
-        
+
         <!-- Queue List -->
         <div class="max-h-40 overflow-y-auto space-y-2">
           <div
-v-for="isbn in sessionQueue" :key="isbn" 
-               class="flex justify-between items-center bg-gray-800 p-2 rounded text-sm font-mono">
+            v-for="isbn in sessionQueue"
+            :key="isbn"
+            class="flex justify-between items-center bg-gray-800 p-2 rounded text-sm font-mono"
+          >
             <span>{{ isbn }}</span>
-            <button class="text-gray-500 hover:text-red-400 px-2" @click="removeFromQueue(isbn)">×</button>
+            <button
+              class="text-gray-500 hover:text-red-400 px-2"
+              @click="removeFromQueue(isbn)"
+            >
+              ×
+            </button>
           </div>
         </div>
-        
+
         <!-- Process Button -->
-        <button 
+        <button
           :disabled="isProcessing"
           class="w-full py-3 bg-green-600 hover:bg-green-500 disabled:bg-gray-700 rounded-lg font-bold text-lg transition-colors"
           @click="processSession"
@@ -397,26 +235,44 @@ v-for="isbn in sessionQueue" :key="isbn"
     <!-- Normal Mode: Result Panel -->
     <div v-else class="p-4">
       <div v-if="loading" class="animate-pulse bg-gray-800 h-32 rounded-lg" />
-      <div v-else-if="error" class="bg-red-900/50 text-red-300 p-4 rounded-lg">{{ error }}</div>
-      <div v-else-if="book"><BookCard :book="book" :show-actions="false" /></div>
+      <div v-else-if="error" class="bg-red-900/50 text-red-300 p-4 rounded-lg">
+        {{ error }}
+      </div>
+      <div v-else-if="book">
+        <BookCard :book="book" :show-actions="false" />
+      </div>
       <div v-else class="text-center text-gray-500 py-8">
         <p>Point camera at a barcode to scan</p>
       </div>
     </div>
 
     <!-- Navigation Footer -->
-    <div class="fixed bottom-0 inset-x-0 bg-gray-900 border-t border-gray-800 p-3 flex justify-around items-center text-sm z-10 pb-6 sm:pb-3">
-      <NuxtLink to="/dashboard" class="flex flex-col items-center gap-1 text-gray-400 hover:text-white transition-colors p-2">
+    <div
+      class="fixed bottom-0 inset-x-0 bg-gray-900 border-t border-gray-800 p-3 flex justify-around items-center text-sm z-10 pb-6 sm:pb-3"
+    >
+      <NuxtLink
+        to="/dashboard"
+        class="flex flex-col items-center gap-1 text-gray-400 hover:text-white transition-colors p-2"
+      >
         <component :is="resolveComponent('LucideHome')" class="h-5 w-5" />
         <span class="text-xs">Home</span>
       </NuxtLink>
-      
-      <NuxtLink to="/scan/batch" class="flex flex-col items-center gap-1 text-amber-400 hover:text-amber-300 transition-colors p-2">
-        <component :is="resolveComponent('LucideClipboardList')" class="h-5 w-5" />
+
+      <NuxtLink
+        to="/scan/batch"
+        class="flex flex-col items-center gap-1 text-amber-400 hover:text-amber-300 transition-colors p-2"
+      >
+        <component
+          :is="resolveComponent('LucideClipboardList')"
+          class="h-5 w-5"
+        />
         <span class="text-xs">Batch</span>
       </NuxtLink>
 
-      <NuxtLink to="/history" class="flex flex-col items-center gap-1 text-gray-400 hover:text-white transition-colors p-2">
+      <NuxtLink
+        to="/history"
+        class="flex flex-col items-center gap-1 text-gray-400 hover:text-white transition-colors p-2"
+      >
         <component :is="resolveComponent('LucideHistory')" class="h-5 w-5" />
         <span class="text-xs">History</span>
       </NuxtLink>
@@ -432,8 +288,14 @@ v-for="isbn in sessionQueue" :key="isbn"
   animation: bounce-in 0.2s reverse;
 }
 @keyframes bounce-in {
-  0% { transform: scale(0); }
-  50% { transform: scale(1.2); }
-  100% { transform: scale(1); }
+  0% {
+    transform: scale(0);
+  }
+  50% {
+    transform: scale(1.2);
+  }
+  100% {
+    transform: scale(1);
+  }
 }
 </style>
