@@ -3,8 +3,9 @@
 ## Development
 
 Start the development server:
+
 ```bash
-pnpm dev
+bun run dev
 ```
 
 Visit http://localhost:3000
@@ -12,10 +13,12 @@ Visit http://localhost:3000
 ## Available Routes
 
 ### Public Pages
+
 - `/` - Home page
 - `/login` - Authentication page
 
 ### Protected Pages (require login)
+
 - `/scan/mobile` - Mobile barcode scanner
 - `/history` - Scan history with search and export
 
@@ -38,52 +41,65 @@ Visit http://localhost:3000
 ## Component Usage
 
 ### BookCard Component
+
 ```vue
-<BookCard 
-  :book="bookData" 
-  :show-actions="true" 
+<BookCard
+  :book="bookData"
+  :show-actions="true"
   @save="handleSave"
   @edit="handleEdit"
 />
 ```
 
 ### ScanHistory Component
+
 ```vue
 <ScanHistory />
 ```
+
 Auto-fetches scans on mount.
 
 ## Composables
 
 ### useBookFetch
+
 ```typescript
-const { book, loading, error, fetchBook, cleanMetadata } = useBookFetch()
+const { book, loading, error, fetchBook, cleanMetadata } = useBookFetch();
 
 // Fetch book by ISBN
-await fetchBook('9780134685991')
+await fetchBook("9780134685991");
 
 // Clean metadata
-const cleaned = await cleanMetadata(book.value)
+const cleaned = await cleanMetadata(book.value);
 ```
 
 ### useScans
+
 ```typescript
-const { scans, loading, error, fetchScans, createScan, updateScan, deleteScan } = useScans()
+const {
+  scans,
+  loading,
+  error,
+  fetchScans,
+  createScan,
+  updateScan,
+  deleteScan,
+} = useScans();
 
 // Fetch all scans
-await fetchScans()
+await fetchScans();
 
 // Create new scan
 await createScan({
-  isbn: '9780134685991',
-  title: 'Effective Java',
-  authors: 'Joshua Bloch',
-  publisher: 'Addison-Wesley',
-  status: 'complete'
-})
+  isbn: "9780134685991",
+  title: "Effective Java",
+  authors: "Joshua Bloch",
+  publisher: "Addison-Wesley",
+  status: "complete",
+});
 
 // Delete scan
-await deleteScan(scanId)
+await deleteScan(scanId);
 ```
 
 ## Type Definitions
@@ -92,54 +108,60 @@ All types are in `app/types/book.ts`:
 
 ```typescript
 interface BookMetadata {
-  isbn: string
-  title: string | null
-  subtitle: string | null
-  authors: string[]
-  publisher: string | null
-  publishedDate: string | null
-  description: string | null
-  pageCount: number | null
-  categories: string[]
-  language: string | null
-  thumbnail: string | null
-  source: 'google' | 'openlibrary' | 'loc'
+  isbn: string;
+  title: string | null;
+  subtitle: string | null;
+  authors: string[];
+  publisher: string | null;
+  publishedDate: string | null;
+  description: string | null;
+  pageCount: number | null;
+  categories: string[];
+  language: string | null;
+  thumbnail: string | null;
+  source: "google" | "openlibrary" | "loc";
 }
 ```
 
 ## Production Deployment
 
 1. Build:
+
    ```bash
-   pnpm build
+   bun run build
    ```
 
 2. Preview:
+
    ```bash
-   npx wrangler pages dev dist
+   bunx wrangler pages dev dist
    ```
 
 3. Deploy to Cloudflare Pages:
    ```bash
-   npx wrangler pages deploy dist
+   bunx wrangler pages deploy dist
    ```
 
 ## Troubleshooting
 
 ### Camera not working
+
 - Check browser permissions
 - Ensure HTTPS (camera API requires secure context)
 - Try different browsers (Chrome/Safari recommended)
 
 ### Images not loading
+
 - Check image proxy whitelist in `server/api/image-proxy.get.ts`
 - Verify CSP headers allow proxied domains
 
 ### Auth middleware blocking public pages
+
 - Check `definePageMeta({ middleware: 'auth' })` only on protected pages
 - Ensure `useAuth()` composable returns correct `isAuthenticated` value
 
 ### Type errors
-- Run `pnpm typecheck` to identify issues
+
+- Run `bun run typecheck` to identify issues
 - Ensure `app/types/book.ts` is used for shared types
 - Check imports use `~/types/book` not `~/server/utils/metadata/types`

@@ -22,7 +22,7 @@ This document serves as the single source of truth for the project's architectur
 - **D1 is the only DB**: Using `hub.database` and `drizzle-orm/d1`.
 - **Drizzle Kit**: Configuration is in `drizzle.config.ts`.
 - **Migrations**:
-  - Locally: `npx drizzle-kit migrate` or `drizzle-kit push` (development only)
+  - Locally: `bunx drizzle-kit migrate` or `drizzle-kit push` (development only)
   - Production: Automated via `nuxthub:deploy` hook in `package.json` calling `migrate:prod`.
 
 ### 2. Caching Strategy
@@ -47,7 +47,7 @@ This document serves as the single source of truth for the project's architectur
 ### 5. Debugging
 
 - **Logs**: Use `console.log` sparingly; explicit error handling with `createError` is preferred.
-- **Local Dev**: Use `npm run dev` (Nuxt Hub CLI). If DB fails, check `.data/hub` folder or `wrangler.toml` binding.
+- **Local Dev**: Use `bun run dev` (Nuxt Hub CLI). If DB fails, check `.data/hub` folder or `wrangler.toml` binding.
 
 ---
 

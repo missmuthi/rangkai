@@ -23,7 +23,7 @@ Rangkai is a book metadata harvester for Indonesian librarians, migrating from S
 | **Auth**            | Better Auth                     | Session management             |
 | **State**           | Vue 3 refs + composables        | Client-side reactivity         |
 | **Styling**         | Tailwind CSS                    | Utility-first styling          |
-| **Package Manager** | pnpm                            | Dependency management          |
+| **Package Manager** | Bun                             | Dependency management          |
 
 ---
 
@@ -284,11 +284,11 @@ export function useDrizzle() {
 
 ```bash
 # Generate migration from schema changes
-pnpm db:generate
+bunx drizzle-kit generate
 
 # Migrations auto-apply on:
-# - npm run dev
-# - npm run build (deploy)
+# - bun run dev
+# - bun run build (deploy)
 ```
 
 ---
@@ -337,13 +337,13 @@ export default defineNuxtConfig({
 
 ```bash
 # Development
-pnpm dev                    # Local dev server
-pnpm dev --remote           # Use remote storage (production data)
+bun run dev                 # Local dev server
+bun run dev --remote        # Use remote storage (production data)
 
 # Production
-pnpm build                  # Build for production
-pnpm preview                # Preview production build locally
-pnpm deploy                 # Deploy to NuxtHub (deprecated) or use Cloudflare CI
+bun run build               # Build for production
+bun run preview             # Preview production build locally
+bun run deploy              # Deploy to NuxtHub (deprecated) or use Cloudflare CI
 ```
 
 ---

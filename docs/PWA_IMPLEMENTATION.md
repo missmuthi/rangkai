@@ -120,7 +120,7 @@ Add `<ReloadPrompt />` to your root layout:
 PWA features are enabled in dev mode:
 
 ```bash
-pnpm dev
+bun run dev
 ```
 
 Visit `http://localhost:3000` and:
@@ -132,8 +132,8 @@ Visit `http://localhost:3000` and:
 ### Production Testing
 
 ```bash
-pnpm build
-pnpm preview
+bun run build
+bun run preview
 ```
 
 Then:

@@ -8,12 +8,13 @@ This guide covers best practices for deploying the Rangkai Book Scanner applicat
 
 - A [Cloudflare account](https://dash.cloudflare.com/sign-up)
 - A GitHub repository with your Rangkai project
-- Node.js 20+ and pnpm installed locally
-- Wrangler CLI: `npm install -g wrangler`
+- [Bun](https://bun.sh) installed locally
+- Wrangler CLI: `bun add -g wrangler`
 
 ## Architecture Overview
 
 Rangkai uses the following Cloudflare services:
+
 - **Cloudflare Pages** - Edge hosting for the Nuxt application with SSR
 - **D1 Database** - SQLite-compatible database for scans, users, sessions
 - **KV Storage** - Key-value cache for book metadata (24h TTL)
@@ -28,14 +29,14 @@ Rangkai uses the following Cloudflare services:
 
 ```bash
 # Login to Cloudflare
-npx wrangler login
+bunx wrangler login
 
 # Create D1 database
-npx wrangler d1 create rangkai-db
+bunx wrangler d1 create rangkai-db
 
 # Create KV namespaces
-npx wrangler kv namespace create KV
-npx wrangler kv namespace create CACHE
+bunx wrangler kv namespace create KV
+bunx wrangler kv namespace create CACHE
 ```
 
 Note the IDs returned for each resource.
@@ -79,36 +80,33 @@ NUXT_PUBLIC_SITE_URL = "https://your-project.pages.dev"
 ### Step 3: Apply Database Migrations
 
 ```bash
-npx wrangler d1 execute rangkai-db --remote --file=./server/db/migrations/0001_init.sql
+bunx wrangler d1 execute rangkai-db --remote --file=./server/db/migrations/0001_init.sql
 
-Or use the helper script:
-
-```bash
-pnpm migrate:prod
-```
+# Or use the helper script:
+bun run migrate:prod
 ```
 
 ### Step 4: Add Secrets
 
 ```bash
 # Generate and add auth secret
-openssl rand -base64 32 | npx wrangler pages secret put NUXT_AUTH_SECRET --project-name=rangkai
+openssl rand -base64 32 | bunx wrangler pages secret put NUXT_AUTH_SECRET --project-name=rangkai
 ```
 
 ```bash
 # Add Google OAuth credentials (required for Google social sign-in)
-npx wrangler pages secret put NUXT_OAUTH_GOOGLE_CLIENT_ID --project-name=rangkai
-npx wrangler pages secret put NUXT_OAUTH_GOOGLE_CLIENT_SECRET --project-name=rangkai
+bunx wrangler pages secret put NUXT_OAUTH_GOOGLE_CLIENT_ID --project-name=rangkai
+bunx wrangler pages secret put NUXT_OAUTH_GOOGLE_CLIENT_SECRET --project-name=rangkai
 ```
 
 ### Step 5: Build and Deploy
 
 ```bash
 # Build the application
-pnpm build
+bun run build
 
 # Deploy to Cloudflare Pages
-npx wrangler pages deploy dist --project-name=rangkai --branch=main
+bunx wrangler pages deploy dist --project-name=rangkai --branch=main
 ```
 
 ---
@@ -119,25 +117,25 @@ npx wrangler pages deploy dist --project-name=rangkai --branch=main
 
 ```bash
 # Start dev server with local bindings
-pnpm dev
+bun run dev
 
 # Or connect to remote Cloudflare resources
-pnpm dev --remote
+bun run dev --remote
 ```
 
 ### Quality Checks (before deployment)
 
 ```bash
 # Run all checks
-pnpm typecheck && pnpm lint && pnpm test
+bun run typecheck && bun run lint && bun run test
 ```
 
 ### Production Deployment
 
 ```bash
 # Build and deploy
-pnpm build
-npx wrangler pages deploy dist --project-name=rangkai --branch=main
+bun run build
+bunx wrangler pages deploy dist --project-name=rangkai --branch=main
 ```
 
 ---
@@ -165,17 +163,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4
+      - uses: oven-sh/setup-bun@v2
         with:
-          version: 10
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          cache: 'pnpm'
-      - run: pnpm install
-      - run: pnpm typecheck
-      - run: pnpm lint
-      - run: pnpm test
+          bun-version: latest
+      - run: bun install
+      - run: bun run typecheck
+      - run: bun run lint
+      - run: bun run test
 
   deploy:
     name: Deploy to Production
@@ -190,15 +184,11 @@ jobs:
       url: ${{ steps.deploy.outputs.deployment-url }}
     steps:
       - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4
+      - uses: oven-sh/setup-bun@v2
         with:
-          version: 10
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          cache: 'pnpm'
-      - run: pnpm install
-      - run: pnpm build
+          bun-version: latest
+      - run: bun install
+      - run: bun run build
       - name: Deploy to Cloudflare Pages
         id: deploy
         uses: cloudflare/wrangler-action@v3
@@ -210,10 +200,10 @@ jobs:
 
 ### Required GitHub Secrets
 
-| Secret | Description |
-|--------|-------------|
-| `CLOUDFLARE_API_TOKEN` | API token with Pages:Edit, D1:Edit, KV:Edit permissions |
-| `CLOUDFLARE_ACCOUNT_ID` | Your Cloudflare account ID |
+| Secret                  | Description                                             |
+| ----------------------- | ------------------------------------------------------- |
+| `CLOUDFLARE_API_TOKEN`  | API token with Pages:Edit, D1:Edit, KV:Edit permissions |
+| `CLOUDFLARE_ACCOUNT_ID` | Your Cloudflare account ID                              |
 
 ---
 
@@ -223,14 +213,19 @@ jobs:
 
 ```typescript
 export default defineNuxtConfig({
-  modules: ['@nuxthub/core', '@nuxt/eslint', '@nuxtjs/tailwindcss', '@vite-pwa/nuxt'],
+  modules: [
+    "@nuxthub/core",
+    "@nuxt/eslint",
+    "@nuxtjs/tailwindcss",
+    "@vite-pwa/nuxt",
+  ],
   hub: {
     database: true,
     kv: true,
-    blob: false,  // Enable if R2 is available
+    blob: false, // Enable if R2 is available
     cache: true,
   },
-})
+});
 ```
 
 ### wrangler.toml Structure
@@ -282,7 +277,7 @@ If R2 is not enabled, set `blob: false` in `nuxt.config.ts` and remove blob-rela
 
 ```bash
 # Verify D1 exists
-npx wrangler d1 list
+bunx wrangler d1 list
 
 # Check binding name matches "DB"
 ```
@@ -291,7 +286,7 @@ npx wrangler d1 list
 
 ```bash
 # Verify KV namespaces exist
-npx wrangler kv namespace list
+bunx wrangler kv namespace list
 
 # Check binding names match "KV" and "CACHE"
 ```
@@ -302,15 +297,15 @@ npx wrangler kv namespace list
 
 ```bash
 # List all resources
-npx wrangler d1 list
-npx wrangler kv namespace list
-npx wrangler pages project list
+bunx wrangler d1 list
+bunx wrangler kv namespace list
+bunx wrangler pages project list
 
 # View deployment logs
-npx wrangler pages deployment tail rangkai
+bunx wrangler pages deployment tail rangkai
 
 # Execute SQL on production D1
-npx wrangler d1 execute rangkai-db --remote --command="SELECT * FROM users"
+bunx wrangler d1 execute rangkai-db --remote --command="SELECT * FROM users"
 
 # Rollback to previous deployment
 # Go to Cloudflare Dashboard → Pages → rangkai → Deployments → Rollback
@@ -337,13 +332,13 @@ Before going public:
 
 ## Current Production Status
 
-| Resource | Status | URL/ID |
-|----------|--------|--------|
-| Pages Project | ✅ Deployed | https://rangkai-d3k.pages.dev |
-| D1 Database | ✅ Created | `rangkai-db` |
-| KV Namespace | ✅ Created | `KV` binding |
-| Cache Namespace | ✅ Created | `CACHE` binding |
-| Auth Secret | ✅ Configured | NUXT_AUTH_SECRET |
+| Resource        | Status        | URL/ID                        |
+| --------------- | ------------- | ----------------------------- |
+| Pages Project   | ✅ Deployed   | https://rangkai-d3k.pages.dev |
+| D1 Database     | ✅ Created    | `rangkai-db`                  |
+| KV Namespace    | ✅ Created    | `KV` binding                  |
+| Cache Namespace | ✅ Created    | `CACHE` binding               |
+| Auth Secret     | ✅ Configured | NUXT_AUTH_SECRET              |
 
 ---
 

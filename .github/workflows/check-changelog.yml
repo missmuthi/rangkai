@@ -1,4 +1,4 @@
-name: 'Check changelog updated'
+name: "Check changelog updated"
 
 on:
   pull_request:
@@ -35,7 +35,7 @@ jobs:
           CHANGED_FILES="${{ steps.changed.outputs.changed_files }}"
 
           # Patterns that require changelog update
-          PATTERN='^(app/|server/|types/|docs/|public/|README.md|nuxt.config.ts|drizzle.config.ts|package.json|pnpm-lock.yaml|package-lock.json|vite.config.ts|playwright.config.ts|vitest.config.ts|tests/|src/|app.vue)'
+          PATTERN='^(app/|server/|types/|docs/|public/|README.md|nuxt.config.ts|drizzle.config.ts|package.json|bun.lock|package-lock.json|vite.config.ts|playwright.config.ts|vitest.config.ts|tests/|src/|app.vue)'
 
           echo "$CHANGED_FILES"
 

@@ -1,3 +1,14 @@
+### 0.1.0 — 2025-12-14
+
+- Changed: Migrated from pnpm to Bun runtime for faster development and CI/CD
+- Changed: Updated all `package.json` scripts to use `bun`/`bunx` instead of `npm`/`npx`/`pnpm`
+- Changed: Migrated 4 GitHub workflows (`deploy.yml`, `nuxthub.yml`, `release.yml`, `check-changelog.yml`) to use Bun
+- Changed: Updated `playwright.config.ts` webServer command to use Bun
+- Changed: Updated all documentation files to reference Bun commands
+- Changed: Re-enabled `hub.cache: true` in `nuxt.config.ts` (previously disabled due to ms issue)
+- Removed: `pnpm-lock.yaml` (replaced by `bun.lock`)
+- Fixed: ESM compatibility issue with `ms` package via patch (auto-applied on install)
+
 ### 0.0.5 — 2025-12-08
 
 - Fixed: Critical `aiLog` crash by normalizing legacy string arrays to object format

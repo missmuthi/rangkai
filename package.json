@@ -6,21 +6,22 @@
   "scripts": {
     "dev": "nuxt dev",
     "build": "nuxt build",
-    "preview": "npx nuxthub preview",
-    "deploy": "npm run build && npx wrangler pages deploy dist --project-name rangkai",
-    "postinstall": "nuxt prepare",
+    "preview": "bunx nuxthub preview",
+    "deploy": "bun run build && bunx wrangler pages deploy dist --project-name rangkai",
+    "postinstall": "nuxt prepare && bun run patch:ms",
+    "patch:ms": "patch -p1 -d node_modules/ms < patches/ms.patch || true",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
-    "release": "npx standard-version",
+    "release": "bunx standard-version",
     "typecheck": "nuxt typecheck",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui",
-    "test:all": "pnpm test && pnpm test:e2e",
-    "record:demo": "node scripts/record-scanner.mjs",
-    "migrate:prod": "npx wrangler d1 execute rangkai-db --remote --file=./server/db/migrations/0001_init.sql"
+    "test:all": "bun run test && bun run test:e2e",
+    "record:demo": "bun scripts/record-scanner.mjs",
+    "migrate:prod": "bunx wrangler d1 execute rangkai-db --remote --file=./server/db/migrations/0001_init.sql"
   },
   "nuxthub": {
     "hooks": {
@@ -67,20 +68,14 @@
     "vue-tsc": "^2.2.10",
     "wrangler": "^4.52.1"
   },
-  "packageManager": "pnpm@10.12.1",
-  "pnpm": {
-    "onlyBuiltDependencies": [
-      "@parcel/watcher",
-      "esbuild",
-      "sharp",
-      "unrs-resolver",
-      "workerd"
-    ],
-    "overrides": {
-      "ms": "3.0.0-beta.2"
-    },
-    "patchedDependencies": {
-      "ms": "patches/ms.patch"
-    }
+  "trustedDependencies": [
+    "@parcel/watcher",
+    "esbuild",
+    "sharp",
+    "unrs-resolver",
+    "workerd"
+  ],
+  "overrides": {
+    "ms": "3.0.0-beta.2"
   }
 }
