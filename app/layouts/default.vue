@@ -8,6 +8,8 @@
     </main>
 
     <LayoutFooter />
-    <ReloadPrompt />
+    <ClientOnly>
+      <ReloadPrompt />
+    </ClientOnly>
   </div>
 </template>
