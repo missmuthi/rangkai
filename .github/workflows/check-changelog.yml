@@ -25,7 +25,8 @@ jobs:
           BASE_REF=${{ github.event.pull_request.base.ref }}
           echo "Comparing with base: $BASE_REF"
           CHANGED=$(git diff --name-only origin/$BASE_REF...HEAD || true)
-          echo "Changed files:\n$CHANGED"
+          echo "Changed files:"
+          echo "$CHANGED"
           echo "changed_files<<EOF" >> $GITHUB_OUTPUT
           echo "$CHANGED" >> $GITHUB_OUTPUT
           echo "EOF" >> $GITHUB_OUTPUT

@@ -1,0 +1,10 @@
+{
+  "github-actions.workflows.pinned.workflows": [],
+  "github-actions.workflows.pinned.refresh.enabled": false,
+  "yaml.schemas": {
+    "https://json.schemastore.org/github-workflow.json": ".github/workflows/*.yml"
+  },
+  // Suppress false positive errors for GitHub Actions
+  "yaml.validate": true,
+  "yaml.customTags": ["!reference sequence"]
+}
