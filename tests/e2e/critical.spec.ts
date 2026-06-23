@@ -323,7 +323,7 @@ test.describe('critical authenticated routes', () => {
     expectNoCriticalIssues(issues)
   })
 
-  test('logout invalidates the session and protected routes redirect afterward', async ({ page }) => {
+  test('logout invalidates the session and protected routes redirect afterward', async ({ page, context }) => {
     const issues = capturePageIssues(page)
     await bootstrapAuthenticatedPage(page)
 
@@ -355,8 +355,24 @@ test.describe('critical authenticated routes', () => {
 
     expect((sessionResult as { user?: unknown }).user ?? null).toBeNull()
 
+    const cookiesAfterLogout = await readSafeCookies(context)
+    expect(
+      cookiesAfterLogout.some((cookie) =>
+        [
+          'rangkai.session_token',
+          'rangkai.session_data',
+          '__Secure-rangkai.session_token',
+          '__Secure-rangkai.session_data',
+          'session',
+        ].includes(cookie.name)
+      )
+    ).toBe(false)
+
     await page.goto('/dashboard')
     await page.waitForURL(/\/login\?redirect=\/dashboard$/)
+    await page.reload()
+    await page.waitForURL(/\/login\?redirect=\/dashboard$/)
+    await page.goBack().catch(() => {})
     await page.goto('/history')
     await page.waitForURL(/\/login\?redirect=\/history$/)
 

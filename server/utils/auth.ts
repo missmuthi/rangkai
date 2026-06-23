@@ -1,11 +1,129 @@
 import type { H3Event } from 'h3'
+import { splitCookiesString } from 'h3'
 
 import { betterAuth } from 'better-auth'
 import { drizzleAdapter } from 'better-auth/adapters/drizzle'
 import { drizzle } from 'drizzle-orm/d1'
 import * as schema from '../db/schema'
 
+export type BetterAuthCookieConfig = {
+  sessionToken: {
+    name: string
+    options: {
+      path?: string
+      domain?: string
+      secure?: boolean
+      sameSite?: 'strict' | 'lax' | 'none'
+      httpOnly?: boolean
+    }
+  }
+  sessionData: {
+    name: string
+    options: {
+      path?: string
+      domain?: string
+      secure?: boolean
+      sameSite?: 'strict' | 'lax' | 'none'
+      httpOnly?: boolean
+    }
+  }
+  legacySession: {
+    name: string
+    options: {
+      path?: string
+      domain?: string
+      secure?: boolean
+      sameSite?: 'strict' | 'lax' | 'none'
+      httpOnly?: boolean
+    }
+  }
+}
+
 let _auth: ReturnType<typeof betterAuth> | null = null
+
+export function isProductionAuthMode() {
+  return process.env.NODE_ENV === 'production' || process.env.ENVIRONMENT === 'production'
+}
+
+export function getAuthCookieConfig(): BetterAuthCookieConfig {
+  const auth = (_auth ?? getAuth()) as ReturnType<typeof betterAuth> & {
+    context?: {
+      authCookies?: {
+        sessionToken?: {
+          name: string
+          options: BetterAuthCookieConfig['sessionToken']['options']
+        }
+        sessionData?: {
+          name: string
+          options: BetterAuthCookieConfig['sessionData']['options']
+        }
+      }
+    }
+  }
+
+  const sessionToken = auth?.context?.authCookies?.sessionToken
+  const sessionData = auth?.context?.authCookies?.sessionData
+
+  if (sessionToken?.name && sessionToken.options && sessionData?.name && sessionData.options) {
+    return {
+      sessionToken,
+      sessionData,
+      legacySession: {
+        name: 'session',
+        options: {
+          path: '/',
+          secure: isProductionAuthMode(),
+          httpOnly: true,
+          sameSite: 'lax',
+        },
+      },
+    }
+  }
+
+  const prefix = isProductionAuthMode() ? '__Secure-rangkai' : 'rangkai'
+  const options = {
+    path: '/',
+    secure: isProductionAuthMode(),
+    httpOnly: true,
+    sameSite: 'lax' as const,
+  }
+
+  return {
+    sessionToken: {
+      name: `${prefix}.session_token`,
+      options,
+    },
+    sessionData: {
+      name: `${prefix}.session_data`,
+      options,
+    },
+    legacySession: {
+      name: 'session',
+      options,
+    },
+  }
+}
+
+export function extractSetCookieHeaders(headers?: Headers | null) {
+  if (!headers) {
+    return []
+  }
+
+  const maybeGetSetCookie = headers as Headers & {
+    getSetCookie?: () => string[]
+  }
+
+  if (typeof maybeGetSetCookie.getSetCookie === 'function') {
+    return maybeGetSetCookie.getSetCookie()
+  }
+
+  const header = headers.get('set-cookie')
+  if (!header) {
+    return []
+  }
+
+  return splitCookiesString(header)
+}
 
 export function getAuth() {
   if (_auth) return _auth
@@ -136,5 +254,8 @@ export async function requireAuth(event: H3Event): Promise<AuthUser> {
 
 export async function signOutFromEvent(event: H3Event) {
   const auth = getAuth()
-  return auth.api.signOut({ headers: event.headers })
+  return auth.api.signOut({
+    headers: event.headers,
+    returnHeaders: true,
+  } as never)
 }
