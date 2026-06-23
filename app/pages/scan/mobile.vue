@@ -3,6 +3,8 @@
  * Mobile Scanner Page
  * Uses native vue-qrcode-reader for hardware-accelerated barcode scanning
  */
+import { ClipboardList, History, Home } from 'lucide-vue-next'
+
 definePageMeta({
   middleware: "auth",
   layout: "scanner",
@@ -254,7 +256,7 @@ async function processSession() {
         to="/dashboard"
         class="flex flex-col items-center gap-1 text-gray-400 hover:text-white transition-colors p-2"
       >
-        <component :is="resolveComponent('LucideHome')" class="h-5 w-5" />
+        <Home class="h-5 w-5" />
         <span class="text-xs">Home</span>
       </NuxtLink>
 
@@ -262,10 +264,7 @@ async function processSession() {
         to="/scan/batch"
         class="flex flex-col items-center gap-1 text-amber-400 hover:text-amber-300 transition-colors p-2"
       >
-        <component
-          :is="resolveComponent('LucideClipboardList')"
-          class="h-5 w-5"
-        />
+        <ClipboardList class="h-5 w-5" />
         <span class="text-xs">Batch</span>
       </NuxtLink>
 
@@ -273,7 +272,7 @@ async function processSession() {
         to="/history"
         class="flex flex-col items-center gap-1 text-gray-400 hover:text-white transition-colors p-2"
       >
-        <component :is="resolveComponent('LucideHistory')" class="h-5 w-5" />
+        <History class="h-5 w-5" />
         <span class="text-xs">History</span>
       </NuxtLink>
     </div>

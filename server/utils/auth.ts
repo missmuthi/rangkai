@@ -29,7 +29,7 @@ export function getAuth() {
   }
   // If OAuth creds are provided, ensure a base site URL is set so redirects use a proper URL
   if ((config.oauthGoogleClientId || config.oauthGoogleClientSecret) && !config.public.siteUrl && process.env.NODE_ENV !== 'production') {
-    console.warn('[auth] oauth credentials found but `public.siteUrl` is not set; callbacks may redirect to http://localhost:3000')
+    console.warn('[auth] oauth credentials found but `public.siteUrl` is not set; callbacks may redirect to http://127.0.0.1:3000')
   }
 
   // Log configured social providers concisely for debugging
@@ -52,9 +52,9 @@ export function getAuth() {
         verification: schema.verification,
       }
     }),
-    secret: config.authSecret || 'dev-secret-change-in-production',
-    baseURL: config.public.siteUrl || 'http://localhost:3000',
-    trustedOrigins: [config.public.siteUrl || 'http://localhost:3000'],
+    secret: config.authSecret || 'rangkai-development-secret-change-me-please-0123456789',
+    baseURL: config.public.siteUrl || 'http://127.0.0.1:3000',
+    trustedOrigins: [config.public.siteUrl || 'http://127.0.0.1:3000'],
     emailAndPassword: {
       enabled: true,
       autoSignIn: true,

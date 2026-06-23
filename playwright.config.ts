@@ -24,7 +24,7 @@ export default defineConfig({
   outputDir: "test-results/artifacts",
 
   use: {
-    baseURL: process.env.E2E_BASE_URL || "http://localhost:3000",
+    baseURL: process.env.E2E_BASE_URL || "http://127.0.0.1:3000",
     trace: "on-first-retry",
     screenshot: "only-on-failure",
     video: "retain-on-failure",
@@ -43,6 +43,13 @@ export default defineConfig({
         storageState: "playwright/.auth/user.json",
       },
       dependencies: ["setup"],
+    },
+    {
+      name: "critical",
+      use: {
+        ...devices["Desktop Chrome"],
+      },
+      testMatch: /critical\.spec\.ts/,
     },
     {
       name: "mobile-chrome",
@@ -64,7 +71,7 @@ export default defineConfig({
 
   webServer: {
     command: "bun run dev",
-    url: "http://localhost:3000",
+    url: "http://127.0.0.1:3000",
     reuseExistingServer: !process.env.CI,
     timeout: 120 * 1000,
   },

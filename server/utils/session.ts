@@ -1,9 +1,12 @@
 import { eq, and, gt } from "drizzle-orm";
+import type { InferSelectModel } from "drizzle-orm";
 import { v4 as uuidv4 } from "uuid";
 import { randomBytes, createHash } from "node:crypto";
 import type { drizzle } from "drizzle-orm/d1";
 import type { H3Event } from "h3";
+
 import * as schema from "../db/schema";
+import { getUserFromEvent, type AuthUser } from "./auth";
 
 // --- PKCE & State Utils ---
 
@@ -91,13 +94,21 @@ export async function invalidateUserSessions(
   await db.delete(schema.session).where(eq(schema.session.userId, userId));
 }
 
-export async function requireUserSession(event: H3Event) {
-  // Check if context is already populated by middleware
-  if (!event.context.user || !event.context.session) {
+export async function requireUserSession(event: H3Event): Promise<{
+  user: AuthUser;
+  session: InferSelectModel<typeof schema.session> | null;
+}> {
+  const user = await getUserFromEvent(event);
+
+  if (!user) {
     throw createError({
       statusCode: 401,
       message: "Unauthorized",
     });
   }
-  return { user: event.context.user, session: event.context.session };
+
+  return {
+    user,
+    session: event.context.session ?? null,
+  };
 }

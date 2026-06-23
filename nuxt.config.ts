@@ -224,7 +224,7 @@ export default defineNuxtConfig({
     public: {
       // Ensure there is a safe fallback so OAuth redirect URI uses a valid domain
       siteUrl:
-        process.env.NUXT_PUBLIC_SITE_URL || "https://rangkai-d3k.pages.dev",
+        process.env.NUXT_PUBLIC_SITE_URL || "http://127.0.0.1:3000",
     },
   },
   app: {

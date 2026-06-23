@@ -9,7 +9,8 @@
  */
 
 import { test, expect } from '@playwright/test'
-import { setupAllMocks, areMocksEnabled } from './mocks/api-mocks'
+import { areMocksEnabled, mockBookApi, mockHistoryApi } from './mocks/api-mocks'
+import { createAuthenticatedUser } from './helpers/auth'
 import { TestReporter } from './utils/test-reporter'
 
 // Test constants
@@ -29,9 +30,13 @@ test.describe('Real ISBN Scan Workflow', () => {
       areMocksEnabled()
     )
     await reporter.attachPage(page)
-    
-    // Setup mocks if enabled
-    await setupAllMocks(page)
+
+    await page.goto('/')
+    await createAuthenticatedUser(page)
+
+    // Setup only the content mocks needed for deterministic ISBN and history flows.
+    await mockBookApi(page)
+    await mockHistoryApi(page)
   })
 
   test.afterEach(async () => {

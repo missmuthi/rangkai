@@ -1,4 +1,6 @@
+import { eq } from 'drizzle-orm'
 import { drizzle } from 'drizzle-orm/d1'
+
 import * as schema from '../../db/schema'
 
 import { deleteSession } from '../../utils/session'
@@ -23,15 +25,32 @@ export default defineEventHandler(async (event) => {
         })
     }
 
-    // 2. Clear Session from DB
-    const token = getCookie(event, 'session')
-    if (token) {
-        const db = drizzle(hubDatabase(), { schema })
-        await deleteSession(db, token)
+    // 2. Clear Sessions from DB
+    const db = drizzle(hubDatabase(), { schema })
+
+    const betterAuthCookie = getCookie(event, 'rangkai.session_token')
+    if (betterAuthCookie) {
+        const token = betterAuthCookie.split('.')[0]
+        if (token) {
+            await db.delete(schema.session).where(eq(schema.session.token, token))
+        }
     }
 
-    // 3. Clear Cookie
+    const legacyToken = getCookie(event, 'session')
+    if (legacyToken) {
+        await deleteSession(db, legacyToken)
+    }
+
+    // 3. Clear Cookies
     const isSecure = process.env.NODE_ENV === 'production' || process.env.ENVIRONMENT === 'production'
+    deleteCookie(event, 'rangkai.session_token', {
+        path: '/',
+        secure: isSecure
+    })
+    deleteCookie(event, 'rangkai.session_data', {
+        path: '/',
+        secure: isSecure
+    })
     deleteCookie(event, 'session', {
         path: '/',
         secure: isSecure

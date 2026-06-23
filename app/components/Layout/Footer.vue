@@ -5,18 +5,29 @@
  */
 const currentYear = new Date().getFullYear()
 
+type ProductLink = {
+  label: string
+  to: string
+}
+
+type ExternalLink = {
+  label: string
+  href: string
+  external: true
+}
+
 const productLinks = [
   { label: 'Home', to: '/' },
   { label: 'FAQ', to: '/faq' },
   { label: 'Dashboard', to: '/dashboard' },
   { label: 'Scan History', to: '/history' }
-]
+] satisfies ProductLink[]
 
 const resourceLinks = [
-  { label: 'Documentation', to: '/docs', external: false },
+  { label: 'Documentation', href: 'https://github.com/missmuthi/rangkai/tree/main/docs', external: true },
   { label: 'NuxtHub', href: 'https://hub.nuxt.com', external: true },
   { label: 'Nuxt UI', href: 'https://ui.nuxt.com', external: true }
-]
+] satisfies ExternalLink[]
 </script>
 
 <template>
@@ -82,16 +93,8 @@ const resourceLinks = [
         <div class="space-y-4">
           <h3 class="font-semibold text-sm uppercase tracking-wider text-foreground">Resources</h3>
           <ul class="space-y-3">
-            <li v-for="link in resourceLinks" :key="link.to || link.href">
-              <NuxtLink 
-                v-if="!link.external"
-                :to="link.to!" 
-                class="text-sm text-muted-foreground hover:text-primary transition-colors inline-flex items-center gap-1 group"
-              >
-                <span>{{ link.label }}</span>
-              </NuxtLink>
+            <li v-for="link in resourceLinks" :key="link.href">
               <a 
-                v-else
                 :href="link.href" 
                 target="_blank"
                 rel="noopener noreferrer"

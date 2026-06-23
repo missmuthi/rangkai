@@ -11,25 +11,18 @@
  */
 
 import { test, expect } from '@playwright/test'
-import { setupAllMocks } from './mocks/api-mocks'
+import { createAuthenticatedUser } from './helpers/auth'
+import { setupContentMocks } from './helpers/mocks'
 
-// Helper to set auth bypass cookie
-async function setupAuthBypass(page: import('@playwright/test').Page) {
-  await page.context().addCookies([{
-    name: 'e2e-test-bypass',
-    value: 'true',
-    domain: 'localhost',
-    path: '/',
-    httpOnly: false,
-    secure: false,
-    sameSite: 'Lax',
-  }])
+async function setupAuthenticatedPage(page: import('@playwright/test').Page) {
+  await page.goto('/')
+  await createAuthenticatedUser(page)
 }
 
 test.describe('Smart Search Logic', () => {
   test.beforeEach(async ({ page }) => {
-    await setupAuthBypass(page)
-    await setupAllMocks(page)
+    await setupAuthenticatedPage(page)
+    await setupContentMocks(page)
   })
 
   test('ISBN (13 digits) routes to Book Details page', async ({ page }) => {
@@ -92,8 +85,8 @@ test.describe('Smart Search Logic', () => {
 
 test.describe('Dashboard Redesign', () => {
   test.beforeEach(async ({ page }) => {
-    await setupAuthBypass(page)
-    await setupAllMocks(page)
+    await setupAuthenticatedPage(page)
+    await setupContentMocks(page)
   })
 
   test('Hero search bar is visible and centered', async ({ page }) => {
@@ -123,12 +116,10 @@ test.describe('Dashboard Redesign', () => {
 })
 
 test.describe('Navigation & Login', () => {
-  test.beforeEach(async ({ page }) => {
-    await setupAuthBypass(page)
-    await setupAllMocks(page)
-  })
-
   test('Mobile Scanner has Home and History navigation', async ({ page }) => {
+    await setupAuthenticatedPage(page)
+    await setupContentMocks(page)
+
     await page.goto('/scan/mobile')
     
     // Look for navigation links
@@ -144,6 +135,9 @@ test.describe('Navigation & Login', () => {
   })
 
   test('Logo click navigates to Dashboard', async ({ page }) => {
+    await setupAuthenticatedPage(page)
+    await setupContentMocks(page)
+
     await page.goto('/history')
     
     // Find logo link (Rangkai text or logo image)
@@ -187,8 +181,8 @@ test.describe('Navigation & Login', () => {
 
 test.describe('Settings & Profile', () => {
   test.beforeEach(async ({ page }) => {
-    await setupAuthBypass(page)
-    await setupAllMocks(page)
+    await setupAuthenticatedPage(page)
+    await setupContentMocks(page)
   })
 
   test('Settings page has Theme Toggle', async ({ page }) => {
