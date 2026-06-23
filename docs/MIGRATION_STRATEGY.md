@@ -1,11 +1,11 @@
 # Database Migration Strategy
 
 ## Current Behavior
-Migrations run automatically on `npx nuxthub deploy` via the hook in `package.json`:
+Migrations run automatically on `bun run migrate:prod` via the hook in `package.json`:
 ```json
 "nuxthub": {
   "hooks": {
-    "deploy": "npm run migrate:prod"
+    "deploy": "bun run migrate:prod"
   }
 }
 ```
@@ -25,7 +25,7 @@ on:
       migration_file:
         description: 'Migration file to run'
         required: true
-        default: 'server/db/migrations/latest.sql'
+        default: 'server/db/migrations/0001_init.sql'
 
 jobs:
   migrate:
@@ -34,9 +34,9 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with: { node-version: 20 }
-      - run: npm ci
+      - run: bun install
       - name: Run Migration
-        run: npx wrangler d1 execute rangkai-db --remote --file=${{ github.event.inputs.migration_file }}
+        run: bunx wrangler d1 execute rangkai-db --remote --file=${{ github.event.inputs.migration_file }}
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
@@ -49,6 +49,6 @@ Current approach is fine until:
 - Deployment timeouts occur
 
 ## When to Switch
-- If `npm run migrate:prod` takes >15 seconds
+- If `bun run migrate:prod` takes >15 seconds
 - If deployment fails with timeout errors
 - Before any breaking schema change (column type changes, etc.)

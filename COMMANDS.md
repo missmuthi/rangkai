@@ -83,7 +83,11 @@ bun run migrate:prod
 ```
 
 ```bash
-bunx wrangler d1 execute rangkai-db --remote --file=./server/db/migrations/0001_init.sql
+bunx wrangler d1 migrations apply DB --remote
+```
+
+```bash
+bun run db:verify:fresh
 ```
 
 ## Release

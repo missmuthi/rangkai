@@ -80,9 +80,6 @@ NUXT_PUBLIC_SITE_URL = "https://your-project.pages.dev"
 ### Step 3: Apply Database Migrations
 
 ```bash
-bunx wrangler d1 execute rangkai-db --remote --file=./server/db/migrations/0001_init.sql
-
-# Or use the helper script:
 bun run migrate:prod
 ```
 

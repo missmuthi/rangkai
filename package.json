@@ -22,11 +22,12 @@
     "test:e2e:ui": "playwright test --ui",
     "test:all": "bun run test && bun run test:e2e",
     "record:demo": "bun scripts/record-scanner.mjs",
-    "migrate:prod": "bunx wrangler d1 execute rangkai-db --remote --file=./server/db/migrations/0001_init.sql"
+    "migrate:prod": "bunx wrangler d1 migrations apply DB --remote",
+    "db:verify:fresh": "bun scripts/db-verify-fresh.mjs"
   },
   "nuxthub": {
     "hooks": {
-      "deploy": "npm run migrate:prod"
+      "deploy": "bun run migrate:prod"
     }
   },
   "dependencies": {
