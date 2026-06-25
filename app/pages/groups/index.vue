@@ -69,25 +69,25 @@ function copyCode(code: string) {
 
 <template>
   <div class="space-y-6">
-    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+    <div class="flex flex-col gap-4 rounded-[1.75rem] border border-border bg-card/90 p-6 shadow-sm sm:flex-row sm:items-end sm:justify-between">
       <div>
-        <h1 class="text-2xl font-bold bg-gradient-to-r from-gray-900 to-gray-600 dark:from-white dark:to-gray-300 bg-clip-text text-transparent">
+        <h1 class="text-2xl font-semibold text-foreground">
           Library Groups
         </h1>
-        <p class="text-gray-500 dark:text-gray-400 mt-1">
+        <p class="mt-1 text-sm text-muted-foreground">
           Collaborate with your team to build a shared library catalog.
         </p>
       </div>
       <div class="flex gap-2 w-full sm:w-auto">
         <button
-          class="flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+          class="flex-1 sm:flex-none flex items-center justify-center gap-2 rounded-xl border border-border px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-muted"
           @click="isJoinModalOpen = true"
         >
           <LogIn class="w-4 h-4" />
           Join Group
         </button>
         <button
-          class="flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
+          class="flex-1 sm:flex-none flex items-center justify-center gap-2 rounded-xl bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:opacity-95"
           @click="isCreateModalOpen = true"
         >
           <Plus class="w-4 h-4" />
@@ -98,20 +98,20 @@ function copyCode(code: string) {
 
     <!-- Loading State -->
     <div v-if="isLoading && groups.length === 0" class="flex justify-center py-12">
-      <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600" />
+      <div class="h-8 w-8 animate-spin rounded-full border-2 border-primary border-t-transparent" />
     </div>
 
     <!-- Empty State -->
-    <div v-else-if="groups.length === 0" class="text-center py-12 border-2 border-dashed border-gray-200 dark:border-gray-700 rounded-xl">
-      <Users class="w-12 h-12 mx-auto text-gray-400 mb-4" />
-      <h3 class="text-lg font-medium text-gray-900 dark:text-white">No Groups Yet</h3>
-      <p class="text-gray-500 dark:text-gray-400 max-w-sm mx-auto mt-2">
+    <div v-else-if="groups.length === 0" class="rounded-[1.75rem] border border-dashed border-border bg-card/70 py-12 text-center">
+      <Users class="mx-auto mb-4 h-12 w-12 text-muted-foreground" />
+      <h3 class="text-lg font-medium text-foreground">No Groups Yet</h3>
+      <p class="mx-auto mt-2 max-w-sm text-sm text-muted-foreground">
         Create a new group for your library or ask a colleague for an invite code to join theirs.
       </p>
       <div class="mt-6 flex justify-center gap-3">
-        <button class="text-indigo-600 hover:underline text-sm font-medium" @click="isCreateModalOpen = true">Create Group</button>
-        <span class="text-gray-300">|</span>
-        <button class="text-indigo-600 hover:underline text-sm font-medium" @click="isJoinModalOpen = true">Join Group</button>
+        <button class="text-sm font-medium text-primary underline-offset-4 hover:underline" @click="isCreateModalOpen = true">Create Group</button>
+        <span class="text-muted-foreground">|</span>
+        <button class="text-sm font-medium text-primary underline-offset-4 hover:underline" @click="isJoinModalOpen = true">Join Group</button>
       </div>
     </div>
 
@@ -121,36 +121,36 @@ function copyCode(code: string) {
         v-for="group in groups"
         :key="group.id"
         :to="`/groups/${group.id}`"
-        class="block bg-white dark:bg-gray-800 p-6 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md hover:border-indigo-300 dark:hover:border-indigo-600 transition-all"
+        class="block rounded-[1.5rem] border border-border bg-card p-6 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md"
       >
         <div class="flex justify-between items-start mb-4">
-          <div class="p-2 bg-indigo-50 dark:bg-indigo-900/30 rounded-lg">
-            <Users class="w-6 h-6 text-indigo-600 dark:text-indigo-400" />
+          <div class="rounded-2xl bg-accent px-2.5 py-2 text-accent-foreground">
+            <Users class="w-6 h-6" />
           </div>
           <span 
             class="text-xs font-medium px-2 py-1 rounded-full"
-            :class="group.role === 'owner' ? 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400' : 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300'"
+            :class="group.role === 'owner' ? 'bg-accent text-accent-foreground' : 'bg-muted text-muted-foreground'"
           >
             {{ group.role === 'owner' ? 'Owner' : 'Member' }}
           </span>
         </div>
         
-        <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-1">{{ group.name }}</h3>
-        <p class="text-sm text-gray-500 dark:text-gray-400 mb-4 line-clamp-2">{{ group.description || 'No description' }}</p>
+        <h3 class="mb-1 text-lg font-semibold text-foreground">{{ group.name }}</h3>
+        <p class="mb-4 line-clamp-2 text-sm text-muted-foreground">{{ group.description || 'No description' }}</p>
         
-        <div class="flex items-center justify-between pt-4 border-t border-gray-100 dark:border-gray-700">
-          <div class="text-xs text-gray-500">
+        <div class="flex items-center justify-between border-t border-border pt-4">
+          <div class="text-xs text-muted-foreground">
             <div class="flex items-center gap-1 mb-1">
               <span>Code:</span>
-              <code class="bg-gray-100 dark:bg-gray-700 px-1.5 py-0.5 rounded font-mono">{{ group.inviteCode }}</code>
-              <button class="p-1 hover:text-indigo-600" title="Copy Code" @click.prevent="copyCode(group.inviteCode)">
+              <code class="rounded bg-muted px-1.5 py-0.5 font-mono">{{ group.inviteCode }}</code>
+              <button class="p-1 hover:text-primary" title="Copy Code" @click.prevent="copyCode(group.inviteCode)">
                 <Copy class="w-3 h-3" />
               </button>
             </div>
             Updated: {{ new Date(group.updatedAt).toLocaleDateString() }}
           </div>
           
-          <span class="text-sm font-medium text-indigo-600 hover:text-indigo-500">
+          <span class="text-sm font-medium text-primary hover:underline">
             Open →
           </span>
         </div>
@@ -158,21 +158,21 @@ function copyCode(code: string) {
     </div>
 
     <!-- Create Modal -->
-    <UModal v-model="isCreateModalOpen">
+  <UModal v-model="isCreateModalOpen">
       <div class="p-6">
-        <h3 class="text-lg font-semibold mb-4">Create New Library Group</h3>
+        <h3 class="mb-4 text-lg font-semibold text-foreground">Create New Library Group</h3>
         <form class="space-y-4" @submit.prevent="handleCreate">
           <div>
-            <label class="block text-sm font-medium mb-1">Group Name</label>
-            <input v-model="newGroupName" type="text" class="w-full px-3 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600" placeholder="e.g. City Public Library" required>
+            <label class="mb-1 block text-sm font-medium text-foreground">Group Name</label>
+            <input v-model="newGroupName" type="text" class="w-full rounded-xl border border-border bg-background px-3 py-2 text-sm text-foreground" placeholder="e.g. City Public Library" required>
           </div>
           <div>
-            <label class="block text-sm font-medium mb-1">Description (Optional)</label>
-            <textarea v-model="newGroupDesc" rows="3" class="w-full px-3 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600 resize-none" placeholder="Brief description of this library..."/>
+            <label class="mb-1 block text-sm font-medium text-foreground">Description (Optional)</label>
+            <textarea v-model="newGroupDesc" rows="3" class="w-full resize-none rounded-xl border border-border bg-background px-3 py-2 text-sm text-foreground" placeholder="Brief description of this library..."/>
           </div>
           <div class="flex justify-end gap-3 pt-2">
-            <button type="button" class="px-4 py-2 text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700 rounded-lg" @click="isCreateModalOpen = false">Cancel</button>
-            <button type="submit" :disabled="isSubmitting" class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:opacity-50">
+            <button type="button" class="rounded-xl px-4 py-2 text-sm font-medium text-muted-foreground hover:bg-muted" @click="isCreateModalOpen = false">Cancel</button>
+            <button type="submit" :disabled="isSubmitting" class="rounded-xl bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:opacity-95 disabled:opacity-50">
               {{ isSubmitting ? 'Creating...' : 'Create Group' }}
             </button>
           </div>
@@ -181,18 +181,18 @@ function copyCode(code: string) {
     </UModal>
 
     <!-- Join Modal -->
-    <UModal v-model="isJoinModalOpen">
+  <UModal v-model="isJoinModalOpen">
       <div class="p-6">
-        <h3 class="text-lg font-semibold mb-4">Join Existing Group</h3>
+        <h3 class="mb-4 text-lg font-semibold text-foreground">Join Existing Group</h3>
         <form class="space-y-4" @submit.prevent="handleJoin">
           <div>
-            <label class="block text-sm font-medium mb-1">Invite Code</label>
-            <input v-model="inviteCode" type="text" class="w-full px-3 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600 font-mono uppercase" placeholder="XXXXXX" maxlength="6" required>
-            <p class="text-xs text-gray-500 mt-1">Ask the group owner for the 6-character invite code.</p>
+            <label class="mb-1 block text-sm font-medium text-foreground">Invite Code</label>
+            <input v-model="inviteCode" type="text" class="w-full rounded-xl border border-border bg-background px-3 py-2 font-mono uppercase text-sm text-foreground" placeholder="XXXXXX" maxlength="6" required>
+            <p class="mt-1 text-xs text-muted-foreground">Ask the group owner for the 6-character invite code.</p>
           </div>
           <div class="flex justify-end gap-3 pt-2">
-            <button type="button" class="px-4 py-2 text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700 rounded-lg" @click="isJoinModalOpen = false">Cancel</button>
-            <button type="submit" :disabled="isSubmitting" class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:opacity-50">
+            <button type="button" class="rounded-xl px-4 py-2 text-sm font-medium text-muted-foreground hover:bg-muted" @click="isJoinModalOpen = false">Cancel</button>
+            <button type="submit" :disabled="isSubmitting" class="rounded-xl bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:opacity-95 disabled:opacity-50">
               {{ isSubmitting ? 'Joining...' : 'Join Group' }}
             </button>
           </div>

@@ -96,7 +96,9 @@ export default defineNuxtConfig({
 
     // API Caching Rules
     // User-specific APIs: No Cache
+    "/api/book/**": { cache: false },
     "/api/scan/**": { cache: false },
+    "/api/scans/**": { cache: false },
     "/api/me/**": { cache: false },
 
     // Public Data APIs: Cache for 1 day
@@ -106,7 +108,7 @@ export default defineNuxtConfig({
     classSuffix: "",
   },
   hub: {
-    database: true,
+    db: "sqlite",
     kv: true,
     blob: false, // Disabled - R2 not enabled on account
     cache: true, // Re-enabled: ms package ESM issue now patched via postinstall

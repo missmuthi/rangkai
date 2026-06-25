@@ -1,7 +1,6 @@
-import { drizzle } from 'drizzle-orm/d1'
-import * as schema from '../../../db/schema'
 import { eq } from 'drizzle-orm'
 
+import { useDb } from '../../../utils/db'
 import { createSession, generateState } from '../../../utils/session'
 import { getSecureCookieOptions } from '../../../utils/secure-cookie'
 
@@ -79,7 +78,7 @@ export default defineEventHandler(async (event) => {
         const googleUser = await userResult.json() as GoogleUser
 
         // 5. DB Operations
-        const db = drizzle(hubDatabase(), { schema })
+        const db = useDb()
 
         // Check if user exists
         let user = await db.select().from(schema.user).where(eq(schema.user.email, googleUser.email)).get()

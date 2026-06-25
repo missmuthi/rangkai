@@ -6,7 +6,7 @@ definePageMeta({
 
 const router = useRouter()
 const toast = useToast()
-const { book, searchByISBN, cleanMetadata } = useBookSearch()
+const { book, scanByISBN, cleanMetadata } = useBookSearch()
 
 // Input state
 const rawInput = ref('')
@@ -55,7 +55,7 @@ async function processQueue() {
   
   for (const isbn of isbnQueue.value) {
     try {
-      await searchByISBN(isbn)
+      await scanByISBN(isbn)
       if (autoClean.value && book.value) {
         await cleanMetadata(book.value)
       }

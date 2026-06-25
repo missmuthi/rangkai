@@ -1,6 +1,8 @@
 <script setup lang="ts">
 definePageMeta({
-  layout: "default",
+  layout: 'app',
+  middleware: 'auth',
+  title: 'Pemeriksaan Kamera',
 });
 
 interface DiagnosticResult {

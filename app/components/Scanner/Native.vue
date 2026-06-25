@@ -5,6 +5,7 @@
  * Features: EAN-13 detection, torch toggle, cooldown flash, corner markers
  */
 import { QrcodeStream } from "vue-qrcode-reader";
+import { normalizeISBN } from "~/utils/isbn";
 
 interface DetectedCode {
   rawValue: string;
@@ -70,7 +71,7 @@ const onDetect = (detectedCodes: DetectedCode[]) => {
     return;
   }
 
-  const code = result.rawValue;
+  const code = normalizeISBN(result.rawValue);
   console.log("[ScannerNative] Code detected:", code, "Format:", result.format);
 
   // Check if we should process this scan (debounce + cooldown)

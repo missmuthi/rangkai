@@ -148,7 +148,7 @@ NUXT_PUBLIC_SITE_URL=http://localhost:3000
 
 3. **Run database migration:**
    ```bash
-   npx wrangler d1 execute rangkai-db --local --file=./server/db/migrations/0002_better_auth.sql
+   bunx wrangler d1 execute rangkai-db --local --file=./server/db/migrations/0002_better_auth.sql
    ```
 
 4. **Start development server:**
@@ -172,7 +172,7 @@ NUXT_PUBLIC_SITE_URL=http://localhost:3000
 
 2. **Run production migration:**
    ```bash
-   npx wrangler d1 execute rangkai-db --remote --file=./server/db/migrations/0002_better_auth.sql
+   bunx wrangler d1 execute rangkai-db --remote --file=./server/db/migrations/0002_better_auth.sql
    ```
 
 3. **Deploy:**

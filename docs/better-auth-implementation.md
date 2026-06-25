@@ -100,10 +100,10 @@ cp .env.example .env
 
 ```bash
 # Local development
-npx wrangler d1 execute rangkai-db --local --file=./server/db/migrations/0002_better_auth.sql
+bunx wrangler d1 execute rangkai-db --local --file=./server/db/migrations/0002_better_auth.sql
 
 # Production
-npx wrangler d1 execute rangkai-db --remote --file=./server/db/migrations/0002_better_auth.sql
+bunx wrangler d1 execute rangkai-db --remote --file=./server/db/migrations/0002_better_auth.sql
 ```
 
 ### 4. Start Development Server
@@ -273,7 +273,7 @@ NUXT_AUTH_SECRET=<generated-secret>
 **Fix:**
 ```bash
 # Run migration
-npx wrangler d1 execute rangkai-db --local --file=./server/db/migrations/0002_better_auth.sql
+bunx wrangler d1 execute rangkai-db --local --file=./server/db/migrations/0002_better_auth.sql
 ```
 
 ## 📚 API Endpoints

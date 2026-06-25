@@ -1,450 +1,1031 @@
 <script setup lang="ts">
-/**
- * Landing Page - Consolidated
- * Premium landing page with full features and marketing CTA
- */
-
-useSeoMeta({
-  title: 'Rangkai - The Fastest Way to Catalog Books for SLiMS',
-  description: 'Scan ISBN barcodes, fetch metadata from multiple sources, AI-powered cleanup, and one-click export to SLiMS-compatible CSV. Join 500+ Indonesian libraries saving 15+ hours weekly.'
+definePageMeta({
+  layout: false,
 })
 
-const { isAuthenticated } = useAuth()
+useHead({
+  htmlAttrs: {
+    lang: 'id',
+  },
+})
 
-// Features data for the grid - User-benefit focused, SLiMS first
-const features = [
+useSeoMeta({
+  title: 'Rangkai | Pindai ISBN, rapikan metadata, ekspor ke SLiMS',
+  description:
+    'Rangkai membantu pustakawan Indonesia memindai ISBN, merapikan metadata dengan AI, lalu mengekspor catatan katalog siap pakai untuk SLiMS, Koha, CSV, dan MARC21.',
+  ogTitle: 'Rangkai | Pindai ISBN, rapikan metadata, ekspor ke SLiMS',
+  ogDescription:
+    'Alur katalog yang tenang dan rapi untuk sekolah, kampus, dan perpustakaan komunitas.',
+  twitterCard: 'summary_large_image',
+})
+
+const primaryCta = '/scan/mobile'
+const secondaryCta = '#cara-kerja'
+
+const workflow = [
   {
-    icon: 'i-lucide-download',
-    title: 'Export to SLiMS & Koha',
-    description: 'One-click export to SLiMS CSV or MARC21 format. Direct import to Koha, SLiMS, or any library system supporting standard formats.'
+    number: '01',
+    title: 'Pindai ISBN atau barcode',
+    body:
+      'Gunakan kamera ponsel atau masukan manual untuk mulai dari buku berikutnya tanpa mengubah kebiasaan kerja staf.',
   },
   {
-    icon: 'i-lucide-zap',
-    title: 'Rapid Fire Scanning',
-    description: 'Scan dozens of books without closing the camera. Batch mode queues ISBNs for bulk processing. Perfect for shelf-reading.'
+    number: '02',
+    title: 'Tarik, gabungkan, dan rapikan metadata',
+    body:
+      'Rangkai mengambil data dari beberapa sumber bibliografis, lalu merapikan judul, nama penulis, klasifikasi, dan subjek.',
   },
   {
-    icon: 'i-lucide-database',
-    title: 'Comprehensive Book Database',
-    description: 'Search across Google Books, OpenLibrary, and Library of Congress simultaneously for the most complete metadata coverage.'
+    number: '03',
+    title: 'Tinjau lalu ekspor catatan jadi',
+    body:
+      'Petugas tetap memegang kendali sebelum ekspor ke CSV SLiMS, MARC21, atau alur lain yang kompatibel dengan sistem perpustakaan.',
   },
-  {
-    icon: 'i-lucide-sparkles',
-    title: 'AI-Powered Data Cleanup',
-    description: 'Gemini AI automatically normalizes author names, adds DDC/LCC classifications, and enriches subject headings—no manual work needed.'
-  },
-  {
-    icon: 'i-lucide-wifi-off',
-    title: 'Works Offline',
-    description: 'Scan books even without internet. Scans queue automatically and sync when you\'re back online. Perfect for stack rooms.'
-  },
-  {
-    icon: 'i-lucide-keyboard',
-    title: 'Power User Features',
-    description: 'Keyboard shortcuts (Ctrl+Enter for AI Clean), batch paste 50+ ISBNs at once, haptic feedback on scan success.'
-  }
 ]
 
-// Stats for social proof - User-facing metrics
-const stats = [
-  { value: '10K+', label: 'Books Cataloged' },
-  { value: '500+', label: 'Libraries Using Rangkai' },
-  { value: '15+', label: 'Hours Saved Weekly' }
+const capabilities = [
+  {
+    title: 'CSV dan MARC21 siap SLiMS',
+    body:
+      'Ekspor dengan format yang bisa dipakai langsung untuk alur kerja katalogisasi dan impor data.',
+  },
+  {
+    title: 'Ekspor kompatibel Koha',
+    body:
+      'Siapkan record yang tetap selaras dengan kebutuhan perpustakaan yang memakai Koha.',
+  },
+  {
+    title: 'Scan beruntun atau batch cepat',
+    body:
+      'Cocok untuk backlog besar, penerimaan buku baru, dan sesi pemindaian yang tidak boleh tersendat.',
+  },
+  {
+    title: 'Banyak sumber bibliografis',
+    body:
+      'Metadata dikumpulkan dari beberapa sumber tepercaya agar catatan lebih lengkap dan lebih mudah dibandingkan.',
+  },
+  {
+    title: 'Normalisasi AI yang terarah',
+    body:
+      'Judul, nama penulis, klasifikasi, dan subjek heading dibersihkan tanpa menghapus jejak asalnya.',
+  },
+  {
+    title: 'Antrean scan luring',
+    body:
+      'Saat koneksi putus, scan tetap masuk antrean lokal dan tersinkron ketika jaringan kembali tersedia.',
+  },
+]
+
+const compatibility = ['SLiMS', 'Koha', 'CSV', 'MARC21', 'UTF-8', 'ISBN-10', 'ISBN-13']
+
+const faqs = [
+  {
+    question: 'Aman untuk SLiMS yang sudah ada?',
+    answer:
+      'Ya. Rangkai menyiapkan ekspor yang selaras dengan alur impor, sehingga Anda tidak perlu mengubah instalasi SLiMS yang sudah berjalan.',
+  },
+  {
+    question: 'Bisa diedit sebelum ekspor?',
+    answer:
+      'Bisa. Setiap saran AI dapat ditinjau, diubah, atau ditolak sebelum file akhir dibuat.',
+  },
+  {
+    question: 'Kalau sumber metadata tidak sepakat?',
+    answer:
+      'Rangkai menampilkan sumber yang dipakai dan memberi catatan saat ada perbedaan, supaya petugas bisa memilih hasil yang paling tepat.',
+  },
+  {
+    question: 'Bisa offline?',
+    answer:
+      'Bisa untuk antrean scan. Catatan tersimpan lokal dulu, lalu disinkronkan saat koneksi kembali.',
+  },
+  {
+    question: 'Banyak ISBN sekaligus?',
+    answer:
+      'Bisa. Mode scan beruntun dan batch dibuat untuk memproses banyak buku tanpa harus membuka alur baru setiap kali.',
+  },
+]
+
+const beforeFields = [
+  { label: 'ISBN', value: '978-602-...-...' },
+  { label: 'Judul', value: '—' },
+  { label: 'Penulis', value: '—' },
+  { label: 'Penerbit', value: '—' },
+  { label: 'Tahun', value: '—' },
+  { label: 'Bahasa', value: '—' },
+]
+
+const afterFields = [
+  { label: 'Judul', value: 'Pengantar Literasi Informasi' },
+  { label: 'Penulis', value: 'Sari, Dewi' },
+  { label: 'Penerbit', value: 'Pustaka Nusantara' },
+  { label: 'Tahun', value: '2024' },
+  { label: 'Bahasa', value: 'Indonesia' },
+  { label: 'Deskripsi fisik', value: 'xii, 214 hlm. : ilustrasi ; 24 cm' },
+  { label: 'DDC', value: '025.5' },
+  { label: 'Subjek', value: 'literasi informasi; perpustakaan sekolah; pengolahan bahan pustaka' },
 ]
 </script>
 
 <template>
-  <main class="min-h-screen bg-background">
-    <!-- Hero Section -->
-    <section class="relative container mx-auto px-4 py-32 sm:py-40 text-center space-y-8 overflow-hidden">
-      <!-- Animated Background -->
-      <LandingHeroBackground />
-      
-      <!-- Badge -->
-      <div 
-        class="inline-flex items-center gap-2 rounded-full bg-primary/10 border border-primary/20 px-4 py-1.5 text-sm font-medium text-primary backdrop-blur-sm animate-fade-in"
-      >
-        <span class="relative flex h-2 w-2">
-          <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75" />
-          <span class="relative inline-flex rounded-full h-2 w-2 bg-primary" />
-        </span>
-        <span>📚 Rangkai v2.0 • Trusted by 500+ Indonesian Libraries</span>
-      </div>
-      
-      <!-- Main Heading - Value Prop First -->
-      <div class="space-y-6 animate-fade-in" style="animation-delay: 150ms">
-        <h1 class="text-5xl sm:text-6xl lg:text-7xl font-extrabold tracking-tight text-foreground leading-tight">
-          The Fastest Way to <br>
-          <span class="bg-gradient-to-r from-primary via-primary/80 to-primary/60 bg-clip-text text-transparent">Catalog Books for SLiMS</span>
-        </h1>
-        <p class="text-xl sm:text-2xl text-gray-300 max-w-3xl mx-auto leading-relaxed">
-          Scan barcodes, fetch complete metadata from multiple sources, clean with AI, and export directly to SLiMS-compatible CSV. 
-          <span class="text-foreground font-semibold">All in under 30 seconds per book.</span>
-        </p>
-        
-        <!-- Pricing Clarity -->
-        <div class="flex items-center justify-center gap-2 text-sm text-primary">
-          <UIcon name="i-lucide-check-circle" class="w-4 h-4" />
-          <span class="font-medium">Free Forever • No Credit Card Required</span>
-        </div>
-      </div>
+  <div class="page-shell">
+    <a class="skip-link" href="#konten">Lewati ke konten utama</a>
 
-      <!-- CTA Buttons -->
-      <div class="flex flex-col sm:flex-row gap-4 justify-center items-center animate-fade-in" style="animation-delay: 300ms">
-        <NuxtLink
-          v-if="!isAuthenticated"
-          to="/login"
-          class="inline-flex items-center justify-center gap-2.5 px-3.5 py-2.5 text-base font-medium rounded-md shadow-sm text-white bg-primary-500 hover:bg-primary-600 dark:text-gray-900 dark:bg-primary-400 dark:hover:bg-primary-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-500 dark:focus-visible:outline-primary-400 transition-colors"
-        >
-          <UIcon name="i-lucide-scan" class="w-5 h-5" />
-          Start Cataloging Free
-        </NuxtLink>
-        <NuxtLink
-          v-else
-          to="/scan/mobile"
-          class="inline-flex items-center justify-center gap-2.5 px-3.5 py-2.5 text-base font-medium rounded-md shadow-sm text-white bg-primary-500 hover:bg-primary-600 dark:text-gray-900 dark:bg-primary-400 dark:hover:bg-primary-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-500 dark:focus-visible:outline-primary-400 transition-colors"
-        >
-          <UIcon name="i-lucide-scan" class="w-5 h-5" />
-          Start Scanning Now
-        </NuxtLink>
-        <a
-          href="#demo"
-          class="inline-flex items-center justify-center gap-2.5 px-3.5 py-2.5 text-base font-medium rounded-md shadow-sm text-foreground bg-transparent border border-border hover:bg-muted focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-500 transition-colors"
-        >
-          <UIcon name="i-lucide-play-circle" class="w-5 h-5" />
-          See How It Works
-        </a>
-      </div>
-
-      <!-- Stats -->
-      <div class="flex flex-wrap justify-center gap-8 pt-8 animate-fade-in" style="animation-delay: 450ms">
-        <div v-for="stat in stats" :key="stat.label" class="text-center">
-          <div class="text-3xl font-bold text-primary">{{ stat.value }}</div>
-          <div class="text-sm text-muted-foreground">{{ stat.label }}</div>
-        </div>
-      </div>
-    </section>
-
-    <!-- Features Section -->
-    <section class="container mx-auto px-4 py-24 space-y-16 bg-muted/30">
-      <div class="max-w-4xl mx-auto text-center space-y-6">
-        <div class="inline-flex items-center gap-2 rounded-full bg-primary/10 border border-primary/20 px-4 py-1.5 text-sm font-medium text-primary">
-          <span>✨</span>
-          <span>Everything You Need</span>
-        </div>
-        <h2 class="text-4xl sm:text-5xl font-bold tracking-tight">
-          Modern Cataloging Made Simple
-        </h2>
-        <p class="text-xl text-muted-foreground">
-          From barcode scanning to SLiMS export, Rangkai handles your entire workflow.
-        </p>
-      </div>
-      
-      <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-        <UCard 
-          v-for="feature in features"
-          :key="feature.title"
-          class="group hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
-          :ui="{ 
-            body: { padding: 'p-6 sm:p-8' },
-            ring: 'ring-1 ring-border group-hover:ring-primary/50'
-          }"
-        >
-          <div class="space-y-4">
-            <div class="w-14 h-14 rounded-xl bg-gradient-to-br from-primary/20 to-primary/10 flex items-center justify-center group-hover:scale-110 transition-transform">
-              <UIcon :name="feature.icon" class="w-7 h-7 text-primary" />
-            </div>
-            <h3 class="text-xl font-bold text-foreground">{{ feature.title }}</h3>
-            <p class="text-muted-foreground leading-relaxed">
-              {{ feature.description }}
-            </p>
-          </div>
-        </UCard>
-      </div>
-    </section>
-
-    <!-- How It Works Section -->
-    <section class="container mx-auto px-4 py-24">
-      <div class="max-w-4xl mx-auto text-center space-y-12">
+    <header class="masthead">
+      <div class="masthead__brand">
+        <span class="masthead__mark" aria-hidden="true">RK</span>
         <div>
-          <div class="inline-flex items-center gap-2 rounded-full bg-primary/10 border border-primary/20 px-4 py-1.5 text-sm font-medium text-primary mb-6">
-            <span>🚀</span>
-            <span>Simple 3-Step Process</span>
-          </div>
-          <h2 class="text-4xl sm:text-5xl font-bold tracking-tight">
-            From Barcode to SLiMS in 30 Seconds
-          </h2>
-        </div>
-        
-        <div class="grid md:grid-cols-3 gap-8 text-left">
-          <!-- Step 1 -->
-          <div class="relative">
-            <div class="absolute -top-4 -left-4 w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center text-xl font-bold text-primary">
-              1
-            </div>
-            <UCard :ui="{ body: { padding: 'p-6' } }">
-              <div class="space-y-4">
-                <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-500/20 to-blue-500/10 flex items-center justify-center">
-                  <UIcon name="i-lucide-scan" class="w-8 h-8 text-blue-500" />
-                </div>
-                <h3 class="text-xl font-bold">Scan Barcode</h3>
-                <p class="text-muted-foreground">
-                  Point your phone camera at the ISBN barcode. Instant detection—no typing required.
-                </p>
-              </div>
-            </UCard>
-          </div>
-          
-          <!-- Step 2 -->
-          <div class="relative">
-            <div class="absolute -top-4 -left-4 w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center text-xl font-bold text-primary">
-              2
-            </div>
-            <UCard :ui="{ body: { padding: 'p-6' } }">
-              <div class="space-y-4">
-                <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-purple-500/20 to-purple-500/10 flex items-center justify-center">
-                  <UIcon name="i-lucide-sparkles" class="w-8 h-8 text-purple-500" />
-                </div>
-                <h3 class="text-xl font-bold">AI Cleans Data</h3>
-                <p class="text-muted-foreground">
-                  Gemini AI fetches metadata, normalizes authors, adds classifications, and enriches subject headings automatically.
-                </p>
-              </div>
-            </UCard>
-          </div>
-          
-          <!-- Step 3 -->
-          <div class="relative">
-            <div class="absolute -top-4 -left-4 w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center text-xl font-bold text-primary">
-              3
-            </div>
-            <UCard :ui="{ body: { padding: 'p-6' } }">
-              <div class="space-y-4">
-                <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-green-500/20 to-green-500/10 flex items-center justify-center">
-                  <UIcon name="i-lucide-download" class="w-8 h-8 text-green-500" />
-                </div>
-                <h3 class="text-xl font-bold">Export to SLiMS</h3>
-                <p class="text-muted-foreground">
-                  One-click CSV export in SLiMS format. Import directly—no reformatting needed.
-                </p>
-              </div>
-            </UCard>
-          </div>
+          <p class="masthead__eyebrow">Rangkai</p>
+          <p class="masthead__sub">Asisten katalog buku untuk pustakawan Indonesia</p>
         </div>
       </div>
-    </section>
 
-    <!-- Product Demo Section (Placeholder) -->
-    <section id="demo" class="container mx-auto px-4 py-24 bg-muted/30">
-      <div class="max-w-6xl mx-auto">
-        <div class="grid lg:grid-cols-2 gap-12 items-center">
-          <!-- Left: Text -->
-          <div class="space-y-6">
-            <div class="inline-flex items-center gap-2 rounded-full bg-primary/10 border border-primary/20 px-4 py-1.5 text-sm font-medium text-primary">
-              <UIcon name="i-lucide-eye" class="w-4 h-4" />
-              <span>See It In Action</span>
-            </div>
-            <h2 class="text-4xl sm:text-5xl font-bold tracking-tight">
-              Watch Rangkai Work Its Magic
-            </h2>
-            <p class="text-xl text-gray-300 leading-relaxed">
-              From scanning a barcode to getting publication-ready metadata, see how Rangkai eliminates hours of manual data entry.
-            </p>
-            <ul class="space-y-3">
-              <li class="flex items-start gap-3">
-                <UIcon name="i-lucide-check" class="w-5 h-5 text-green-500 mt-1 flex-shrink-0" />
-                <span class="text-gray-300">Real-time barcode scanning with instant metadata retrieval</span>
-              </li>
-              <li class="flex items-start gap-3">
-                <UIcon name="i-lucide-check" class="w-5 h-5 text-green-500 mt-1 flex-shrink-0" />
-                <span class="text-gray-300">AI-powered cleanup with DDC/LCC classification</span>
-              </li>
-              <li class="flex items-start gap-3">
-                <UIcon name="i-lucide-check" class="w-5 h-5 text-green-500 mt-1 flex-shrink-0" />
-                <span class="text-gray-300">SLiMS-ready CSV export with UTF-8 encoding</span>
-              </li>
-            </ul>
-          </div>
-          
-          <!-- Right: Placeholder for demo -->
-          <div class="relative">
-            <div class="aspect-video rounded-2xl border-4 border-primary/20 bg-gradient-to-br from-primary/10 to-background flex items-center justify-center">
-              <div class="text-center space-y-4 p-8">
-                <UIcon name="i-lucide-image" class="w-16 h-16 text-primary/50 mx-auto" />
-                <p class="text-muted-foreground text-sm">
-                  Product demo screenshots/GIF will be added here
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
+      <nav class="masthead__nav" aria-label="Navigasi utama">
+        <NuxtLink to="#cara-kerja">Cara kerja</NuxtLink>
+        <NuxtLink to="#contoh-catatan">Contoh catatan</NuxtLink>
+        <NuxtLink to="#fitur">Fitur</NuxtLink>
+        <NuxtLink to="/history">Riwayat</NuxtLink>
+        <NuxtLink to="/faq">FAQ</NuxtLink>
+      </nav>
+    </header>
 
-    <!-- Testimonials Section (Placeholder) -->
-    <section class="container mx-auto px-4 py-24">
-      <div class="max-w-6xl mx-auto space-y-12">
-        <div class="text-center space-y-6">
-          <div class="inline-flex items-center gap-2 rounded-full bg-primary/10 border border-primary/20 px-4 py-1.5 text-sm font-medium text-primary">
-            <span>💬</span>
-            <span>Loved by Librarians</span>
-          </div>
-          <h2 class="text-4xl sm:text-5xl font-bold tracking-tight">
-            What Indonesian Libraries Are Saying
-          </h2>
-        </div>
-        
-        <div class="grid md:grid-cols-3 gap-8">
-          <!-- Placeholder Testimonial 1 -->
-          <UCard :ui="{ body: { padding: 'p-6' } }">
-            <div class="space-y-4">
-              <div class="flex gap-1">
-                <UIcon v-for="i in 5" :key="i" name="i-lucide-star" class="w-4 h-4 text-yellow-500 fill-current" />
-              </div>
-              <p class="text-gray-300 italic">
-                "Rangkai cut my cataloging time from 20 minutes per book to under 2 minutes. The AI cleanup is shockingly accurate."
-              </p>
-              <div class="pt-4 border-t border-border">
-                <div class="flex items-center gap-3">
-                  <div class="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center">
-                    <UIcon name="i-lucide-user" class="w-5 h-5 text-primary" />
-                  </div>
-                  <div>
-                    <p class="font-semibold text-foreground">Testimonial Placeholder</p>
-                    <p class="text-sm text-muted-foreground">Library Name</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </UCard>
-          
-          <!-- Placeholder Testimonial 2 -->
-          <UCard :ui="{ body: { padding: 'p-6' } }">
-            <div class="space-y-4">
-              <div class="flex gap-1">
-                <UIcon v-for="i in 5" :key="i" name="i-lucide-star" class="w-4 h-4 text-yellow-500 fill-current" />
-              </div>
-              <p class="text-gray-300 italic">
-                "The SLiMS export feature is a game-changer. No more manual CSV formatting—it just works perfectly."
-              </p>
-              <div class="pt-4 border-t border-border">
-                <div class="flex items-center gap-3">
-                  <div class="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center">
-                    <UIcon name="i-lucide-user" class="w-5 h-5 text-primary" />
-                  </div>
-                  <div>
-                    <p class="font-semibold text-foreground">Testimonial Placeholder</p>
-                    <p class="text-sm text-muted-foreground">Library Name</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </UCard>
-          
-          <!-- Placeholder Testimonial 3 -->
-          <UCard :ui="{ body: { padding: 'p-6' } }">
-            <div class="space-y-4">
-              <div class="flex gap-1">
-                <UIcon v-for="i in 5" :key="i" name="i-lucide-star" class="w-4 h-4 text-yellow-500 fill-current" />
-              </div>
-              <p class="text-gray-300 italic">
-                "Finally, a tool that understands Indonesian library workflows. The offline mode is perfect for our rural school."
-              </p>
-              <div class="pt-4 border-t border-border">
-                <div class="flex items-center gap-3">
-                  <div class="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center">
-                    <UIcon name="i-lucide-user" class="w-5 h-5 text-primary" />
-                  </div>
-                  <div>
-                    <p class="font-semibold text-foreground">Testimonial Placeholder</p>
-                    <p class="text-sm text-muted-foreground">Library Name</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </UCard>
-        </div>
-      </div>
-    </section>
+    <main id="konten">
+      <section class="hero section">
+        <div class="hero__content">
+          <p class="section-kicker">Untuk sekolah, kampus, komunitas, dan perpustakaan kecil</p>
+          <h1>Barcode ISBN masuk, kartu katalog keluar.</h1>
+          <p class="hero__lede">
+            Rangkai mengurangi pekerjaan katalogisasi yang berulang. Pindai ISBN, biarkan metadata
+            dirapikan AI, lalu ekspor record yang siap dipakai di SLiMS atau Koha.
+          </p>
 
-    <!-- Social Proof - Trusted By (Placeholder) -->
-    <section class="container mx-auto px-4 py-16 bg-muted/30">
-      <div class="max-w-4xl mx-auto text-center space-y-8">
-        <p class="text-sm font-medium text-muted-foreground uppercase tracking-wider">
-          Trusted by Leading Indonesian Libraries
-        </p>
-        <div class="flex flex-wrap justify-center items-center gap-8 opacity-60">
-          <!-- Placeholder for school logos -->
-          <div class="px-8 py-4 rounded-lg bg-foreground/5 border border-border">
-            <p class="text-foreground/50 font-medium">School Logo 1</p>
-          </div>
-          <div class="px-8 py-4 rounded-lg bg-foreground/5 border border-border">
-            <p class="text-foreground/50 font-medium">School Logo 2</p>
-          </div>
-          <div class="px-8 py-4 rounded-lg bg-foreground/5 border border-border">
-            <p class="text-foreground/50 font-medium">School Logo 3</p>
-          </div>
-          <div class="px-8 py-4 rounded-lg bg-foreground/5 border border-border">
-            <p class="text-foreground/50 font-medium">School Logo 4</p>
-          </div>
-        </div>
-        <p class="text-xs text-muted-foreground italic">
-          (Placeholder for actual school/library logos - awaiting assets)
-        </p>
-      </div>
-    </section>
+          <p class="hero__workflow" aria-label="Alur utama Rangkai">
+            Pindai barcode <span aria-hidden="true">→</span> metadata dirapikan AI
+            <span aria-hidden="true">→</span> ekspor ke SLiMS
+          </p>
 
-    <!-- CTA Section - Marketing for Login -->
-    <section class="container mx-auto px-4 py-24">
-      <div class="rounded-3xl border bg-gradient-to-br from-primary/10 via-background to-background p-8 md:p-16 text-center space-y-8 relative overflow-hidden">
-        <!-- Decorative elements -->
-        <div class="absolute top-0 right-0 w-64 h-64 bg-primary/5 rounded-full blur-3xl" />
-        <div class="absolute bottom-0 left-0 w-48 h-48 bg-primary/5 rounded-full blur-3xl" />
-        
-        <div class="relative z-10 space-y-6">
-          <div class="inline-flex items-center gap-2 rounded-full bg-primary/10 border border-primary/20 px-4 py-1.5 text-sm font-medium text-primary">
-            <UIcon name="i-lucide-zap" class="w-4 h-4" />
-            <span>Ready to Transform Your Workflow?</span>
+          <div class="hero__actions">
+            <NuxtLink class="button button--primary" :to="primaryCta">Mulai Memindai</NuxtLink>
+            <NuxtLink class="button button--secondary" :to="secondaryCta">Lihat Cara Kerjanya</NuxtLink>
           </div>
-          
-          <h2 class="text-3xl md:text-5xl font-bold tracking-tight max-w-3xl mx-auto">
-            Join 500+ Indonesian Librarians<br>
-            <span class="bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">Saving 15+ Hours Every Week</span>
-          </h2>
-          
-          <p class="text-lg text-muted-foreground max-w-2xl mx-auto">
-            Join hundreds of Indonesian librarians who save hours every week with Rangkai's intelligent metadata harvesting. 
-            <span class="text-foreground font-medium">Free to get started.</span>
+
+          <p class="hero__note">
+            Targetnya sederhana: satu record katalog yang bisa dipakai dalam kurang dari 30 detik per
+            buku, saat sumber metadata tersedia.
           </p>
         </div>
-        
-        <div class="relative z-10 flex flex-col sm:flex-row gap-4 justify-center">
-          <NuxtLink
-            v-if="!isAuthenticated"
-            to="/register"
-            class="inline-flex items-center justify-center gap-2.5 px-3.5 py-2.5 text-base font-medium rounded-md shadow-sm text-white bg-primary-500 hover:bg-primary-600 dark:text-gray-900 dark:bg-primary-400 dark:hover:bg-primary-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-500 dark:focus-visible:outline-primary-400 transition-colors"
-          >
-            <UIcon name="i-lucide-user-plus" class="w-5 h-5" />
-            Create Free Account
-          </NuxtLink>
-          <NuxtLink
-            v-else
-            to="/scan/mobile"
-            class="inline-flex items-center justify-center gap-2.5 px-3.5 py-2.5 text-base font-medium rounded-md shadow-sm text-white bg-primary-500 hover:bg-primary-600 dark:text-gray-900 dark:bg-primary-400 dark:hover:bg-primary-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-500 dark:focus-visible:outline-primary-400 transition-colors"
-          >
-            <UIcon name="i-lucide-scan" class="w-5 h-5" />
-            Start Scanning Now
-          </NuxtLink>
-          <NuxtLink
-            to="/faq"
-            class="inline-flex items-center justify-center gap-2.5 px-3.5 py-2.5 text-base font-medium rounded-md shadow-sm text-foreground bg-transparent border border-border hover:bg-muted focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-500 transition-colors"
-          >
-            <UIcon name="i-lucide-message-circle" class="w-5 h-5" />
-            View FAQ
-          </NuxtLink>
-        </div>
-      </div>
-    </section>
 
-  </main>
+        <aside class="hero__panel" aria-label="Pratinjau hasil kerja">
+          <div class="record-card">
+            <div class="record-card__top">
+              <span class="record-card__stamp">CATATAN KATALOG</span>
+              <span class="record-card__badge">siap tinjau</span>
+            </div>
+
+            <div class="record-card__split">
+              <div class="record-card__block">
+                <p class="record-card__label">Sebelum</p>
+                <ul class="field-list" aria-label="Catatan hasil pindai kasar">
+                  <li v-for="field in beforeFields" :key="field.label" class="field-list__item">
+                    <span class="field-list__key">{{ field.label }}</span>
+                    <span class="field-list__value">{{ field.value }}</span>
+                  </li>
+                </ul>
+              </div>
+
+              <div class="record-card__block record-card__block--after">
+                <p class="record-card__label">Sesudah</p>
+                <ul class="field-list" aria-label="Catatan katalog yang sudah dirapikan">
+                  <li v-for="field in afterFields" :key="field.label" class="field-list__item">
+                    <span class="field-list__key">{{ field.label }}</span>
+                    <span class="field-list__value">{{ field.value }}</span>
+                  </li>
+                </ul>
+                <p class="record-card__source">
+                  Sumber dirujuk: Google Books, Open Library, Library of Congress
+                </p>
+              </div>
+            </div>
+          </div>
+        </aside>
+      </section>
+
+      <section id="cara-kerja" class="section process">
+        <div class="section-heading">
+          <p class="section-kicker">Cara kerja</p>
+          <h2>Tiga langkah, tanpa memaksa pustakawan berpindah alat kerja.</h2>
+        </div>
+
+        <ol class="workflow-list">
+          <li v-for="item in workflow" :key="item.number" class="workflow-list__item">
+            <span class="workflow-list__number">{{ item.number }}</span>
+            <div>
+              <h3>{{ item.title }}</h3>
+              <p>{{ item.body }}</p>
+            </div>
+          </li>
+        </ol>
+      </section>
+
+      <section id="contoh-catatan" class="section comparison">
+        <div class="section-heading section-heading--tight">
+          <p class="section-kicker">Contoh nyata</p>
+          <h2>Catatan yang tadinya kosong menjadi record katalog yang lengkap.</h2>
+        </div>
+
+        <div class="comparison__grid">
+          <article class="comparison-card comparison-card--before">
+            <div class="comparison-card__head">
+              <span class="comparison-card__index">Hasil pindai kasar</span>
+              <span class="comparison-card__state">belum lengkap</span>
+            </div>
+            <p class="comparison-card__lead">Barcode terbaca, tetapi isian katalog masih minim.</p>
+            <ul class="catalog-fields">
+              <li><span>ISBN</span><strong>978-602-...</strong></li>
+              <li><span>Judul</span><strong>—</strong></li>
+              <li><span>Penulis</span><strong>—</strong></li>
+              <li><span>Penerbit</span><strong>—</strong></li>
+              <li><span>Tahun</span><strong>—</strong></li>
+              <li><span>Bahasa</span><strong>—</strong></li>
+            </ul>
+          </article>
+
+          <article class="comparison-card comparison-card--after">
+            <div class="comparison-card__head">
+              <span class="comparison-card__index">Catatan katalog siap tinjau</span>
+              <span class="comparison-card__state comparison-card__state--success">dirapikan AI</span>
+            </div>
+            <p class="comparison-card__lead">
+              Petugas mendapat record yang lebih utuh, lengkap dengan sumber dan jejak penelusuran.
+            </p>
+            <ul class="catalog-fields catalog-fields--complete">
+              <li><span>Judul</span><strong>Pengantar Literasi Informasi</strong></li>
+              <li><span>Penulis</span><strong>Sari, Dewi</strong></li>
+              <li><span>Penerbit</span><strong>Pustaka Nusantara</strong></li>
+              <li><span>Tahun</span><strong>2024</strong></li>
+              <li><span>Bahasa</span><strong>Indonesia</strong></li>
+              <li><span>Deskripsi fisik</span><strong>xii, 214 hlm. : ilustrasi ; 24 cm</strong></li>
+              <li><span>DDC</span><strong>025.5</strong></li>
+              <li><span>Subjek</span><strong>literasi informasi; perpustakaan sekolah; pengolahan bahan pustaka</strong></li>
+              <li><span>Sumber</span><strong>Google Books · Open Library · Library of Congress</strong></li>
+            </ul>
+          </article>
+        </div>
+      </section>
+
+      <section id="fitur" class="section features">
+        <div class="section-heading">
+          <p class="section-kicker">Kemampuan inti</p>
+          <h2>Dirancang untuk backlog buku, bukan untuk pamer istilah teknis.</h2>
+        </div>
+
+        <div class="feature-stack">
+          <article v-for="capability in capabilities" :key="capability.title" class="feature-item">
+            <span class="feature-item__rule" aria-hidden="true"></span>
+            <div>
+              <h3>{{ capability.title }}</h3>
+              <p>{{ capability.body }}</p>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <section class="section control">
+        <div class="control__copy">
+          <p class="section-kicker">Kendali tetap di tangan petugas</p>
+          <h2>AI memberi usulan, bukan keputusan final.</h2>
+          <p>
+            Setiap hasil dirapikan secara terbuka: bisa ditinjau, bisa diedit, dan bisa dilacak sebelum
+            ekspor. Rangkai membantu mempercepat kerja katalog, tetapi pustakawan tetap memutuskan
+            record akhir yang masuk ke sistem.
+          </p>
+        </div>
+
+        <ul class="control__list" aria-label="Prinsip kendali petugas">
+          <li>Usulan AI terlihat jelas sebelum disimpan.</li>
+          <li>Perubahan dapat ditelusuri kembali ke sumber dan langkah penyesuaian.</li>
+          <li>Ekspor baru berjalan setelah petugas memeriksa record.</li>
+        </ul>
+      </section>
+
+      <section class="section privacy">
+        <div class="privacy__panel">
+          <p class="section-kicker">Privasi dan luring</p>
+          <h2>Pas untuk sekolah dan institusi yang tidak selalu punya koneksi stabil.</h2>
+          <p>
+            Antrean scan dapat disimpan secara lokal saat offline, lalu disinkronkan ketika koneksi
+            kembali. Itu membuat Rangkai cocok dipakai di ruang katalog, perpustakaan cabang, atau
+            jaringan sekolah yang naik turun tanpa mengorbankan alur kerja.
+          </p>
+        </div>
+
+        <div class="compatibility">
+          <p class="compatibility__label">Kompatibel dengan</p>
+          <ul class="compatibility__list">
+            <li v-for="item in compatibility" :key="item">{{ item }}</li>
+          </ul>
+        </div>
+      </section>
+
+      <section class="section faq">
+        <div class="section-heading">
+          <p class="section-kicker">FAQ singkat</p>
+          <h2>Jawaban cepat untuk alur kerja yang paling sering ditanyakan.</h2>
+        </div>
+
+        <div class="faq-list">
+          <details v-for="faq in faqs" :key="faq.question" class="faq-item">
+            <summary>{{ faq.question }}</summary>
+            <p>{{ faq.answer }}</p>
+          </details>
+        </div>
+      </section>
+
+      <section class="section cta">
+        <div>
+          <p class="section-kicker">Mulai dari buku berikutnya</p>
+          <h2>Ambil satu buku di meja Anda, lalu mulai dari sana.</h2>
+          <p>
+            Rangkai membantu Anda bergerak dari barcode ke record katalog tanpa menambah beban kerja
+            yang tidak perlu.
+          </p>
+        </div>
+
+        <div class="cta__actions">
+          <NuxtLink class="button button--primary" :to="primaryCta">Mulai Memindai</NuxtLink>
+          <NuxtLink class="button button--secondary" to="/history">Lihat Riwayat</NuxtLink>
+        </div>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <p class="footer__brand">Rangkai</p>
+      <nav class="footer__nav" aria-label="Tautan pendukung">
+        <NuxtLink to="/scan/mobile">Scan</NuxtLink>
+        <NuxtLink to="/history">Riwayat</NuxtLink>
+        <NuxtLink to="/profile">Profil</NuxtLink>
+        <NuxtLink to="/faq">FAQ</NuxtLink>
+      </nav>
+      <p class="footer__meta">Rapi, tenang, dan siap dipakai di meja katalog.</p>
+    </footer>
+  </div>
 </template>
+
+<style scoped>
+/* Hallmark · genre: editorial · macrostructure: Narrative Workflow · theme: Linen · enrichment: none · nav: N6 Newspaper masthead · footer: Ft1 Mast-headed */
+
+.page-shell {
+  position: relative;
+  min-height: 100vh;
+  overflow: clip;
+  background:
+    linear-gradient(180deg, color-mix(in oklab, var(--color-paper) 96%, white 4%), var(--color-paper-2)),
+    repeating-linear-gradient(
+      180deg,
+      transparent 0,
+      transparent 3.25rem,
+      color-mix(in oklab, var(--color-rule) 28%, transparent) 3.25rem,
+      color-mix(in oklab, var(--color-rule) 28%, transparent) 3.4rem
+    );
+  color: var(--color-ink);
+}
+
+.page-shell::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(circle at top left, color-mix(in oklab, var(--color-accent-surface) 55%, transparent) 0, transparent 34%),
+    radial-gradient(circle at 82% 14%, color-mix(in oklab, var(--color-success-soft) 55%, transparent) 0, transparent 26%);
+  opacity: 0.95;
+}
+
+.skip-link {
+  position: absolute;
+  left: var(--page-gutter);
+  top: var(--space-sm);
+  z-index: 20;
+  transform: translateY(-200%);
+  padding: 0.65rem 0.9rem;
+  border: 1px solid var(--color-rule);
+  border-radius: var(--radius-pill);
+  background: var(--color-paper);
+  color: var(--color-ink);
+  text-decoration: none;
+}
+
+.skip-link:focus-visible {
+  transform: translateY(0);
+}
+
+.masthead,
+main,
+.footer {
+  position: relative;
+  z-index: 1;
+  width: min(calc(100% - (var(--page-gutter) * 2)), var(--page-measure));
+  margin: 0 auto;
+}
+
+.masthead {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: end;
+  justify-content: space-between;
+  gap: var(--space-md);
+  padding: var(--space-lg) 0 var(--space-md);
+  border-bottom: var(--rule-heavy) solid var(--color-rule);
+}
+
+.masthead__brand {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.masthead__mark {
+  display: grid;
+  place-items: center;
+  width: 3rem;
+  height: 3rem;
+  border: 1px solid var(--color-rule);
+  border-radius: 0.95rem;
+  background: color-mix(in oklab, var(--color-paper) 88%, white 12%);
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  letter-spacing: 0.18em;
+}
+
+.masthead__eyebrow,
+.masthead__sub,
+.section-kicker,
+.comparison-card__index,
+.record-card__stamp,
+.record-card__label,
+.compatibility__label,
+.footer__meta {
+  font-family: var(--font-mono);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.masthead__eyebrow {
+  margin: 0;
+  font-size: var(--text-sm);
+  color: var(--color-ink-soft);
+}
+
+.masthead__sub {
+  margin: 0.2rem 0 0;
+  font-size: var(--text-xs);
+  color: var(--color-muted);
+}
+
+.masthead__nav,
+.footer__nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.7rem 1rem;
+}
+
+.masthead__nav a,
+.footer__nav a {
+  color: var(--color-ink-soft);
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+  transition: border-color var(--dur-short) var(--ease-out), color var(--dur-short) var(--ease-out);
+}
+
+.masthead__nav a:hover,
+.masthead__nav a:focus-visible,
+.footer__nav a:hover,
+.footer__nav a:focus-visible {
+  color: var(--color-ink);
+  border-color: currentColor;
+}
+
+.section {
+  padding: clamp(2rem, 4.5vw, 4.2rem) 0;
+}
+
+.hero {
+  display: grid;
+  gap: var(--space-xl);
+  align-items: start;
+}
+
+.hero__content {
+  display: grid;
+  gap: var(--space-md);
+}
+
+.section-kicker {
+  margin: 0;
+  font-size: var(--text-xs);
+  color: var(--color-accent-strong);
+}
+
+h1,
+h2,
+h3,
+p {
+  margin: 0;
+}
+
+h1,
+h2 {
+  font-family: var(--font-display);
+  font-weight: 600;
+  line-height: 0.98;
+  letter-spacing: -0.03em;
+}
+
+h1 {
+  max-width: 11ch;
+  font-size: var(--text-display);
+}
+
+h2 {
+  max-width: 14ch;
+  font-size: var(--text-display-s);
+}
+
+h3 {
+  font-family: var(--font-display);
+  font-size: var(--text-xl);
+  line-height: 1.1;
+  font-weight: 600;
+}
+
+p,
+li,
+summary {
+  font-size: var(--text-md);
+  line-height: 1.65;
+}
+
+.hero__lede,
+.hero__note,
+.section-heading p,
+.comparison-card__lead,
+.feature-item p,
+.control__copy p,
+.privacy__panel p,
+.faq-item p,
+.cta p {
+  color: var(--color-ink-soft);
+  max-width: 68ch;
+}
+
+.hero__workflow {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 0.35rem 0.6rem;
+  align-items: center;
+  width: fit-content;
+  padding: 0.8rem 1rem;
+  border: 1px solid var(--color-rule);
+  border-radius: var(--radius-pill);
+  background: color-mix(in oklab, var(--color-paper) 92%, white 8%);
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  color: var(--color-ink);
+}
+
+.hero__actions,
+.cta__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.9rem;
+}
+
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 3rem;
+  padding: 0.8rem 1.15rem;
+  border-radius: var(--radius-pill);
+  border: 1px solid transparent;
+  text-decoration: none;
+  font-weight: 600;
+  transition:
+    transform var(--dur-short) var(--ease-out),
+    background-color var(--dur-short) var(--ease-out),
+    border-color var(--dur-short) var(--ease-out),
+    color var(--dur-short) var(--ease-out);
+}
+
+.button:hover {
+  transform: translateY(-1px);
+}
+
+.button--primary {
+  background: var(--color-ink);
+  color: var(--color-paper);
+  border-color: var(--color-ink);
+}
+
+.button--secondary {
+  background: transparent;
+  color: var(--color-ink);
+  border-color: var(--color-rule);
+}
+
+.button:focus-visible,
+details summary:focus-visible,
+.masthead__nav a:focus-visible,
+.footer__nav a:focus-visible {
+  outline: 3px solid color-mix(in oklab, var(--color-focus) 58%, white 42%);
+  outline-offset: 3px;
+}
+
+.hero__note {
+  max-width: 52ch;
+  font-size: var(--text-base);
+}
+
+.hero__panel {
+  min-width: 0;
+}
+
+.record-card,
+.comparison-card,
+.privacy__panel,
+.compatibility,
+.control,
+.faq-item,
+.cta {
+  border: 1px solid var(--color-rule);
+  background: color-mix(in oklab, var(--color-paper) 92%, white 8%);
+  box-shadow: 0 16px 40px color-mix(in oklab, black 8%, transparent);
+}
+
+.record-card {
+  padding: var(--space-md);
+  border-radius: 1.2rem;
+}
+
+.record-card__top {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-sm);
+  align-items: center;
+  padding-bottom: var(--space-sm);
+  border-bottom: 1px solid var(--color-rule);
+}
+
+.record-card__stamp,
+.record-card__label,
+.compatibility__label {
+  font-size: var(--text-xs);
+  color: var(--color-muted);
+}
+
+.record-card__badge,
+.comparison-card__state {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.35rem 0.65rem;
+  border-radius: var(--radius-pill);
+  background: var(--color-success-soft);
+  color: var(--color-success);
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+}
+
+.record-card__split {
+  display: grid;
+  gap: var(--space-md);
+  margin-top: var(--space-md);
+}
+
+.record-card__block {
+  padding: var(--space-sm);
+  border: 1px solid var(--color-rule);
+  border-radius: 1rem;
+  background: color-mix(in oklab, var(--color-paper-3) 68%, white 32%);
+}
+
+.record-card__block--after {
+  background: color-mix(in oklab, var(--color-success-soft) 52%, white 48%);
+}
+
+.field-list {
+  list-style: none;
+  display: grid;
+  gap: 0.55rem;
+  margin: var(--space-sm) 0 0;
+  padding: 0;
+}
+
+.field-list__item {
+  display: grid;
+  gap: 0.15rem;
+}
+
+.field-list__key {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  color: var(--color-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.field-list__value {
+  color: var(--color-ink);
+}
+
+.record-card__source {
+  margin-top: var(--space-sm);
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  color: var(--color-muted);
+}
+
+.section-heading {
+  display: grid;
+  gap: var(--space-sm);
+  margin-bottom: var(--space-lg);
+}
+
+.section-heading--tight {
+  max-width: 42rem;
+}
+
+.workflow-list {
+  list-style: none;
+  display: grid;
+  gap: var(--space-md);
+  margin: 0;
+  padding: 0;
+}
+
+.workflow-list__item {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: var(--space-md);
+  align-items: start;
+  padding: 1rem 0;
+  border-top: 1px solid var(--color-rule);
+}
+
+.workflow-list__item:last-child {
+  border-bottom: 1px solid var(--color-rule);
+}
+
+.workflow-list__number {
+  display: inline-grid;
+  place-items: center;
+  width: 3rem;
+  height: 3rem;
+  border-radius: 999px;
+  border: 1px solid var(--color-rule);
+  background: color-mix(in oklab, var(--color-accent-surface) 70%, white 30%);
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  color: var(--color-accent-strong);
+}
+
+.comparison__grid {
+  display: grid;
+  gap: var(--space-md);
+}
+
+.comparison-card {
+  padding: var(--space-md);
+  border-radius: 1.1rem;
+}
+
+.comparison-card__head {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-sm);
+  align-items: center;
+  padding-bottom: var(--space-sm);
+  margin-bottom: var(--space-sm);
+  border-bottom: 1px solid var(--color-rule);
+}
+
+.comparison-card__index {
+  font-size: var(--text-xs);
+  color: var(--color-muted);
+}
+
+.comparison-card__state {
+  background: color-mix(in oklab, var(--color-paper-3) 56%, white 44%);
+  color: var(--color-ink-soft);
+}
+
+.comparison-card__state--success {
+  background: var(--color-success-soft);
+  color: var(--color-success);
+}
+
+.comparison-card__lead {
+  margin-bottom: var(--space-md);
+}
+
+.catalog-fields {
+  list-style: none;
+  display: grid;
+  gap: 0.45rem;
+  margin: 0;
+  padding: 0;
+}
+
+.catalog-fields li {
+  display: grid;
+  gap: 0.2rem;
+  padding: 0.55rem 0;
+  border-top: 1px dotted var(--color-rule);
+}
+
+.catalog-fields li:first-child {
+  border-top: 0;
+  padding-top: 0;
+}
+
+.catalog-fields span {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  color: var(--color-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.catalog-fields strong {
+  font-weight: 500;
+  color: var(--color-ink);
+}
+
+.catalog-fields--complete strong {
+  color: var(--color-ink);
+}
+
+.feature-stack {
+  display: grid;
+  gap: 0;
+}
+
+.feature-item {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: var(--space-md);
+  padding: 1.1rem 0;
+  border-top: 1px solid var(--color-rule);
+}
+
+.feature-item:last-child {
+  border-bottom: 1px solid var(--color-rule);
+}
+
+.feature-item__rule {
+  width: 0.8rem;
+  height: 0.8rem;
+  margin-top: 0.35rem;
+  border-radius: 999px;
+  background: var(--color-success);
+  box-shadow: 0 0 0 0.35rem var(--color-success-soft);
+}
+
+.control,
+.privacy {
+  display: grid;
+  gap: var(--space-lg);
+  padding: clamp(1.2rem, 2.8vw, 2rem);
+  border-radius: 1.2rem;
+}
+
+.control__list {
+  list-style: none;
+  display: grid;
+  gap: 0.75rem;
+  margin: 0;
+  padding: 0;
+}
+
+.control__list li {
+  padding-left: 1rem;
+  border-left: 2px solid var(--color-success);
+}
+
+.privacy__panel {
+  padding: 1rem;
+  border-radius: 1rem;
+}
+
+.compatibility {
+  padding: 1rem;
+  border-radius: 1rem;
+}
+
+.compatibility__list {
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+  margin: var(--space-sm) 0 0;
+  padding: 0;
+}
+
+.compatibility__list li {
+  padding: 0.5rem 0.8rem;
+  border: 1px solid var(--color-rule);
+  border-radius: var(--radius-pill);
+  background: color-mix(in oklab, var(--color-paper) 82%, white 18%);
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+}
+
+.faq-list {
+  display: grid;
+  gap: var(--space-sm);
+}
+
+.faq-item {
+  padding: 0.15rem 1rem 0.2rem;
+  border-radius: 1rem;
+}
+
+.faq-item summary {
+  cursor: pointer;
+  list-style: none;
+  padding: 0.9rem 0;
+  font-weight: 600;
+  color: var(--color-ink);
+}
+
+.faq-item summary::-webkit-details-marker {
+  display: none;
+}
+
+.faq-item p {
+  padding: 0 0 1rem;
+}
+
+.cta {
+  display: grid;
+  gap: var(--space-lg);
+  padding: clamp(1.3rem, 3vw, 2rem);
+  border-radius: 1.3rem;
+}
+
+.footer {
+  display: grid;
+  gap: 0.65rem;
+  padding: var(--space-lg) 0 var(--space-xl);
+  border-top: var(--rule-heavy) solid var(--color-rule);
+}
+
+.footer__brand {
+  font-family: var(--font-display);
+  font-size: var(--text-xl);
+  line-height: 1;
+}
+
+.footer__meta {
+  font-size: var(--text-xs);
+  color: var(--color-muted);
+}
+
+@media (min-width: 760px) {
+  .hero {
+    grid-template-columns: minmax(0, 1.1fr) minmax(320px, 0.9fr);
+    gap: var(--space-2xl);
+  }
+
+  .record-card__split,
+  .control,
+  .privacy,
+  .cta {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 0.95fr);
+    align-items: start;
+  }
+
+  .comparison__grid {
+    grid-template-columns: minmax(0, 0.93fr) minmax(0, 1.07fr);
+  }
+
+  .privacy {
+    grid-template-columns: minmax(0, 1.2fr) minmax(18rem, 0.8fr);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto;
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+  }
+
+  .button:hover {
+    transform: none;
+  }
+}
+</style>

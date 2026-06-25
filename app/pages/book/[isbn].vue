@@ -7,7 +7,7 @@ import Skeleton from "@/components/ui/Skeleton.vue";
 const route = useRoute();
 const isbn = computed(() => route.params.isbn as string);
 
-const { book, scanId, loading, error, searchByISBN, cleanMetadata } =
+const { book, scanId, loading, error, loadBookByISBN, cleanMetadata } =
   useBookSearch();
 const isCleaning = ref(false);
 const loadingStep = ref("");
@@ -39,7 +39,7 @@ const isSaved = computed(() => !!scanId.value);
 
 onMounted(async () => {
   if (isbn.value) {
-    await searchByISBN(isbn.value);
+    await loadBookByISBN(isbn.value);
   }
 });
 

@@ -5,8 +5,8 @@
  * to the specified group. Use this to move personal history to a group.
  */
 
-import { eq, and } from 'drizzle-orm'
-import { groupMembers } from '../../../db/schema'
+import { eq, and, isNull, or } from 'drizzle-orm'
+import { groupMembers, scans } from '../../../db/schema'
 import { useDb } from '../../../utils/db'
 import { requireUserSession } from '../../../utils/session'
 
@@ -34,17 +34,20 @@ export default defineEventHandler(async (event) => {
 
   console.info(`[api:groups:migrate] User ${userId} migrating books to group ${groupId}`)
 
-  // 2. Update scans: Set groupId where it is currently NULL and userId matches
-  const d1 = hubDatabase()
-  
-  // Using raw query for update efficiency/simplicity
-  const result = await d1.prepare(`
-    UPDATE scans
-    SET group_id = ?, updated_at = ?
-    WHERE user_id = ? AND (group_id IS NULL OR group_id = '' OR group_id = 'null')
-  `).bind(groupId, new Date().toISOString(), userId).run()
+  // 2. Update only personal scans and return the affected IDs for an exact count.
+  const moved = await db
+    .update(scans)
+    .set({
+      groupId,
+      updatedAt: new Date(),
+    })
+    .where(and(
+      eq(scans.userId, userId),
+      or(isNull(scans.groupId), eq(scans.groupId, ''), eq(scans.groupId, 'null'))
+    ))
+    .returning({ id: scans.id })
 
-  const movedCount = result.meta?.changes || 0
+  const movedCount = moved.length
 
   console.info(`[api:groups:migrate] Migrated ${movedCount} scans for user ${userId}`)
 

@@ -6,8 +6,6 @@
 import type { BookMetadata } from './types'
 
 const OPEN_LIBRARY_API = 'https://openlibrary.org'
-const TIMEOUT_MS = 10000
-
 interface OpenLibraryEdition {
   title?: string
   subtitle?: string
@@ -26,15 +24,15 @@ interface OpenLibraryAuthor {
   personal_name?: string
 }
 
-export async function fetchOpenLibrary(isbn: string): Promise<BookMetadata | null> {
-  const controller = new AbortController()
-  const timeoutId = setTimeout(() => controller.abort(), TIMEOUT_MS)
-
+export async function fetchOpenLibrary(
+  isbn: string,
+  signal?: AbortSignal
+): Promise<BookMetadata | null> {
   try {
     // First, fetch the edition by ISBN
     const editionUrl = `${OPEN_LIBRARY_API}/isbn/${isbn}.json`
     const editionResponse = await fetch(editionUrl, {
-      signal: controller.signal,
+      signal,
       headers: {
         'Accept': 'application/json',
         'User-Agent': 'RangkaiBot/1.0 (https://rangkai.app)'
@@ -58,7 +56,7 @@ export async function fetchOpenLibrary(isbn: string): Promise<BookMetadata | nul
       const authorPromises = edition.authors.slice(0, 5).map(async (author) => {
         try {
           const authorResponse = await fetch(`${OPEN_LIBRARY_API}${author.key}.json`, {
-            signal: controller.signal,
+            signal,
             headers: { 'Accept': 'application/json' }
           })
           if (authorResponse.ok) {
@@ -113,13 +111,8 @@ export async function fetchOpenLibrary(isbn: string): Promise<BookMetadata | nul
       source: 'openlibrary'
     }
   } catch (error) {
-    if (error instanceof Error && error.name === 'AbortError') {
-      console.warn(`[metadata:openlibrary] Timeout after ${TIMEOUT_MS}ms for ISBN ${isbn}`)
-    } else {
-      console.error(`[metadata:openlibrary] Error fetching ISBN ${isbn}:`, error)
-    }
+    if (error instanceof Error && error.name === 'AbortError') throw error
+    console.error(`[metadata:openlibrary] Error fetching ISBN ${isbn}:`, error)
     return null
-  } finally {
-    clearTimeout(timeoutId)
   }
 }

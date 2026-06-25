@@ -12,7 +12,7 @@ definePageMeta({
 
 const router = useRouter();
 const toast = useToast();
-const { book, loading, error, searchByISBN, cleanMetadata } = useBookSearch();
+const { book, loading, error, scanByISBN, cleanMetadata } = useBookSearch();
 const {
   isOnline,
   queue: offlineQueue,
@@ -31,11 +31,12 @@ const sessionQueue = ref<string[]>([]);
 const isProcessing = ref(false);
 const processProgress = ref(0);
 const autoClean = ref(true);
+const inFlightIsbn = ref<string | null>(null);
 
 /**
  * Handle successful barcode scan
  */
-function onScan(isbn: string) {
+async function onScan(isbn: string) {
   // Normalize ISBN (remove hyphens/spaces)
   const normalizedIsbn = isbn.replace(/[-\s]/g, "");
 
@@ -61,8 +62,23 @@ function onScan(isbn: string) {
       sessionQueue.value.push(normalizedIsbn);
     }
   } else {
-    // Normal mode: Navigate to book page
-    router.push(`/book/${normalizedIsbn}`);
+    if (inFlightIsbn.value === normalizedIsbn) return;
+
+    inFlightIsbn.value = normalizedIsbn;
+    scannerActive.value = false;
+    try {
+      await scanByISBN(normalizedIsbn);
+      await router.push(`/book/${normalizedIsbn}`);
+    } catch {
+      toast.add({
+        title: "Scan not saved",
+        description: error.value || "Could not save this scan to the database.",
+        color: "red",
+      });
+      scannerActive.value = true;
+    } finally {
+      inFlightIsbn.value = null;
+    }
   }
 }
 
@@ -96,7 +112,7 @@ async function processSession() {
 
   for (const isbn of sessionQueue.value) {
     try {
-      await searchByISBN(isbn);
+      await scanByISBN(isbn);
       if (autoClean.value && book.value) {
         await cleanMetadata(book.value);
       }
@@ -108,9 +124,9 @@ async function processSession() {
   }
 
   toast.add({
-    title: "Batch complete!",
-    description: `Processed ${processed} of ${total} books`,
-    color: "green",
+    title: processed === total ? "Batch complete!" : "Batch incomplete",
+    description: `Saved ${processed} of ${total} books`,
+    color: processed === total ? "green" : "yellow",
   });
 
   sessionQueue.value = [];

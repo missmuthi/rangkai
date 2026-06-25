@@ -1,4 +1,4 @@
-import { LayoutDashboard, History, Users, Upload, FlaskConical, Settings, type LucideIcon } from 'lucide-vue-next'
+import { LayoutDashboard, History, Users, Upload, FlaskConical, Settings, UserCircle2, type LucideIcon } from 'lucide-vue-next'
 
 export interface NavItem {
   label: string
@@ -10,12 +10,13 @@ export const useNavigation = () => {
   const route = useRoute()
 
   const navItems: NavItem[] = [
-    { label: 'Dashboard', to: '/dashboard', icon: LayoutDashboard },
-    { label: 'History', to: '/history', icon: History },
-    { label: 'Library Groups', to: '/groups', icon: Users },
-    { label: 'Import Books', to: '/import', icon: Upload },
-    { label: 'Experimental', to: '/diagnostics/perpusnas', icon: FlaskConical },
-    { label: 'Settings', to: '/settings', icon: Settings },
+    { label: 'Beranda', to: '/dashboard', icon: LayoutDashboard },
+    { label: 'Riwayat', to: '/history', icon: History },
+    { label: 'Grup', to: '/groups', icon: Users },
+    { label: 'Impor', to: '/import', icon: Upload },
+    { label: 'Profil', to: '/profile', icon: UserCircle2 },
+    { label: 'Eksperimental', to: '/experimental', icon: FlaskConical },
+    { label: 'Pengaturan', to: '/settings', icon: Settings },
   ]
 
   /**

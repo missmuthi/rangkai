@@ -31,7 +31,7 @@
 This release requires migration `0008_add_source_to_scans.sql`.
 
 ```bash
-npx wrangler d1 execute rangkai-db --remote --file=server/db/migrations/0008_add_source_to_scans.sql
+bunx wrangler d1 execute rangkai-db --remote --file=server/db/migrations/0008_add_source_to_scans.sql
 ```
 
 _(Note: This migration has already been applied to production.)_

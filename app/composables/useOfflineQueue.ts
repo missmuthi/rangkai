@@ -15,7 +15,7 @@ interface OfflineQueueItem {
 export function useOfflineQueue() {
   const isOnline = useOnline()
   const toast = useToast()
-  const { searchByISBN, cleanMetadata, book } = useBookSearch()
+  const { scanByISBN, cleanMetadata, book } = useBookSearch()
   
   // Queue state
   const queue = ref<OfflineQueueItem[]>([])
@@ -97,7 +97,7 @@ export function useOfflineQueue() {
     // Process each queued item
     for (const item of [...queue.value]) {
       try {
-        await searchByISBN(item.isbn)
+        await scanByISBN(item.isbn)
         if (item.autoClean && book.value) {
           await cleanMetadata(book.value)
         }

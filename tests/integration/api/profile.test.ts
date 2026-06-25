@@ -1,22 +1,15 @@
-import { describe, it, expect, beforeAll } from 'vitest'
-import { setup, $fetch } from '@nuxt/test-utils/e2e'
+import { describe, it, expect } from 'vitest'
+import { setup, fetch, url } from '@nuxt/test-utils/e2e'
+
+await setup({
+  server: true,
+})
 
 describe('Profile API', () => {
-  beforeAll(async () => {
-    await setup({
-      server: true,
-    })
-  })
-
   describe('GET /api/profile', () => {
     it('should return 401 without authentication', async () => {
-      try {
-        await $fetch('/api/profile')
-        expect.fail('Should have thrown 401')
-      } catch (error: unknown) {
-        const err = error as { response?: { status?: number }; statusCode?: number }
-        expect(err.response?.status || err.statusCode).toBe(401)
-      }
+      const response = await fetch(url('/api/profile'))
+      expect(response.status).toBe(401)
     })
 
     it('should return profile with valid session', async () => {
@@ -28,16 +21,14 @@ describe('Profile API', () => {
 
   describe('PATCH /api/profile', () => {
     it('should return 401 without authentication', async () => {
-      try {
-        await $fetch('/api/profile', {
-          method: 'PATCH',
-          body: { name: 'New Name' }
-        })
-        expect.fail('Should have thrown 401')
-      } catch (error: unknown) {
-        const err = error as { response?: { status?: number }; statusCode?: number }
-        expect(err.response?.status || err.statusCode).toBe(401)
-      }
+      const response = await fetch(url('/api/profile'), {
+        method: 'PATCH',
+        headers: {
+          'content-type': 'application/json',
+        },
+        body: JSON.stringify({ name: 'New Name' }),
+      })
+      expect(response.status).toBe(401)
     })
 
     it('should return 422 with invalid data', async () => {

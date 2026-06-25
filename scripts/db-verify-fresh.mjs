@@ -9,8 +9,6 @@ import { fileURLToPath } from 'node:url'
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
 const persistTo = mkdtempSync(path.join(tmpdir(), 'rangkai-d1-'))
 const wranglerHome = mkdtempSync(path.join(tmpdir(), 'rangkai-wrangler-home-'))
-const overlayFile = path.join(repoRoot, 'server/db/bootstrap/fresh-install-overlay.sql')
-
 const canonicalLedger = [
   '0001_init.sql',
   '0002_better_auth.sql',
@@ -19,6 +17,7 @@ const canonicalLedger = [
   '0005_add_history_table.sql',
   '0006_classification_cache.sql',
   '0007_add_exported_at.sql',
+  '0008_add_groups_and_scan_origin.sql',
 ]
 
 function runWrangler(args, { json = false } = {}) {
@@ -105,10 +104,6 @@ function assertForeignKeys(tableName, expectedReferences) {
 
 try {
   runWrangler(['d1', 'migrations', 'apply', 'DB', '--local', '--persist-to', persistTo])
-  runWrangler(['d1', 'execute', 'DB', '--local', '--persist-to', persistTo, '--file', overlayFile, '--json'], {
-    json: true,
-  })
-
   const tableResponse = queryLocal(`SELECT name FROM sqlite_master WHERE type = 'table' ORDER BY name;`)
   const tables = new Set((tableResponse.at(0)?.results ?? []).map((row) => row.name))
 
@@ -203,6 +198,7 @@ try {
     'idx_scans_bookId',
     'idx_scans_createdAt',
     'idx_scans_ddc',
+    'idx_scans_groupId',
     'idx_scans_isbn',
     'idx_scans_lcc',
     'idx_scans_status',

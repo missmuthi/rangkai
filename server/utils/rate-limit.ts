@@ -17,7 +17,6 @@ interface RateLimitData {
  * @returns true if rate limited, false otherwise
  */
 export async function isRateLimited(ip: string): Promise<boolean> {
-  const kv = hubKV()
   const now = Date.now()
   const key = `ratelimit:${ip}`
 
@@ -62,7 +61,6 @@ export async function getRateLimitStatus(ip: string): Promise<{
   remaining: number
   resetAt: number
 } | null> {
-  const kv = hubKV()
   const key = `ratelimit:${ip}`
 
   try {

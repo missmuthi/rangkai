@@ -68,6 +68,13 @@ export function useCommandPalette() {
       section: 'Navigation'
     },
     {
+      id: 'experimental',
+      label: 'Experimental',
+      icon: 'i-lucide-flask-conical',
+      to: '/experimental',
+      section: 'Navigation'
+    },
+    {
       id: 'settings',
       label: 'Settings',
       icon: 'i-lucide-settings',

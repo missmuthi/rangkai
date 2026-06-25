@@ -1,9 +1,8 @@
 import type { InferSelectModel } from "drizzle-orm";
-import { drizzle } from "drizzle-orm/d1";
-
-import * as schema from "../db/schema";
 import { getSessionByToken } from "../utils/session";
 import { isRateLimited } from "../utils/rate-limit";
+import { useDb } from "../utils/db";
+import * as schema from "../db/schema";
 
 export default defineEventHandler(async (event) => {
   const url = getRequestURL(event);
@@ -21,7 +20,7 @@ export default defineEventHandler(async (event) => {
   }
 
   // 2. Initialize DB
-  const db = drizzle(hubDatabase(), { schema });
+  const db = useDb();
 
   // 3. Check Session Cookie
   const token = getCookie(event, "session");

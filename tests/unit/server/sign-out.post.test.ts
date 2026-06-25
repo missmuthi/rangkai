@@ -3,10 +3,10 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 const signOutFromEventMock = vi.fn()
 const getAuthCookieConfigMock = vi.fn()
 const deleteSessionMock = vi.fn()
-const drizzleMock = vi.fn(() => ({ db: true }))
+const dbMock = { db: true }
 
-vi.mock('drizzle-orm/d1', () => ({
-  drizzle: drizzleMock,
+vi.mock('../../../server/utils/db', () => ({
+  useDb: () => dbMock,
 }))
 
 vi.mock('../../../server/utils/auth', () => ({
@@ -190,7 +190,7 @@ describe('sign-out handler', () => {
     await signOutHandler(event)
 
     expect(signOutFromEventMock).toHaveBeenCalledTimes(1)
-    expect(deleteSessionMock).toHaveBeenCalledWith({ db: true }, 'legacy-token')
+    expect(deleteSessionMock).toHaveBeenCalledWith(dbMock, 'legacy-token')
     expect(event.node.res.statusCode).toBe(204)
 
     const setCookies = getSetCookieValues(event)

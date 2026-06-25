@@ -9,7 +9,7 @@ This guide covers best practices for deploying the Rangkai Book Scanner applicat
 - A [Cloudflare account](https://dash.cloudflare.com/sign-up)
 - A GitHub repository with your Rangkai project
 - [Bun](https://bun.sh) installed locally
-- Wrangler CLI: `bun add -g wrangler`
+- Wrangler CLI: `bun add -d wrangler@latest`
 
 ## Architecture Overview
 
@@ -51,7 +51,7 @@ Update `wrangler.toml` with the resource IDs:
 # https://developers.cloudflare.com/pages/functions/wrangler-configuration/
 
 name = "rangkai"
-compatibility_date = "2025-04-25"
+compatibility_date = "2026-06-24"
 compatibility_flags = ["nodejs_compat"]
 
 # Pages configuration - enables wrangler.toml as source of truth
@@ -62,6 +62,7 @@ pages_build_output_dir = "dist"
 binding = "DB"
 database_name = "rangkai-db"
 database_id = "YOUR_DATABASE_ID"  # From step 1
+preview_database_id = "YOUR_PREVIEW_DATABASE_ID"
 
 # KV Namespaces
 [[kv_namespaces]]
@@ -80,8 +81,12 @@ NUXT_PUBLIC_SITE_URL = "https://your-project.pages.dev"
 ### Step 3: Apply Database Migrations
 
 ```bash
+bun run migrate:preview
 bun run migrate:prod
 ```
+
+Apply only the environment you intend to update. Never use the binding name for
+remote migration reconciliation when preview and production differ.
 
 ### Step 4: Add Secrets
 
@@ -116,7 +121,7 @@ bunx wrangler pages deploy dist --project-name=rangkai --branch=main
 # Start dev server with local bindings
 bun run dev
 
-# Or connect to remote Cloudflare resources
+# Or connect to the configured preview database
 bun run dev --remote
 ```
 
@@ -229,7 +234,7 @@ export default defineNuxtConfig({
 
 ```toml
 name = "rangkai"
-compatibility_date = "2025-04-25"
+compatibility_date = "2026-06-24"
 compatibility_flags = ["nodejs_compat"]
 pages_build_output_dir = "dist"
 
@@ -250,10 +255,8 @@ id = "xxx"
 [vars]
 NUXT_PUBLIC_SITE_URL = "https://rangkai-d3k.pages.dev"
 
-# Environment overrides (optional)
-# [env.preview]
-# [env.preview.vars]
-# NUXT_PUBLIC_SITE_URL = "https://preview.rangkai-d3k.pages.dev"
+# Remote preview development and preview uploads use this database.
+preview_database_id = "preview-database-uuid"
 ```
 
 ---

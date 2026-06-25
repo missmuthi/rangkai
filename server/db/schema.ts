@@ -158,7 +158,7 @@ export const scans = sqliteTable('scans', {
   aiLog: text('ai_log', { mode: 'json' }).$type<any[]>(),
   jsonData: text('json_data'), // Full MergedBookData as JSON
   // Scan-specific data
-  source: text('source'), // 'google', 'openlibrary', 'ai', 'manual'
+  source: text('source').default('manual'), // metadata or ingestion origin
   status: text('status').notNull().default('pending'), // 'pending', 'complete', 'error', 'exported'
   notes: text('notes'), // User notes
   exportedAt: integer('exported_at', { mode: 'timestamp' }), // When exported to SLIMS
@@ -166,6 +166,7 @@ export const scans = sqliteTable('scans', {
   updatedAt: integer('updated_at', { mode: 'timestamp' }).notNull(),
 }, (table) => [
   index('idx_scans_userId').on(table.userId),
+  index('idx_scans_groupId').on(table.groupId),
   index('idx_scans_bookId').on(table.bookId),
   index('idx_scans_isbn').on(table.isbn),
   index('idx_scans_status').on(table.status),

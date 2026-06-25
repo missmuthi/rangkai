@@ -1,5 +1,8 @@
 import type { Scan } from '../../db/schema'
+import { desc, eq } from 'drizzle-orm'
+import { scans } from '../../db/schema'
 import { requireAuth } from '../../utils/auth'
+import { useDb } from '../../utils/db'
 
 /**
  * Server-Side SLiMS CSV Export
@@ -11,16 +14,11 @@ export default defineEventHandler(async (event) => {
   // Get authenticated user (throws 401 if not logged in)
   const user = await requireAuth(event)
 
-  // Use D1 database directly (same pattern as scans/index.get.ts)
-  const d1 = hubDatabase()
-  
-  // Fetch user's scans using raw SQL
-  const { results } = await d1
-    .prepare('SELECT * FROM scans WHERE user_id = ? ORDER BY created_at DESC')
-    .bind(user.id)
-    .all()
-
-  const userScans = results as unknown as Scan[]
+  const userScans = await useDb()
+    .select()
+    .from(scans)
+    .where(eq(scans.userId, user.id))
+    .orderBy(desc(scans.createdAt))
 
   // Generate SLiMS CSV
   const csv = generateSlimsCSV(userScans)

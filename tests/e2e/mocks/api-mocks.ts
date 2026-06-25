@@ -31,6 +31,25 @@ const USE_MOCKS = process.env.E2E_MOCKS !== 'false'
 export async function mockBookApi(page: Page): Promise<void> {
   if (!USE_MOCKS) return
 
+  await page.route('**/api/scans/lookup', async (route: Route) => {
+    const body = route.request().postDataJSON()
+    await route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({
+        saved: true,
+        scan_id: 'mock-scan-id-123',
+        isbn: body?.isbn || bookFixture.isbn,
+        book: bookFixture,
+        cache: { status: 'miss' },
+        requestId: 'mock-request-id',
+      }),
+      headers: {
+        'Cache-Control': 'private, no-store',
+      },
+    })
+  })
+
   await page.route('**/api/book/**', async (route: Route) => {
     const url = route.request().url()
     const isbnMatch = url.match(/\/api\/book\/(\d{10,13})/)
@@ -45,7 +64,7 @@ export async function mockBookApi(page: Page): Promise<void> {
           contentType: 'application/json',
           body: JSON.stringify({
             metadata: bookFixture,
-            scan_id: 'mock-scan-id-123',
+            scan_id: null,
             source: 'mock',
             cached: false
           }),

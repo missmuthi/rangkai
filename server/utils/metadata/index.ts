@@ -17,11 +17,11 @@ export async function fetchBookByIsbn(
 ): Promise<{ data: BookMetadata | null; meta: unknown }> {
   const startTime = Date.now();
 
-  // Run all fetchers in parallel
+  // Keep the user-facing request bounded even when a provider is degraded.
   const results = await Promise.allSettled([
-    measureFetch("google", () => fetchGoogleBooks(isbn)),
-    measureFetch("openlibrary", () => fetchOpenLibrary(isbn)),
-    measureFetch("loc", () => fetchLoc(isbn)),
+    measureFetch("google", (signal) => fetchGoogleBooks(isbn, signal), 4500),
+    measureFetch("openlibrary", (signal) => fetchOpenLibrary(isbn, signal), 4500),
+    measureFetch("loc", (signal) => fetchLoc(isbn, signal), 3500),
   ]);
 
   // Process results
@@ -43,6 +43,19 @@ export async function fetchBookByIsbn(
     totalDuration: Date.now() - startTime,
     sourcesAttempted: ["google", "openlibrary", "loc"],
     sourcesFound: validData.map((r) => r.source),
+    sourceStatus: successfulResults.reduce(
+      (acc, result) => ({
+        ...acc,
+        [result.source]: result.error
+          ? result.error.includes("timed out")
+            ? "timeout"
+            : "failed"
+          : result.data
+            ? "found"
+            : "not_found",
+      }),
+      {}
+    ),
     individualDurations: successfulResults.reduce(
       (acc, r) => ({ ...acc, [r.source]: r.durationMs }),
       {}
@@ -117,22 +130,32 @@ export async function fetchBookByIsbn(
 
 async function measureFetch(
   source: string,
-  fetcher: () => Promise<BookMetadata | null>
+  fetcher: (signal: AbortSignal) => Promise<BookMetadata | null>,
+  timeoutMs: number
 ): Promise<MetadataFetchResult> {
   const start = Date.now();
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), timeoutMs);
+
   try {
-    const data = await fetcher();
+    const data = await fetcher(controller.signal);
     return {
       data,
       source,
       durationMs: Date.now() - start,
     };
   } catch (error) {
+    const message =
+      error instanceof Error && error.name === "AbortError"
+        ? `${source} timed out after ${timeoutMs}ms`
+        : String(error);
     return {
       data: null,
       source,
-      error: String(error),
+      error: message,
       durationMs: Date.now() - start,
     };
+  } finally {
+    clearTimeout(timeout);
   }
 }

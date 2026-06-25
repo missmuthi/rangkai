@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { BookOpen, Menu, X, Search } from 'lucide-vue-next'
+import { BookOpen, Menu, ScanLine, Search, X } from 'lucide-vue-next'
 import { cn } from '~/utils/cn'
 
 interface Props {
@@ -7,99 +7,59 @@ interface Props {
 }
 
 const props = withDefaults(defineProps<Props>(), {
-  pageTitle: 'Dashboard'
+  pageTitle: 'Dashboard',
 })
 
-// Use the navigation composable
 const { navItems, isActive } = useNavigation()
-
-// Auth state for loading check (SPA Auth Flicker prevention)
 const { isLoading: isAuthLoading } = useAuth()
-
-// Command palette state
 const { isOpen: commandPaletteOpen } = useCommandPalette()
-
-// Mobile sidebar state
 const isMobileMenuOpen = ref(false)
-
-// Close mobile menu when route changes
 const route = useRoute()
-watch(() => route.path, () => {
-  isMobileMenuOpen.value = false
-})
+
+watch(
+  () => route.path,
+  () => {
+    isMobileMenuOpen.value = false
+  }
+)
+
+const activeLabel = computed(
+  () => navItems.find((item) => isActive(item.to))?.label || 'Beranda'
+)
+
+function openCommandPalette() {
+  commandPaletteOpen.value = true
+}
 </script>
 
 <template>
-  <div class="flex min-h-screen bg-background">
-    <!-- Desktop Sidebar -->
-    <aside class="fixed inset-y-0 left-0 z-50 hidden w-64 flex-col border-r border-border bg-card lg:flex">
-      <!-- Logo / Brand -->
-      <div class="flex h-16 items-center gap-3 border-b border-border px-6">
-        <NuxtLink to="/dashboard" class="flex items-center gap-3 hover:opacity-80 transition-opacity">
-          <div class="flex h-9 w-9 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-            <BookOpen class="h-5 w-5" />
-          </div>
-          <span class="text-lg font-semibold text-foreground">Rangkai</span>
-        </NuxtLink>
-      </div>
+  <div class="relative min-h-screen overflow-x-clip bg-background text-foreground">
+    <div
+      aria-hidden="true"
+      class="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(30,64,175,0.07),transparent_32%),linear-gradient(180deg,rgba(255,255,255,0.22),transparent_18%)]"
+    />
 
-      <!-- Navigation -->
-      <nav class="flex-1 space-y-1 px-3 py-4">
-        <NuxtLink
-          v-for="item in navItems"
-          :key="item.to"
-          :to="item.to"
-          :aria-current="isActive(item.to) ? 'page' : undefined"
-          :class="cn(
-            'flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors',
-            isActive(item.to)
-              ? 'bg-primary/10 text-primary'
-              : 'text-muted-foreground hover:bg-muted hover:text-foreground'
-          )"
-        >
-          <component
-            :is="item.icon"
-            :class="cn(
-              'h-5 w-5 shrink-0',
-              isActive(item.to)
-                ? 'text-primary'
-                : 'text-muted-foreground'
-            )"
-          />
-          {{ item.label }}
-        </NuxtLink>
-      </nav>
-
-      <!-- Footer -->
-      <div class="border-t border-border p-4">
-        <p class="text-xs text-muted-foreground">© 2025 Rangkai</p>
-      </div>
-    </aside>
-
-    <!-- Mobile Sidebar (Sheet) -->
-    <UiSheet v-model:open="isMobileMenuOpen" side="left" class="w-64 p-0">
-      <template #default="{ close }">
-        <!-- Logo / Brand -->
-        <div class="flex h-16 items-center justify-between border-b border-border px-6">
-          <div class="flex items-center gap-3">
-            <NuxtLink to="/dashboard" class="flex items-center gap-3 hover:opacity-80 transition-opacity">
-              <div class="flex h-9 w-9 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-                <BookOpen class="h-5 w-5" />
-              </div>
-              <span class="text-lg font-semibold text-foreground">Rangkai</span>
-            </NuxtLink>
-          </div>
-          <button
-            type="button"
-            class="rounded-md p-1 text-muted-foreground hover:bg-muted hover:text-foreground"
-            @click="close"
-          >
-            <X class="h-5 w-5" />
-            <span class="sr-only">Close menu</span>
-          </button>
+    <div class="relative flex min-h-screen">
+      <aside class="sticky top-0 hidden h-screen w-72 flex-col border-r border-border bg-card/95 backdrop-blur lg:flex">
+        <div class="flex h-20 items-center gap-3 border-b border-border px-6 py-5">
+          <NuxtLink to="/dashboard" class="flex items-center gap-3 transition-opacity hover:opacity-80">
+            <div class="flex h-10 w-10 items-center justify-center rounded-2xl border border-border bg-accent text-accent-foreground">
+              <BookOpen class="h-5 w-5" />
+            </div>
+            <div>
+              <p class="text-[0.62rem] uppercase tracking-[0.32em] text-muted-foreground">Meja katalog</p>
+              <p class="text-lg font-semibold text-foreground">Rangkai</p>
+            </div>
+          </NuxtLink>
         </div>
 
-        <!-- Navigation -->
+        <div class="border-b border-border px-6 py-4">
+          <p class="text-xs uppercase tracking-[0.3em] text-muted-foreground">Ruang kerja aktif</p>
+          <p class="mt-2 text-sm leading-6 text-muted-foreground">
+            Pindai barcode, rapikan metadata, dan kirim record siap pakai ke SLiMS atau Koha.
+          </p>
+        </div>
+
         <nav class="flex-1 space-y-1 px-3 py-4">
           <NuxtLink
             v-for="item in navItems"
@@ -107,75 +67,166 @@ watch(() => route.path, () => {
             :to="item.to"
             :aria-current="isActive(item.to) ? 'page' : undefined"
             :class="cn(
-              'flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors',
+              'flex items-center gap-3 rounded-2xl px-4 py-3 text-sm font-medium transition-colors',
               isActive(item.to)
-                ? 'bg-primary/10 text-primary'
-                : 'text-muted-foreground hover:bg-muted hover:text-foreground'
+                ? 'border border-border bg-accent/70 text-accent-foreground shadow-sm'
+                : 'text-muted-foreground hover:bg-muted/70 hover:text-foreground'
             )"
-            @click="close"
           >
             <component
               :is="item.icon"
               :class="cn(
                 'h-5 w-5 shrink-0',
-                isActive(item.to)
-                  ? 'text-primary'
-                  : 'text-muted-foreground'
+                isActive(item.to) ? 'text-accent-foreground' : 'text-muted-foreground'
               )"
             />
-            {{ item.label }}
+            <span class="truncate">{{ item.label }}</span>
           </NuxtLink>
         </nav>
 
-        <!-- Footer -->
-        <div class="border-t border-border p-4">
-          <p class="text-xs text-muted-foreground">© 2025 Rangkai</p>
+        <div class="space-y-3 border-t border-border p-4">
+          <NuxtLink
+            to="/scan/mobile"
+            class="flex items-center justify-center gap-2 rounded-2xl bg-primary px-4 py-3 text-sm font-semibold text-primary-foreground transition-opacity hover:opacity-95"
+          >
+            <ScanLine class="h-4 w-4" />
+            Mulai Memindai
+          </NuxtLink>
+          <p class="px-1 text-xs leading-5 text-muted-foreground">
+            Pindai barcode → metadata dirapikan AI → ekspor ke SLiMS
+          </p>
         </div>
-      </template>
-    </UiSheet>
+      </aside>
 
-    <!-- Main Content Area -->
-    <div class="flex flex-1 flex-col lg:pl-64">
-      <!-- Header -->
-      <header class="sticky top-0 z-40 flex h-16 items-center gap-4 border-b border-border bg-card/80 px-4 backdrop-blur-sm sm:px-6">
-        <!-- Mobile Menu Trigger -->
-        <button
-          type="button"
-          class="rounded-md p-2 text-muted-foreground hover:bg-muted hover:text-foreground lg:hidden"
-          @click="isMobileMenuOpen = true"
-        >
-          <Menu class="h-5 w-5" />
-          <span class="sr-only">Open menu</span>
-        </button>
+      <UiSheet v-model:open="isMobileMenuOpen" side="left" class="w-[19rem] p-0">
+        <template #default="{ close }">
+          <div class="flex min-h-screen flex-col bg-card text-foreground">
+            <div class="flex items-center justify-between border-b border-border px-5 py-4">
+              <NuxtLink to="/dashboard" class="flex items-center gap-3" @click="close">
+                <div class="flex h-10 w-10 items-center justify-center rounded-2xl border border-border bg-accent text-accent-foreground">
+                  <BookOpen class="h-5 w-5" />
+                </div>
+                <div>
+                  <p class="text-[0.62rem] uppercase tracking-[0.28em] text-muted-foreground">Meja katalog</p>
+                  <p class="text-lg font-semibold text-foreground">Rangkai</p>
+                </div>
+              </NuxtLink>
+              <button
+                type="button"
+                class="rounded-full border border-border p-2 text-muted-foreground"
+                @click="close"
+              >
+                <X class="h-5 w-5" />
+                <span class="sr-only">Tutup menu</span>
+              </button>
+            </div>
 
-        <!-- Page Title -->
-        <h1 class="text-xl font-semibold text-foreground">
-          {{ props.pageTitle }}
-        </h1>
+            <div class="border-b border-border px-5 py-4">
+              <p class="text-xs uppercase tracking-[0.3em] text-muted-foreground">Ruang kerja aktif</p>
+              <p class="mt-2 text-sm leading-6 text-muted-foreground">
+                Pindai barcode, rapikan metadata, dan kirim record siap pakai.
+              </p>
+            </div>
 
-        <!-- Search Button (Command Palette Trigger) -->
-        <button
-          type="button"
-          class="ml-auto hidden sm:flex items-center gap-2 px-3 py-1.5 text-sm text-muted-foreground bg-muted/50 border border-border rounded-lg hover:bg-muted transition-colors"
-          @click="commandPaletteOpen = true"
-        >
-          <Search class="h-4 w-4" />
-          <span>Search...</span>
-          <UKbd size="xs">⌘K</UKbd>
-        </button>
-      </header>
+            <nav class="flex-1 space-y-1 px-3 py-4">
+              <NuxtLink
+                v-for="item in navItems"
+                :key="item.to"
+                :to="item.to"
+                :aria-current="isActive(item.to) ? 'page' : undefined"
+                :class="cn(
+                  'flex items-center gap-3 rounded-2xl px-4 py-3 text-sm font-medium transition-colors',
+                  isActive(item.to)
+                    ? 'border border-border bg-accent/70 text-accent-foreground'
+                    : 'text-muted-foreground hover:bg-muted/70 hover:text-foreground'
+                )"
+                @click="close"
+              >
+                <component
+                  :is="item.icon"
+                  :class="cn(
+                    'h-5 w-5 shrink-0',
+                    isActive(item.to) ? 'text-accent-foreground' : 'text-muted-foreground'
+                  )"
+                />
+                <span class="truncate">{{ item.label }}</span>
+              </NuxtLink>
+            </nav>
 
-      <!-- Page Content -->
-      <main class="flex flex-1 flex-col p-4 sm:p-6">
-        <!-- Auth Loading State (Prevents flash of unauthenticated content on SPA pages) -->
-        <div v-if="isAuthLoading" class="flex flex-1 items-center justify-center">
-          <div class="text-center space-y-4">
-            <div class="h-10 w-10 mx-auto border-4 border-primary border-t-transparent rounded-full animate-spin" />
-            <p class="text-sm text-muted-foreground">Loading...</p>
+            <div class="space-y-3 border-t border-border p-4">
+              <NuxtLink
+                to="/scan/mobile"
+                class="flex items-center justify-center gap-2 rounded-2xl bg-primary px-4 py-3 text-sm font-semibold text-primary-foreground"
+                @click="close"
+              >
+                <ScanLine class="h-4 w-4" />
+                Mulai Memindai
+              </NuxtLink>
+              <p class="px-1 text-xs leading-5 text-muted-foreground">
+                Pindai barcode → metadata dirapikan AI → ekspor ke SLiMS
+              </p>
+            </div>
           </div>
-        </div>
-        <slot v-else />
-      </main>
+        </template>
+      </UiSheet>
+
+      <div class="flex min-h-screen flex-1 flex-col">
+        <header class="sticky top-0 z-40 border-b border-border bg-card/90 backdrop-blur">
+          <div class="mx-auto flex w-full max-w-[1120px] items-center gap-3 px-4 py-4 sm:px-6 lg:px-8">
+            <button
+              type="button"
+              class="inline-flex h-11 w-11 items-center justify-center rounded-2xl border border-border text-muted-foreground transition-colors hover:bg-muted lg:hidden"
+              @click="isMobileMenuOpen = true"
+            >
+              <Menu class="h-5 w-5" />
+              <span class="sr-only">Buka menu</span>
+            </button>
+
+            <div class="min-w-0">
+              <p class="text-[0.62rem] uppercase tracking-[0.3em] text-muted-foreground">
+                {{ activeLabel }}
+              </p>
+              <h1 class="truncate text-xl font-semibold text-foreground sm:text-2xl">
+                {{ props.pageTitle }}
+              </h1>
+            </div>
+
+            <div class="ml-auto flex items-center gap-2">
+              <NuxtLink
+                to="/scan/mobile"
+                class="hidden items-center gap-2 rounded-full border border-border px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-muted sm:inline-flex"
+              >
+                <ScanLine class="h-4 w-4" />
+                Mulai Memindai
+              </NuxtLink>
+              <button
+                type="button"
+                class="inline-flex items-center gap-2 rounded-full border border-border px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-muted"
+                @click="openCommandPalette"
+              >
+                <Search class="h-4 w-4" />
+                <span class="hidden sm:inline">Cari</span>
+                <UKbd size="xs">⌘K</UKbd>
+              </button>
+            </div>
+          </div>
+        </header>
+
+        <main class="flex-1 px-4 py-6 sm:px-6 lg:px-8">
+          <div class="mx-auto w-full max-w-[1120px]">
+            <div
+              v-if="isAuthLoading"
+              class="flex min-h-[60vh] items-center justify-center rounded-[1.75rem] border border-border bg-card/80"
+            >
+              <div class="space-y-4 text-center">
+                <div class="mx-auto h-10 w-10 animate-spin rounded-full border-4 border-primary border-t-transparent" />
+                <p class="text-sm text-muted-foreground">Memuat ruang kerja...</p>
+              </div>
+            </div>
+            <slot v-else />
+          </div>
+        </main>
+      </div>
     </div>
   </div>
 </template>

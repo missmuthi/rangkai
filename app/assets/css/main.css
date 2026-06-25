@@ -1,43 +1,50 @@
+@import url('../../../tokens.css');
+
 /* Shadcn CSS Variables - Custom Color Palette */
 /* Primary: Deep Space Blue | Destructive: Brick Red | Accent: Papaya Whip | Secondary: Steel Blue */
 
+html,
+body {
+  overflow-x: clip;
+}
+
 :root {
   /* Background & Foreground */
-  --background: 0 0% 100%;
-  --foreground: 202 100% 14%; /* deep-space-blue */
+  --background: 39 56% 96%;
+  --foreground: 209 48% 18%;
 
   /* Card */
-  --card: 0 0% 100%;
-  --card-foreground: 202 100% 14%;
+  --card: 39 56% 98%;
+  --card-foreground: 209 48% 18%;
 
   /* Popover */
-  --popover: 0 0% 100%;
-  --popover-foreground: 202 100% 14%;
+  --popover: 39 56% 98%;
+  --popover-foreground: 209 48% 18%;
 
-  /* Primary: Deep Space Blue (#003049) → HSL: 201 100% 14% */
-  --primary: 201 100% 14%;
-  --primary-foreground: 39 93% 91%; /* papaya-whip */
+  /* Primary: deep ink blue */
+  --primary: 209 48% 18%;
+  --primary-foreground: 39 56% 96%;
 
-  /* Secondary: Steel Blue (#669bbc) → HSL: 201 36% 57% */
-  --secondary: 201 36% 57%;
-  --secondary-foreground: 0 0% 100%;
+  /* Secondary: softened slate */
+  --secondary: 39 28% 90%;
+  --secondary-foreground: 209 48% 18%;
 
-  /* Muted: Steel Blue 50 (#e1ebf2) */
-  --muted: 204 37% 92%;
-  --muted-foreground: 202 31% 35%;
+  /* Muted */
+  --muted: 39 22% 92%;
+  --muted-foreground: 209 18% 38%;
 
-  /* Accent: Papaya Whip (#fdf0d5) → HSL: 39 91% 91% */
-  --accent: 39 91% 91%;
-  --accent-foreground: 202 100% 14%;
+  /* Accent: archival green */
+  --accent: 145 35% 88%;
+  --accent-foreground: 145 50% 22%;
 
-  /* Destructive: Brick Red (#c1121f) → HSL: 355 83% 41% */
-  --destructive: 355 83% 41%;
+  /* Destructive */
+  --destructive: 355 70% 42%;
   --destructive-foreground: 0 0% 98%;
 
   /* Border, Input, Ring */
-  --border: 204 37% 85%;
-  --input: 204 37% 85%;
-  --ring: 201 100% 14%; /* matches primary */
+  --border: 39 20% 83%;
+  --input: 39 20% 83%;
+  --ring: 145 50% 30%;
 
   /* Radius */
   --radius: 0.5rem;
@@ -45,41 +52,41 @@
 
 .dark {
   /* Background & Foreground */
-  --background: 202 100% 4%; /* deep-space-blue.900 */
-  --foreground: 39 93% 91%; /* papaya-whip */
+  --background: 209 32% 10%;
+  --foreground: 39 56% 96%;
 
   /* Card */
-  --card: 202 50% 8%;
-  --card-foreground: 39 93% 91%;
+  --card: 209 28% 13%;
+  --card-foreground: 39 56% 96%;
 
   /* Popover */
-  --popover: 202 50% 8%;
-  --popover-foreground: 39 93% 91%;
+  --popover: 209 28% 13%;
+  --popover-foreground: 39 56% 96%;
 
-  /* Primary: Brighter blue for dark mode */
-  --primary: 200 100% 48%; /* #00a0f7 */
-  --primary-foreground: 202 100% 4%;
+  /* Primary */
+  --primary: 39 56% 96%;
+  --primary-foreground: 209 32% 10%;
 
-  /* Secondary: Steel Blue 300 */
-  --secondary: 201 36% 65%;
-  --secondary-foreground: 202 100% 4%;
+  /* Secondary */
+  --secondary: 209 22% 20%;
+  --secondary-foreground: 39 56% 96%;
 
   /* Muted */
-  --muted: 202 31% 15%;
-  --muted-foreground: 204 37% 70%;
+  --muted: 209 20% 18%;
+  --muted-foreground: 39 18% 78%;
 
   /* Accent */
-  --accent: 39 50% 25%;
-  --accent-foreground: 39 93% 91%;
+  --accent: 145 22% 20%;
+  --accent-foreground: 39 56% 96%;
 
-  /* Destructive: Brighter red for dark mode */
-  --destructive: 355 79% 65%; /* #f05a64 */
+  /* Destructive */
+  --destructive: 355 65% 55%;
   --destructive-foreground: 0 0% 98%;
 
   /* Border, Input, Ring */
-  --border: 202 31% 20%;
-  --input: 202 31% 20%;
-  --ring: 200 100% 48%;
+  --border: 209 20% 22%;
+  --input: 209 20% 22%;
+  --ring: 145 35% 55%;
 }
 
 /* Global border and body styles */
@@ -92,4 +99,8 @@
 body {
   background-color: hsl(var(--background));
   color: hsl(var(--foreground));
+  background-image:
+    radial-gradient(circle at top, rgba(28, 62, 94, 0.06), transparent 28%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.4), transparent 22%);
+  background-attachment: fixed;
 }

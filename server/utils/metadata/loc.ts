@@ -6,8 +6,6 @@
 import type { BookMetadata } from './types'
 
 const LOC_API = 'https://www.loc.gov/books'
-const TIMEOUT_MS = 5000
-
 interface LocItem {
   title?: string
   contributor?: string[]
@@ -22,15 +20,15 @@ interface LocResponse {
   results?: LocItem[]
 }
 
-export async function fetchLoc(isbn: string): Promise<BookMetadata | null> {
-  const controller = new AbortController()
-  const timeoutId = setTimeout(() => controller.abort(), TIMEOUT_MS)
-
+export async function fetchLoc(
+  isbn: string,
+  signal?: AbortSignal
+): Promise<BookMetadata | null> {
   try {
     // LoC search API with ISBN
     const url = `${LOC_API}/?q=${isbn}&fo=json&c=1`
     const response = await fetch(url, {
-      signal: controller.signal,
+      signal,
       headers: {
         'Accept': 'application/json',
         'User-Agent': 'RangkaiBot/1.0 (https://rangkai.app)'
@@ -94,13 +92,8 @@ export async function fetchLoc(isbn: string): Promise<BookMetadata | null> {
       source: 'loc'
     }
   } catch (error) {
-    if (error instanceof Error && error.name === 'AbortError') {
-      console.warn(`[metadata:loc] Timeout after ${TIMEOUT_MS}ms for ISBN ${isbn}`)
-    } else {
-      console.error(`[metadata:loc] Error fetching ISBN ${isbn}:`, error)
-    }
+    if (error instanceof Error && error.name === 'AbortError') throw error
+    console.error(`[metadata:loc] Error fetching ISBN ${isbn}:`, error)
     return null
-  } finally {
-    clearTimeout(timeoutId)
   }
 }

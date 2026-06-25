@@ -1,14 +1,15 @@
 # Database Migration Strategy
 
 ## Current Behavior
-Migrations run automatically on `bun run migrate:prod` via the hook in `package.json`:
-```json
-"nuxthub": {
-  "hooks": {
-    "deploy": "bun run migrate:prod"
-  }
-}
+Migrations are explicit and environment-specific:
+
+```bash
+bun run migrate:preview
+bun run migrate:prod
 ```
+
+Deploy workflows do not apply D1 migrations automatically. Verify the target
+database first, apply the migration separately, then deploy code.
 
 ## Risk
 Large migrations (adding indexes on 100k+ rows) can timeout during Cloudflare deployment.
@@ -42,11 +43,13 @@ jobs:
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
 ```
 
-### Option 2: Keep Current (Acceptable for Now)
-Current approach is fine until:
-- Table has 50k+ rows
-- Migration involves complex indexes or data transforms
-- Deployment timeouts occur
+### Preview and Production
+
+- Preview database: `rangkai-preview`
+- Production database: `rangkai-db`
+- Runtime binding name remains `DB`.
+- `preview_database_id` in `wrangler.toml` prevents remote preview development
+  and preview uploads from falling back to the production D1 database.
 
 ## When to Switch
 - If `bun run migrate:prod` takes >15 seconds

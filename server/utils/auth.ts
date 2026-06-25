@@ -3,7 +3,7 @@ import { splitCookiesString } from 'h3'
 
 import { betterAuth } from 'better-auth'
 import { drizzleAdapter } from 'better-auth/adapters/drizzle'
-import { drizzle } from 'drizzle-orm/d1'
+import { db as hubDb } from '@nuxthub/db'
 import * as schema from '../db/schema'
 
 export type BetterAuthCookieConfig = {
@@ -128,8 +128,6 @@ export function extractSetCookieHeaders(headers?: Headers | null) {
 export function getAuth() {
   if (_auth) return _auth
 
-  const db = hubDatabase()
-  const drizzleDb = drizzle(db, { schema })
   const config = useRuntimeConfig()
 
   // Build social providers only if credentials are present
@@ -161,7 +159,7 @@ export function getAuth() {
   }
 
   _auth = betterAuth({
-    database: drizzleAdapter(drizzleDb, {
+    database: drizzleAdapter(hubDb, {
       provider: 'sqlite',
       schema: {
         user: schema.user,

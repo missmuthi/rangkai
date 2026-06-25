@@ -1,0 +1,62 @@
+:root {
+  --color-paper: oklch(97.2% 0.012 92);
+  --color-paper-2: oklch(95.5% 0.013 92);
+  --color-paper-3: oklch(93.7% 0.014 92);
+  --color-rule: oklch(84.6% 0.012 92);
+  --color-ink: oklch(20.5% 0.028 248);
+  --color-ink-soft: oklch(35.8% 0.018 248);
+  --color-muted: oklch(48.5% 0.015 248);
+  --color-accent: oklch(45.2% 0.14 145);
+  --color-accent-strong: oklch(36.2% 0.13 145);
+  --color-accent-surface: oklch(95.8% 0.022 145);
+  --color-success: oklch(46.8% 0.12 145);
+  --color-success-soft: oklch(95.9% 0.02 145);
+  --color-focus: oklch(53.5% 0.17 145);
+
+  --font-display: 'Newsreader', Georgia, serif;
+  --font-body: 'IBM Plex Sans', system-ui, sans-serif;
+  --font-mono: 'IBM Plex Mono', ui-monospace, monospace;
+
+  --space-3xs: 0.125rem;
+  --space-2xs: 0.25rem;
+  --space-xs: 0.5rem;
+  --space-sm: 0.75rem;
+  --space-md: 1rem;
+  --space-lg: 1.5rem;
+  --space-xl: 2.5rem;
+  --space-2xl: 4rem;
+  --space-3xl: 6rem;
+  --space-4xl: 9rem;
+
+  --text-xs: 0.72rem;
+  --text-sm: 0.84rem;
+  --text-base: 1rem;
+  --text-md: 1.125rem;
+  --text-lg: 1.35rem;
+  --text-xl: 1.7rem;
+  --text-2xl: 2.1rem;
+  --text-3xl: 2.7rem;
+  --text-4xl: 3.4rem;
+  --text-display: clamp(2.8rem, 5vw + 1rem, 5.3rem);
+  --text-display-s: clamp(2.25rem, 4vw + 0.9rem, 4rem);
+
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in: cubic-bezier(0.7, 0, 0.84, 0);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+
+  --dur-micro: 120ms;
+  --dur-short: 220ms;
+  --dur-long: 420ms;
+
+  --rule-hair: 1px;
+  --rule-heavy: 2px;
+
+  --radius-sm: 0.5rem;
+  --radius-md: 0.8rem;
+  --radius-lg: 1rem;
+  --radius-xl: 1.4rem;
+  --radius-pill: 999px;
+
+  --page-gutter: clamp(1rem, 3.5vw, 2rem);
+  --page-measure: 1120px;
+}

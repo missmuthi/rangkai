@@ -1,4 +1,10 @@
 <script setup lang="ts">
+definePageMeta({
+  layout: 'app',
+  middleware: 'auth',
+  title: 'Status Auth',
+})
+
 type ProvidersResponse = {
   siteUrl: string | null
   providers: Record<string, boolean>

@@ -7,7 +7,7 @@ export function useSearchRouting() {
 
     // ISBN-10 or ISBN-13 check (digits, potentially with dashes, but we strip them for check?)
     // User said "Sanitize: Remove dashes/spaces"
-    const sanitized = cleanQuery.replace(/[-\s]/g, '')
+    const sanitized = normalizeISBN(cleanQuery)
     const isISBN = /^\d{10}$|^\d{13}$/.test(sanitized)
 
     if (isISBN) {

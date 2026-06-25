@@ -6,7 +6,9 @@
  * Allows manual ISBN input and displays results with timing.
  */
 definePageMeta({
-  layout: "default",
+  layout: 'app',
+  middleware: 'auth',
+  title: 'Tes Perpusnas',
 });
 
 useSeoMeta({

@@ -1,4 +1,3 @@
-import { drizzle } from 'drizzle-orm/d1'
 import {
   appendResponseHeader,
   deleteCookie,
@@ -8,12 +7,12 @@ import {
   setResponseStatus,
 } from 'h3'
 
-import * as schema from '../../db/schema'
 import {
   extractSetCookieHeaders,
   getAuthCookieConfig,
   signOutFromEvent,
 } from '../../utils/auth'
+import { useDb } from '../../utils/db'
 import { deleteSession } from '../../utils/session'
 
 export default defineEventHandler(async (event) => {
@@ -32,7 +31,7 @@ export default defineEventHandler(async (event) => {
 
   const signOutResult = await signOutFromEvent(event)
   const cookieConfig = getAuthCookieConfig()
-  const db = drizzle(hubDatabase(), { schema })
+  const db = useDb()
   const legacyToken = getCookie(event, cookieConfig.legacySession.name)
   const responseHeaders =
     signOutResult instanceof Response

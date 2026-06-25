@@ -23,6 +23,10 @@ bun run test
 ```
 
 ```bash
+bun run test:integration
+```
+
+```bash
 bun run test:watch
 ```
 
@@ -83,11 +87,15 @@ bun run migrate:prod
 ```
 
 ```bash
-bunx wrangler d1 migrations apply DB --remote
+bun run migrate:preview
 ```
 
 ```bash
 bun run db:verify:fresh
+```
+
+```bash
+bun run db:verify:upgrade
 ```
 
 ## Release
